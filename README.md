@@ -25,6 +25,27 @@ de la sélection Cadets Air France.
 Le tirage est **adaptatif** : les questions ratées reviennent plus souvent, celles
 acquises s'espacent, et les questions jamais vues sont priorisées.
 
+## Calcul mental
+
+Module séparé (`drill-calcul.html`), accessible depuis l'accueil, pour la partie
+psychotechnique de la sélection.
+
+| Jeu de données | Contenu |
+|---|---|
+| Tables | `a × b` de 2 à 12, sous-filtre « zone chaude » 6–12 × 6–12 |
+| Carrés | `n²` de 1 à 30, et la reconnaissance inverse (441 → 21) |
+| Puissances | 2¹–2¹⁴, 3¹–3⁷, 4¹–4⁶, 5¹–5⁵, 6¹–6⁵, 7¹–7⁴, 8¹–8⁴, 9¹–9⁴, et leur inverse |
+| Chaînes | additions et chaînes `+ / −` à 2, 3 ou 4 termes, générées à la volée |
+
+Sessions de 60 / 120 / 300 s ou séries de 20 / 50 / 100 questions. Chaque item
+garde son propre historique de latences : le tirage est pondéré par
+`latence médiane × (1 + 2 × taux d'erreur)`, donc ce qui est lent ou raté revient
+beaucoup plus souvent. Une heatmap de la table de multiplication montre
+visuellement les cases lentes.
+
+Utilisable au clavier seul sur ordinateur (chiffres + Entrée, jamais de souris)
+et au doigt sur téléphone (pavé numérique intégré, pas de clavier logiciel).
+
 ## Suivi
 
 Scores, courbe de progression, maîtrise par thème et historique de sessions sont
@@ -67,6 +88,7 @@ js/app.js               navigation, rendu, interactions
 data/bank.js            registre de la banque de questions
 data/q-*.js             les 22 thèmes de questions
 data/cours-*.js         les 22 fiches de cours
+drill-calcul.html       drill de calcul mental (autonome, sans dépendance)
 sw.js                   service worker (cache hors-ligne)
 tools/gen-icons.js      génération des icônes PNG, sans dépendance
 ```

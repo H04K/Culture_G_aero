@@ -343,6 +343,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .cta-body small { color: #b9d4f5; font-size: 12.5px; line-height: 1.35; display: block; margin-top: 2px; }
 .cta-go { font-size: 20px; color: var(--accent); }
 
+a.cours-cta { text-decoration: none; color: inherit; }
+.drill-cta { background: linear-gradient(145deg, #2a3550, #171f33); border-color: #445a86; }
+.drill-cta:hover { border-color: #7f9dd0; }
+.drill-cta .cta-body small { color: #a8b8d6; }
+.drill-cta .cta-go { color: #8fb0e2; }
+
 .cours-progress {
   display: flex; align-items: center; gap: 14px; margin-top: 18px;
   background: var(--surface); border: 1px solid var(--line);

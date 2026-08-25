@@ -2,11 +2,12 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'cadets-prep-v2';
+const VERSION = 'cadets-prep-v3';
 
 const ASSETS = [
   './',
   './index.html',
+  './drill-calcul.html',
   './manifest.webmanifest',
   './css/style.css',
   './js/storage.js',
