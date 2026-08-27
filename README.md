@@ -32,7 +32,7 @@ psychotechnique de la sélection.
 
 | Jeu de données | Contenu |
 |---|---|
-| Tables | `a × b` de 2 à 20, sous-filtre « zone chaude » 6–20 × 6–20 |
+| Tables | `a × b` de 2 à 20 ; sélecteur : toutes, zone chaude 6–20, ou une table précise |
 | Carrés | `n²` de 1 à 30, et la reconnaissance inverse (441 → 21) |
 | Puissances | 2¹–2¹⁴, 3¹–3⁷, 4¹–4⁶, 5¹–5⁵, 6¹–6⁵, 7¹–7⁴, 8¹–8⁴, 9¹–9⁴, et leur inverse |
 | Chaînes | additions et chaînes `+ / −` à 2, 3 ou 4 termes, générées à la volée |
@@ -50,6 +50,10 @@ garde son propre historique de latences : le tirage est pondéré par
 `latence médiane × (1 + 2 × taux d'erreur)`, donc ce qui est lent ou raté revient
 beaucoup plus souvent. Une heatmap de la table de multiplication montre
 visuellement les cases lentes.
+
+Un écran « Apprendre une table » affiche une table entière (`17 × 1` à `17 × 20`),
+chaque ligne colorée par ta latence sur ce fait — les deux sens confondus, `17 × 3`
+et `3 × 17` étant le même fait — puis lance un exercice sur cette seule table.
 
 Utilisable au clavier seul sur ordinateur (chiffres + Entrée, jamais de souris)
 et au doigt sur téléphone (pavé numérique intégré, pas de clavier logiciel).

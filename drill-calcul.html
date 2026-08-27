@@ -78,6 +78,7 @@ body.touch .row.action.pri.cur{background:#26364a}
 body.touch .row .key{display:none}
 body.touch .opt{padding:8px 12px;font-size:14px}
 body.touch .kbhint{display:none}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
 .touchhint{display:none}
 .wide-only{display:inline}
 .touchonly{display:none}
@@ -93,7 +94,7 @@ body.touch .hm th{font-size:10px}
 body.touch .legend{font-size:11px;flex-wrap:wrap;gap:6px}
 body.touch .delta{font-size:11.5px}
 body.touch .touchhint{display:block}
-.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+body.touch .btns.touchhint{display:flex}
 .btn{
   border:1px solid var(--line);border-radius:6px;padding:11px 18px;
   color:var(--fg);background:#171b21;font-size:14px;letter-spacing:.04em
@@ -173,6 +174,23 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .tag{border:1px solid #3a2b2b;background:#1d1516;color:#e6b9b9;padding:2px 9px;border-radius:3px;font-size:13px}
 .empty{color:var(--dimmer);font-size:13px}
 
+/* ---------- apprendre une table ---------- */
+.tpick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.tpick span{
+  padding:5px 11px;border:1px solid var(--line);border-radius:3px;
+  color:var(--dimmer);font-size:13px;font-variant-numeric:tabular-nums
+}
+.tpick span.on{border-color:#4d6a8f;color:#cfe0f5;background:#1a2331}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px 16px}
+.tline{
+  display:flex;align-items:center;gap:10px;padding:6px 10px;
+  border-left:3px solid #262d38;border-radius:2px;background:#141821
+}
+.tline b{font-weight:500;font-variant-numeric:tabular-nums;font-size:15px}
+.tline i{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--dimmer)}
+body.touch .tgrid{grid-template-columns:1fr}
+body.touch .tpick span{padding:8px 13px;font-size:14px}
+
 /* ---------- stats ---------- */
 #stats .wrap,#end .wrap{overflow-y:auto;height:100%}
 .hm{border-collapse:separate;border-spacing:2px;width:auto;font-size:11px}
@@ -199,8 +217,8 @@ svg{display:block;max-width:100%}
   <div id="menu"></div>
   <div class="err" id="homeErr"></div>
   <div class="hint kbhint">
-    <kbd>↑</kbd><kbd>↓</kbd> naviguer &nbsp;·&nbsp; <kbd>espace</kbd> / <kbd>←</kbd><kbd>→</kbd> modifier &nbsp;·&nbsp; <kbd>1</kbd>–<kbd>8</kbd> bascule directe, <kbd>0</kbd> zone chaude, <kbd>F</kbd> format<br>
-    <kbd>entrée</kbd> démarrer &nbsp;·&nbsp; <kbd>S</kbd> statistiques &nbsp;·&nbsp; <kbd>⌫</kbd> retour à Cadets Prep &nbsp;·&nbsp; en session : <kbd>entrée</kbd> valider (ou <kbd>V</kbd>/<kbd>F</kbd>), <kbd>échap</kbd> terminer
+    <kbd>↑</kbd><kbd>↓</kbd> naviguer &nbsp;·&nbsp; <kbd>espace</kbd> / <kbd>←</kbd><kbd>→</kbd> modifier &nbsp;·&nbsp; <kbd>1</kbd>–<kbd>8</kbd> bascule directe, <kbd>F</kbd> format<br>
+    <kbd>entrée</kbd> démarrer &nbsp;·&nbsp; <kbd>T</kbd> apprendre une table &nbsp;·&nbsp; <kbd>S</kbd> statistiques &nbsp;·&nbsp; <kbd>⌫</kbd> retour &nbsp;·&nbsp; en session : <kbd>entrée</kbd> valider (ou <kbd>V</kbd>/<kbd>F</kbd>), <kbd>échap</kbd> terminer
   </div>
   <div class="hint touchhint">
     Touche une ligne pour l'activer, puis <b>Démarrer</b>.<br>
@@ -243,6 +261,21 @@ svg{display:block;max-width:100%}
   </div>
   <div class="hint kbhint">
     <kbd>entrée</kbd> relancer la même config &nbsp;·&nbsp; <kbd>S</kbd> statistiques &nbsp;·&nbsp; <kbd>échap</kbd> accueil
+  </div>
+</div></section>
+
+<!-- =============== TABLE =============== -->
+<section id="table" class="screen"><div class="wrap">
+  <h1>Apprendre une table</h1>
+  <div class="tpick" id="tblPick"></div>
+  <div id="tblBody"></div>
+  <div class="btns touchhint">
+    <button class="btn pri" data-act="tdrill">S'entraîner sur cette table</button>
+    <button class="btn" data-act="home">← Retour</button>
+  </div>
+  <div class="hint kbhint">
+    <kbd>←</kbd><kbd>→</kbd> changer de table &nbsp;·&nbsp;
+    <kbd>entrée</kbd> s'entraîner sur celle-ci &nbsp;·&nbsp; <kbd>échap</kbd> retour
   </div>
 </div></section>
 
@@ -418,7 +451,7 @@ function decoy(it, v){
    ============================================================ */
 const KEY = "drill.mental.v1";
 const DEFAULT_CFG = {sets:{tables:true,sq:false,isq:true,pw:false,ipw:false,sum:false,sub:false,mix:false},
-                     hot:false, mode:1, fmt:0};
+                     tf:0, mode:1, fmt:0};
 let DB = load();
 
 function load(){
@@ -427,8 +460,11 @@ function load(){
   if(!d || typeof d!=="object") d = {};
   d.items    = d.items    || {};
   d.sessions = d.sessions || [];
-  d.cfg      = Object.assign({}, DEFAULT_CFG, d.cfg||{});
-  d.cfg.sets = Object.assign({}, DEFAULT_CFG.sets, d.cfg.sets||{});
+  const raw  = d.cfg || {};
+  d.cfg      = Object.assign({}, DEFAULT_CFG, raw);
+  d.cfg.sets = Object.assign({}, DEFAULT_CFG.sets, raw.sets||{});
+  if(raw.tf === undefined) d.cfg.tf = raw.hot ? 1 : 0;       // migration ancien toggle
+  delete d.cfg.hot;
   return d;
 }
 function save(){
@@ -475,7 +511,11 @@ function pick(pool, lastId){
 function buildPool(cfg){
   return ITEMS.filter(i=>{
     if(!cfg.sets[i.set]) return false;
-    if(i.set==="tables" && cfg.hot && !i.hot) return false;
+    if(i.set==="tables"){
+      const tf = cfg.tf|0;
+      if(tf===1 && !i.hot) return false;                     // zone chaude 6–20
+      if(tf>=2 && i.a!==tf && i.b!==tf) return false;         // une seule table
+    }
     return true;
   });
 }
@@ -487,18 +527,23 @@ if(TOUCH) document.body.classList.add("touch");
 /* ============================================================
    4. NAVIGATION D'ÉCRAN
    ============================================================ */
-const SCREENS = ["home","play","end","stats"];
+const SCREENS = ["home","play","end","stats","table"];
 let screen = "home";
 function show(name){
   screen = name;
   SCREENS.forEach(s=>document.getElementById(s).classList.toggle("on", s===name));
   if(name==="home") renderHome();
   if(name==="stats") renderStats();
+  if(name==="table") renderTable();
 }
 
 /* ============================================================
    5. ACCUEIL
    ============================================================ */
+// 0 = toutes, 1 = zone chaude, n>=2 = la table de n
+const TF_OPTS = ["toutes","zone chaude"];
+for(let n=2;n<=TMAX;n++) TF_OPTS.push(String(n));
+
 const MODES = [
   {kind:"time",  v:60,  label:"60 s"},
   {kind:"time",  v:120, label:"120 s"},
@@ -517,9 +562,8 @@ function buildRows(){
     ROWS.push({type:"toggle", key:String(i+1), label:s.label,
       get:()=>c.sets[s.id], set:v=>{c.sets[s.id]=v}});
     if(s.id==="tables"){
-      ROWS.push({type:"toggle", sub:true, key:"0", label:"zone chaude uniquement (6–20 × 6–20)",
-        dis:()=>!c.sets.tables,
-        get:()=>c.hot, set:v=>{c.hot=v}});
+      ROWS.push({type:"opts", sub:true, key:"", label:"Table ciblée", cfg:"tf",
+        dis:()=>!c.sets.tables, opts:TF_OPTS});
     }
   });
   ROWS.push({type:"opts", key:"F", label:"Format", cfg:"fmt",
@@ -527,6 +571,7 @@ function buildRows(){
   ROWS.push({type:"opts", key:"",  label:"Durée",  cfg:"mode",
              opts:MODES.map(m=>m.label)});
   ROWS.push({type:"action", key:"⏎", label:"Démarrer", pri:true, run:start});
+  ROWS.push({type:"action", key:"T", label:"Apprendre une table", run:()=>show("table")});
   ROWS.push({type:"action", key:"S", label:"Statistiques", run:()=>show("stats")});
   ROWS.push({type:"action", key:"\u2190", label:"Retour \u00e0 Cadets Prep", run:()=>{location.href="index.html";}});
 }
@@ -576,6 +621,7 @@ document.addEventListener("click", e=>{
   if(a==="replay") start();
   else if(a==="stats") show("stats");
   else if(a==="home")  show("home");
+  else if(a==="tdrill") drillTable();
   else if(a==="reset"){
     if(!resetArmed){
       resetArmed = true;
@@ -599,6 +645,7 @@ function homeKey(e){
     e.preventDefault(); return;
   }
   if(k==="s"||k==="S"){ show("stats"); e.preventDefault(); return; }
+  if(k==="t"||k==="T"){ show("table"); e.preventDefault(); return; }
   if(k==="f"||k==="F"){ DB.cfg.fmt = DB.cfg.fmt?0:1; save(); renderHome(); e.preventDefault(); return; }
   if(k==="Backspace"){ location.href="index.html"; e.preventDefault(); return; }
   const r = ROWS[cur];
@@ -763,7 +810,7 @@ function finish(){
     ts: Date.now(),
     mode: S.mode.kind, modeV: S.mode.v,
     sets: Object.keys(DB.cfg.sets).filter(k=>DB.cfg.sets[k]),
-    hot: !!DB.cfg.hot,
+    tf: DB.cfg.tf|0,
     seconds: Math.round(elapsed),
     count: S.asked, correct: S.correct,
     avgMs: S.lat.length ? Math.round(S.lat.reduce((a,b)=>a+b,0)/S.lat.length) : 0,
@@ -939,6 +986,64 @@ function renderStats(){
   `;
 }
 
+/* ============================================================
+   8 bis. APPRENDRE UNE TABLE
+   ============================================================ */
+const tblN = () => DB.cfg.tf >= 2 ? DB.cfg.tf : 12;
+
+/* latence médiane d'un fait, les deux sens confondus */
+function medPair(a,b){
+  const s1 = DB.items[`t:${a}x${b}`], s2 = DB.items[`t:${b}x${a}`];
+  const l = [];
+  if(s1) l.push(...s1.lat.slice(-5));
+  if(s2 && a!==b) l.push(...s2.lat.slice(-5));
+  return l.length ? median(l) : null;
+}
+
+function renderTable(){
+  const n = tblN();
+  document.getElementById("tblPick").innerHTML =
+    Array.from({length:TMAX-1},(_,i)=>i+2)
+      .map(k=>`<span class="${k===n?"on":""}" data-tbl="${k}">${k}</span>`).join("");
+
+  let rows = "";
+  for(let k=1;k<=TMAX;k++){
+    // n × k et k × n sont le même fait à apprendre : on fusionne les deux sens
+    const m  = k>=2 ? medPair(n,k) : null;             // n × 1 n'est pas un item du drill
+    const col = m==null ? "#262d38" : heatColor(m);
+    const lat = m==null ? (k>=2 ? "jamais vu" : "—") : (m/1000).toFixed(1)+" s";
+    rows += `<div class="tline" style="border-left-color:${col}">
+               <b>${n} × ${k} = ${n*k}</b><i>${lat}</i></div>`;
+  }
+  document.getElementById("tblBody").innerHTML = `<div class="tgrid">${rows}</div>`;
+}
+
+/* lance une session sur la seule table affichée */
+function drillTable(){
+  const n = tblN();
+  Object.keys(DB.cfg.sets).forEach(k => DB.cfg.sets[k] = (k==="tables"));
+  DB.cfg.tf = n;
+  save();
+  start();
+}
+
+document.getElementById("tblPick").addEventListener("click", e=>{
+  const el = e.target.closest("[data-tbl]");
+  if(!el) return;
+  DB.cfg.tf = +el.dataset.tbl; save(); renderTable();
+});
+
+function tableKey(e){
+  const k = e.key;
+  if(k==="Escape"){ show("home"); e.preventDefault(); return; }
+  if(k==="Enter"){ drillTable(); e.preventDefault(); return; }
+  const d = (k==="ArrowRight"||k==="ArrowDown") ? 1 : (k==="ArrowLeft"||k==="ArrowUp") ? -1 : 0;
+  if(d){
+    DB.cfg.tf = Math.min(TMAX, Math.max(2, tblN()+d));
+    save(); renderTable(); e.preventDefault();
+  }
+}
+
 let resetArmed = false;
 function statsKey(e){
   if(e.key==="r"||e.key==="R"){
@@ -967,6 +1072,7 @@ document.addEventListener("keydown", e=>{
   if(e.metaKey||e.ctrlKey||e.altKey) return;
   if(screen==="home")  return homeKey(e);
   if(screen==="stats") return statsKey(e);
+  if(screen==="table") return tableKey(e);
   if(screen==="play"){
     if(e.key==="Escape"){ finish(); e.preventDefault(); return; }
     if(S && S.vf){
@@ -992,7 +1098,7 @@ window.addEventListener("beforeunload", ()=>{
   if(S && !S.done && S.asked>0){
     DB.sessions.push({
       ts:Date.now(), mode:S.mode.kind, modeV:S.mode.v,
-      sets:Object.keys(DB.cfg.sets).filter(k=>DB.cfg.sets[k]), hot:!!DB.cfg.hot,
+      sets:Object.keys(DB.cfg.sets).filter(k=>DB.cfg.sets[k]), tf:DB.cfg.tf|0,
       seconds:Math.round((performance.now()-S.t0)/1000),
       count:S.asked, correct:S.correct,
       avgMs:Math.round(S.lat.reduce((a,b)=>a+b,0)/S.lat.length),
