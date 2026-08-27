@@ -62,10 +62,11 @@ h2{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
 /* ---------- tactile ---------- */
 body.touch .row{padding:13px 14px;font-size:14px;-webkit-tap-highlight-color:transparent}
 body.touch .row.sub{padding-left:24px;font-size:13px}
-body.touch .row.mode{flex-direction:column;align-items:stretch;gap:9px}
-body.touch .row.mode .lbl{flex:none;color:var(--dim);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-body.touch .row.mode .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-body.touch .row.mode .opt{text-align:center;padding:10px 2px;font-size:13px}
+body.touch .row.opts{flex-direction:column;align-items:stretch;gap:9px}
+body.touch .row.opts .lbl{flex:none;color:var(--dim);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+body.touch .row.opts .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+body.touch .row.opts .opts.n2{grid-template-columns:repeat(2,1fr)}
+body.touch .row.opts .opt{text-align:center;padding:10px 2px;font-size:13px}
 body.touch .row.action{
   justify-content:center;border-color:#333c48;background:#171b21;
   margin-top:9px;padding:15px;letter-spacing:.06em
@@ -87,7 +88,7 @@ body.touch .kpi .v{font-size:30px}
 body.touch table{font-size:12.5px}
 body.touch th,body.touch td{padding:7px 5px}
 body.touch td.num,body.touch th.num{width:1%;white-space:nowrap}
-body.touch .hm td{width:34px;height:30px;font-size:10.5px}
+body.touch .hm td{width:29px;height:25px;font-size:9.5px}
 body.touch .hm th{font-size:10px}
 body.touch .legend{font-size:11px;flex-wrap:wrap;gap:6px}
 body.touch .delta{font-size:11.5px}
@@ -99,6 +100,21 @@ body.touch .touchhint{display:block}
 }
 .btn.pri{background:#22303f;border-color:#3d5570}
 .btn.dgr{color:#e0a0a0;border-color:#3a2b2b;background:#1d1516}
+
+/* ---------- vrai / faux ---------- */
+#vf{display:none;gap:12px;justify-content:center;max-width:460px;width:100%;
+    margin:0 auto;padding:0 10px calc(14px + env(safe-area-inset-bottom,0px))}
+body.vf #vf{display:flex}
+body.vf #ans,body.vf #pad,body.touch.vf #pad{display:none}
+#vf button{
+  flex:1;border-radius:8px;border:1px solid #2c3542;background:#181c23;
+  padding:20px 0;font-size:20px;letter-spacing:.16em;color:var(--fg)
+}
+#vf button small{display:block;font-size:11px;letter-spacing:.1em;color:var(--dimmer);margin-top:5px}
+#vf .v{background:#16281d;border-color:#2f6f4a}
+#vf .f{background:#28191a;border-color:#7a3030}
+#vf .v:active{background:#1e3a2a}
+#vf .f:active{background:#3a2224}
 
 /* ---------- pavé numérique ---------- */
 #pad{display:none;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));gap:8px;
@@ -163,7 +179,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .hm td,.hm th{border:none;padding:0}
 .hm th{color:var(--dimmer);font-size:11px;text-align:center;padding:2px 0;letter-spacing:0}
 .hm td{
-  width:46px;height:34px;border-radius:3px;text-align:center;
+  width:37px;height:28px;border-radius:3px;text-align:center;font-size:10.5px;
   font-variant-numeric:tabular-nums;color:#0c0f12;font-weight:600;
 }
 .hm td.none{background:#1b1f25;color:#4a525d;font-weight:400}
@@ -183,8 +199,8 @@ svg{display:block;max-width:100%}
   <div id="menu"></div>
   <div class="err" id="homeErr"></div>
   <div class="hint kbhint">
-    <kbd>↑</kbd><kbd>↓</kbd> naviguer &nbsp;·&nbsp; <kbd>espace</kbd> / <kbd>←</kbd><kbd>→</kbd> modifier &nbsp;·&nbsp; <kbd>1</kbd>–<kbd>7</kbd> bascule directe, <kbd>0</kbd> zone chaude<br>
-    <kbd>entrée</kbd> démarrer &nbsp;·&nbsp; <kbd>S</kbd> statistiques &nbsp;·&nbsp; <kbd>⌫</kbd> retour à Cadets Prep &nbsp;·&nbsp; en session : <kbd>entrée</kbd> valider, <kbd>échap</kbd> terminer
+    <kbd>↑</kbd><kbd>↓</kbd> naviguer &nbsp;·&nbsp; <kbd>espace</kbd> / <kbd>←</kbd><kbd>→</kbd> modifier &nbsp;·&nbsp; <kbd>1</kbd>–<kbd>8</kbd> bascule directe, <kbd>0</kbd> zone chaude, <kbd>F</kbd> format<br>
+    <kbd>entrée</kbd> démarrer &nbsp;·&nbsp; <kbd>S</kbd> statistiques &nbsp;·&nbsp; <kbd>⌫</kbd> retour à Cadets Prep &nbsp;·&nbsp; en session : <kbd>entrée</kbd> valider (ou <kbd>V</kbd>/<kbd>F</kbd>), <kbd>échap</kbd> terminer
   </div>
   <div class="hint touchhint">
     Touche une ligne pour l'activer, puis <b>Démarrer</b>.<br>
@@ -201,6 +217,10 @@ svg{display:block;max-width:100%}
     <div id="q"></div>
     <input id="ans" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div id="corr"></div>
+  </div>
+  <div id="vf">
+    <button data-vf="1" class="v">VRAI<small>V</small></button>
+    <button data-vf="0" class="f">FAUX<small>F</small></button>
   </div>
   <div id="pad">
     <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
@@ -247,13 +267,14 @@ svg{display:block;max-width:100%}
    1. JEUX DE DONNÉES — générés par calcul au chargement
    ============================================================ */
 const SETS = [
-  {id:"tables", label:"Tables  a × b  (2–12)"},
+  {id:"tables", label:"Tables  a × b  (2–20)"},
   {id:"sq",     label:"Carrés directs  n²  (1–30)"},
   {id:"isq",    label:"Carrés inverses  √n²  (1–30)"},
   {id:"pw",     label:"Puissances  b^e"},
   {id:"ipw",    label:"Puissances inverses  b^? = x"},
   {id:"sum",    label:"Chaînes d'additions  5+19+17"},
-  {id:"sub",    label:"Chaînes + et \u2212  24+17\u221215"}
+  {id:"sub",    label:"Chaînes + et \u2212  24+17\u221215"},
+  {id:"mix",    label:"Chaînes avec × et n²  7×8+23"}
 ];
 
 const POWERS = [[2,14],[3,7],[4,6],[5,5],[6,5],[7,4],[8,4],[9,4]];
@@ -264,59 +285,99 @@ const BY_ID = Object.create(null);
 function addItem(it){ ITEMS.push(it); BY_ID[it.id] = it; return it; }
 
 // 1. tables (paires ordonnées : 7×8 et 8×7 sont deux items → heatmap complète)
-for(let a=2;a<=12;a++) for(let b=2;b<=12;b++){
+const TMAX = 20;
+for(let a=2;a<=TMAX;a++) for(let b=2;b<=TMAX;b++){
   addItem({id:`t:${a}x${b}`, set:"tables", q:`${a} × ${b}`, ans:a*b, a:a, b:b,
            hot: a>=6 && b>=6});
 }
 // 2. carrés directs
-for(let n=1;n<=30;n++) addItem({id:`sq:${n}`, set:"sq", q:`${n}²`, ans:n*n});
+for(let n=1;n<=30;n++) addItem({id:`sq:${n}`, set:"sq", q:`${n}²`, ans:n*n, n:n});
 // 3. carrés inverses
-for(let n=1;n<=30;n++) addItem({id:`isq:${n}`, set:"isq", q:`√${n*n}`, ans:n});
+for(let n=1;n<=30;n++) addItem({id:`isq:${n}`, set:"isq", q:`√${n*n}`, ans:n, n:n});
 // 4 & 5. puissances et puissances inverses
 for(const [b,maxE] of POWERS) for(let e=1;e<=maxE;e++){
   const v = Math.pow(b,e);
-  addItem({id:`pw:${b}^${e}`,  set:"pw",  q:`${b}^${e}`,      ans:v});
-  addItem({id:`ipw:${b}^${e}`, set:"ipw", q:`${b}^? = ${v}`,  ans:e});
+  addItem({id:`pw:${b}^${e}`,  set:"pw",  q:`${b}^${e}`,      ans:v, b:b, e:e});
+  addItem({id:`ipw:${b}^${e}`, set:"ipw", q:`${b}^? = ${v}`,  ans:e, b:b, e:e,
+           vfq:c=>`${b}^${c} = ${v}`});
 }
 
 /* --- chaînes de calcul : l'item traqué est la CLASSE de difficulté,
    l'énoncé est régénéré à chaque tirage (jamais deux fois le même calcul) --- */
-const CHAINS = [
-  {id:"sum:2d",   set:"sum", label:"2 termes \u00b7 2 chiffres",          r:[[12,89],[13,89]],                 hard:1},
-  {id:"sum:3u",   set:"sum", label:"3 termes \u00b7 1 chiffre",           r:[[3,9],[4,9],[4,9]],               hard:1},
-  {id:"sum:3mix", set:"sum", label:"3 termes \u00b7 unit\u00e9s + dizaines",   r:[[3,9],[11,29],[12,29]],     hard:1, mix:1},
-  {id:"sum:3d",   set:"sum", label:"3 termes \u00b7 2 chiffres",          r:[[12,49],[13,49],[14,49]],         hard:2},
-  {id:"sum:4mix", set:"sum", label:"4 termes \u00b7 m\u00e9lang\u00e9",       r:[[3,9],[11,29],[4,9],[12,39]], hard:2, mix:1},
-
-  {id:"sub:2d",   set:"sub", label:"2 termes \u00b7 soustraction",        r:[[31,98],[12,49]],                 hard:1, minus:1},
-  {id:"sub:3mix", set:"sub", label:"3 termes \u00b7 + et \u2212 \u00b7 m\u00e9lang\u00e9", r:[[14,49],[11,29],[4,19]], hard:1, minus:1, mix:1},
-  {id:"sub:3d",   set:"sub", label:"3 termes \u00b7 + et \u2212 \u00b7 2 chiffres", r:[[21,69],[14,49],[12,49]], hard:2, minus:1},
-  {id:"sub:4mix", set:"sub", label:"4 termes \u00b7 + et \u2212 \u00b7 m\u00e9lang\u00e9", r:[[11,39],[4,19],[11,29],[3,9]], hard:1, minus:1, mix:1}
-];
-
 const ri = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+
+/* un terme de chaîne est un ATOME : un nombre, un produit ou un carré.
+   Le produit et le carré sont réduits avant l'enchaînement, donc la lecture
+   gauche-à-droite coïncide avec la priorité des opérateurs. */
+const N  = (lo,hi)          => ({t:"n", r:[lo,hi]});
+const M  = (a1,a2,b1,b2)    => ({t:"m", a:[a1,a2], b:[b1,b2]});
+const SQ = (lo,hi)          => ({t:"s", n:[lo,hi]});
+
+function atom(sp){
+  if(sp.t==="m"){ const a=ri(sp.a[0],sp.a[1]), b=ri(sp.b[0],sp.b[1]); return {d:a+"\u00d7"+b, v:a*b}; }
+  if(sp.t==="s"){ const n=ri(sp.n[0],sp.n[1]);                         return {d:n+"\u00b2",   v:n*n}; }
+  const v = ri(sp.r[0],sp.r[1]);                                       return {d:String(v),   v:v};
+}
+
+const CHAINS = [
+  {id:"sum:2d",   set:"sum", label:"2 termes \u00b7 2 chiffres",         hard:1,
+   terms:[N(12,89),N(13,89)]},
+  {id:"sum:3u",   set:"sum", label:"3 termes \u00b7 1 chiffre",          hard:1,
+   terms:[N(3,9),N(4,9),N(4,9)]},
+  {id:"sum:3mix", set:"sum", label:"3 termes \u00b7 unit\u00e9s + dizaines", hard:1, mix:1,
+   terms:[N(3,9),N(11,29),N(12,29)]},
+  {id:"sum:3d",   set:"sum", label:"3 termes \u00b7 2 chiffres",         hard:2,
+   terms:[N(12,49),N(13,49),N(14,49)]},
+  {id:"sum:4mix", set:"sum", label:"4 termes \u00b7 m\u00e9lang\u00e9",      hard:2, mix:1,
+   terms:[N(3,9),N(11,29),N(4,9),N(12,39)]},
+
+  {id:"sub:2d",   set:"sub", label:"2 termes \u00b7 soustraction",       hard:1, minus:1,
+   terms:[N(31,98),N(12,49)]},
+  {id:"sub:3mix", set:"sub", label:"3 termes \u00b7 + et \u2212 \u00b7 m\u00e9lang\u00e9", hard:1, minus:1, mix:1,
+   terms:[N(14,49),N(11,29),N(4,19)]},
+  {id:"sub:3d",   set:"sub", label:"3 termes \u00b7 + et \u2212 \u00b7 2 chiffres", hard:2, minus:1,
+   terms:[N(21,69),N(14,49),N(12,49)]},
+  {id:"sub:4mix", set:"sub", label:"4 termes \u00b7 + et \u2212 \u00b7 m\u00e9lang\u00e9", hard:1, minus:1, mix:1,
+   terms:[N(11,39),N(4,19),N(11,29),N(3,9)]},
+
+  {id:"mix:m1",   set:"mix", label:"produit + terme",
+   terms:[M(3,9,4,9),N(11,49)]},
+  {id:"mix:m2",   set:"mix", label:"produit \u2212 terme",              minus:1,
+   terms:[M(4,12,4,9),N(11,39)]},
+  {id:"mix:m3",   set:"mix", label:"deux produits",
+   terms:[M(3,9,3,9),M(3,9,4,9)]},
+  {id:"mix:m4",   set:"mix", label:"produit + 2 termes",                mix:1,
+   terms:[M(3,9,3,9),N(11,29),N(4,9)]},
+  {id:"mix:s1",   set:"mix", label:"carr\u00e9 + terme",
+   terms:[SQ(4,15),N(11,49)]},
+  {id:"mix:s2",   set:"mix", label:"carr\u00e9 \u2212 terme",              minus:1,
+   terms:[SQ(6,16),N(12,60)]},
+  {id:"mix:s3",   set:"mix", label:"carr\u00e9 + produit",
+   terms:[SQ(3,12),M(3,9,3,9)]},
+  {id:"mix:s4",   set:"mix", label:"carr\u00e9 + et \u2212 \u00b7 3 termes",   minus:1, mix:1,
+   terms:[SQ(5,14),N(11,39),N(4,19)]}
+];
 
 function chainGen(c){
   return function(){
     let fallback = null;
     for(let tr=0; tr<80; tr++){
-      // termes
-      const t = c.r.map(x=>ri(x[0],x[1]));
-      if(c.mix) for(let i=t.length-1;i>0;i--){ const j=ri(0,i); const s=t[i]; t[i]=t[j]; t[j]=s; }
+      const t = c.terms.map(atom);
+      if(c.mix) for(let i=t.length-1;i>0;i--){ const j=ri(0,i); const x=t[i]; t[i]=t[j]; t[j]=x; }
       // opérateurs : exactement un "−" si demandé, jamais en tête
       const ops = new Array(t.length-1).fill("+");
       if(c.minus) ops[ri(0,ops.length-1)] = "\u2212";
       // accumulation + comptage des retenues / emprunts
-      let acc = t[0], events = 0, ok = true;
+      let acc = t[0].v, events = 0, ok = true;
       for(let i=1;i<t.length;i++){
-        const u = acc%10, v = t[i]%10;
-        if(ops[i-1]==="+"){ if(u+v>=10) events++; acc += t[i]; }
-        else             { if(u<v)      events++; acc -= t[i]; }
+        const u = acc%10, v = t[i].v%10;
+        if(ops[i-1]==="+"){ if(u+v>=10) events++; acc += t[i].v; }
+        else             { if(u<v)      events++; acc -= t[i].v; }
         if(acc < 2){ ok = false; break; }
       }
       if(!ok) continue;
-      let q = String(t[0]);
-      for(let i=1;i<t.length;i++) q += ops[i-1] + t[i];
+      let q = t[0].d;
+      for(let i=1;i<t.length;i++) q += ops[i-1] + t[i].d;
       const inst = {q:q, ans:acc};
       if(events >= (c.hard||0)) return inst;
       if(!fallback) fallback = inst;            // filet : positif mais trop facile
@@ -328,11 +389,36 @@ CHAINS.forEach(c => addItem({id:c.id, set:c.set, label:c.label, gen:chainGen(c)}
 
 const itemLabel = it => it.label || it.q;
 
+/* Leurre pour le mode vrai/faux : une valeur FAUSSE mais crédible, pour qu'on
+   soit obligé de calculer au lieu de repérer une absurdité. */
+function decoy(it, v){
+  // erreurs typiques du jeu de données : crédibles par construction
+  const special = [];
+  if(it.set==="tables"){ special.push(v+it.a, v-it.a, v+it.b, v-it.b); }
+  else if(it.set==="sq"){ special.push((it.n+1)*(it.n+1), (it.n-1)*(it.n-1)); }
+  else if(it.set==="pw"){ special.push(v*it.b, Math.round(v/it.b)); }
+  else if(it.set==="isq" || it.set==="ipw"){ special.push(v+1, v-1); }
+  // erreurs de calcul génériques, bornées : pas de leurre absurde sur un petit nombre
+  const generic = [v+1, v-1];
+  if(v>=8)  generic.push(v+2, v-2);
+  if(v>=25) generic.push(v+10, v-10);
+  const d = String(v);                                   // transposition de chiffres
+  if(d.length>=2){
+    const t = parseInt(d[1]+d[0]+d.slice(2), 10);
+    if(t!==v) generic.push(t);
+  }
+  const span = Math.max(2, v*0.6);
+  const ok = special.concat(generic.filter(x => Math.abs(x-v) <= span))
+                    .filter(x => Number.isFinite(x) && x>0 && x!==v);
+  return ok.length ? ok[Math.floor(Math.random()*ok.length)] : v+1;
+}
+
 /* ============================================================
    2. PERSISTANCE
    ============================================================ */
 const KEY = "drill.mental.v1";
-const DEFAULT_CFG = {sets:{tables:true,sq:false,isq:true,pw:false,ipw:false,sum:false,sub:false}, hot:false, mode:1};
+const DEFAULT_CFG = {sets:{tables:true,sq:false,isq:true,pw:false,ipw:false,sum:false,sub:false,mix:false},
+                     hot:false, mode:1, fmt:0};
 let DB = load();
 
 function load(){
@@ -431,12 +517,15 @@ function buildRows(){
     ROWS.push({type:"toggle", key:String(i+1), label:s.label,
       get:()=>c.sets[s.id], set:v=>{c.sets[s.id]=v}});
     if(s.id==="tables"){
-      ROWS.push({type:"toggle", sub:true, key:"0", label:"zone chaude uniquement (6–12 × 6–12)",
+      ROWS.push({type:"toggle", sub:true, key:"0", label:"zone chaude uniquement (6–20 × 6–20)",
         dis:()=>!c.sets.tables,
         get:()=>c.hot, set:v=>{c.hot=v}});
     }
   });
-  ROWS.push({type:"mode", key:"", label:"Durée"});
+  ROWS.push({type:"opts", key:"F", label:"Format", cfg:"fmt",
+             opts:["Réponse chiffrée","Vrai / Faux"]});
+  ROWS.push({type:"opts", key:"",  label:"Durée",  cfg:"mode",
+             opts:MODES.map(m=>m.label)});
   ROWS.push({type:"action", key:"⏎", label:"Démarrer", pri:true, run:start});
   ROWS.push({type:"action", key:"S", label:"Statistiques", run:()=>show("stats")});
   ROWS.push({type:"action", key:"\u2190", label:"Retour \u00e0 Cadets Prep", run:()=>{location.href="index.html";}});
@@ -450,8 +539,8 @@ function renderHome(){
     const cls = ["row", r.type, r.sub?"sub":"", i===cur?"cur":"", dis?"off":"", r.pri?"pri":""].join(" ");
     let right = "";
     if(r.type==="toggle") right = `<span class="box ${r.get()&&!dis?"on":""}"></span>`;
-    if(r.type==="mode")   right = `<span class="opts">${MODES.map((o,j)=>
-        `<span class="opt ${j===DB.cfg.mode?"on":""}">${o.label}</span>`).join("")}</span>`;
+    if(r.type==="opts")   right = `<span class="opts n${r.opts.length}">${r.opts.map((o,j)=>
+        `<span class="opt ${j===DB.cfg[r.cfg]?"on":""}">${o}</span>`).join("")}</span>`;
     return `<div class="${cls}"><span class="key">${r.key}</span><span class="lbl">${r.label}</span>${right}</div>`;
   }).join("");
 
@@ -472,9 +561,9 @@ document.getElementById("menu").addEventListener("click", e=>{
   cur = i;
   if(r.type==="action") return r.run();
   if(r.type==="toggle"){ if(!(r.dis&&r.dis())){ r.set(!r.get()); save(); } renderHome(); return; }
-  if(r.type==="mode"){
+  if(r.type==="opts"){
     const o = e.target.closest(".opt");
-    if(o){ DB.cfg.mode = [...o.parentNode.children].indexOf(o); save(); }
+    if(o){ DB.cfg[r.cfg] = [...o.parentNode.children].indexOf(o); save(); }
     renderHome();
   }
 });
@@ -510,12 +599,13 @@ function homeKey(e){
     e.preventDefault(); return;
   }
   if(k==="s"||k==="S"){ show("stats"); e.preventDefault(); return; }
+  if(k==="f"||k==="F"){ DB.cfg.fmt = DB.cfg.fmt?0:1; save(); renderHome(); e.preventDefault(); return; }
   if(k==="Backspace"){ location.href="index.html"; e.preventDefault(); return; }
   const r = ROWS[cur];
   if(k===" "||k==="ArrowLeft"||k==="ArrowRight"){
     if(r.type==="toggle" && !(r.dis&&r.dis())){ r.set(!r.get()); save(); renderHome(); }
-    else if(r.type==="mode"){
-      DB.cfg.mode = (DB.cfg.mode + (k==="ArrowLeft"?-1:1) + MODES.length) % MODES.length;
+    else if(r.type==="opts"){
+      DB.cfg[r.cfg] = (DB.cfg[r.cfg] + (k==="ArrowLeft"?-1:1) + r.opts.length) % r.opts.length;
       save(); renderHome();
     }
     e.preventDefault(); return;
@@ -554,8 +644,10 @@ function start(){
   }
   document.getElementById("homeErr").textContent = "";
   const mode = MODES[cfg.mode];
+  const vf = cfg.fmt === 1;
+  document.body.classList.toggle("vf", vf);
   S = {
-    pool, mode,
+    pool, mode, vf,
     t0: performance.now(),
     asked:0, correct:0,
     lat:[],                    // latences de la session
@@ -567,7 +659,7 @@ function start(){
   show("play");
   elA.value=""; elC.textContent="";
   next();
-  elA.focus();
+  if(!vf) elA.focus();
   clearInterval(tickId);
   tickId = setInterval(tick, 100);
   tick();
@@ -578,8 +670,15 @@ function next(){
   S.item = it; S.last = it.id;
   const inst = it.gen ? it.gen() : {q:it.q, ans:it.ans};
   S.q = inst.q; S.ans = inst.ans;
-  elQ.textContent = S.q;
-  elQ.className = S.q.length > 8 ? "sm" : "";
+  let shown = S.q;
+  if(S.vf){
+    S.truth = Math.random() < 0.5;                 // une égalité sur deux est vraie
+    S.claim = S.truth ? S.ans : decoy(it, S.ans);
+    shown = it.vfq ? it.vfq(S.claim) : `${S.q} = ${S.claim}`;
+    S.shownQ = shown;
+  }
+  elQ.textContent = shown;
+  elQ.className = shown.length > 8 ? "sm" : "";
   elA.value = "";
   elC.textContent = "";
   S.shown = performance.now();
@@ -604,15 +703,24 @@ function tick(){
 }
 
 function submit(){
-  if(!S || S.locked || S.done) return;
+  if(!S || S.locked || S.done || S.vf) return;
   const raw = elA.value.trim();
   if(raw==="") return;                       // Entrée à vide : ignorée
   const val = parseInt(raw,10);
   if(isNaN(val)) { elA.value=""; return; }
+  record(val === S.ans, {q:S.q, given:val, ans:S.ans});
+}
 
+/* mode vrai/faux : l'égalité affichée est-elle exacte ? */
+function answerVF(said){
+  if(!S || S.locked || S.done || !S.vf) return;
+  record(said === S.truth,
+         {q:S.shownQ, given:said?"VRAI":"FAUX", ans:S.truth?"VRAI":"FAUX"});
+}
+
+function record(good, miss){
   const ms = Math.round(performance.now() - S.shown);
   const it = S.item;
-  const good = (val === S.ans);
 
   // --- persistance par item
   const st = stat(it.id);
@@ -626,7 +734,7 @@ function submit(){
   if(good) S.correct++;
   const pi = S.perItem[it.id] || (S.perItem[it.id] = {id:it.id, q:itemLabel(it), lat:[], ko:0});
   pi.lat.push(ms);
-  if(!good){ pi.ko++; S.missed.push({q:S.q, given:val, ans:S.ans}); }
+  if(!good){ pi.ko++; S.missed.push(miss); }
 
   // --- feedback 250 ms, puis enchaînement automatique
   S.locked = true;
@@ -677,12 +785,16 @@ elPad.addEventListener("click", e=>{
   else if(!S.locked && elA.value.length<6) elA.value += k;
 });
 document.getElementById("quit").addEventListener("click", finish);
+document.getElementById("vf").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(b) answerVF(b.dataset.vf === "1");
+});
 
 /* saisie session */
 elA.addEventListener("keydown", e=>{
   if(e.key==="Enter"){ submit(); e.preventDefault(); }
 });
-elA.addEventListener("blur", ()=>{ if(screen==="play" && S && !S.done) setTimeout(()=>elA.focus(),0); });
+elA.addEventListener("blur", ()=>{ if(screen==="play" && S && !S.done && !S.vf) setTimeout(()=>elA.focus(),0); });
 elA.addEventListener("input", ()=>{ elA.value = elA.value.replace(/[^0-9]/g,""); });
 
 /* ============================================================
@@ -749,11 +861,11 @@ function heatColor(ms){
 
 function heatmapHtml(){
   let h = `<div class="hmwrap"><table class="hm"><tr><th></th>`;
-  for(let b=2;b<=12;b++) h += `<th>${b}</th>`;
+  for(let b=2;b<=TMAX;b++) h += `<th>${b}</th>`;
   h += `</tr>`;
-  for(let a=2;a<=12;a++){
+  for(let a=2;a<=TMAX;a++){
     h += `<tr><th>${a}</th>`;
-    for(let b=2;b<=12;b++){
+    for(let b=2;b<=TMAX;b++){
       const m = med5(`t:${a}x${b}`);
       h += m==null
         ? `<td class="none" title="${a}×${b} jamais vu">·</td>`
@@ -818,7 +930,7 @@ function renderStats(){
       <div class="kpi"><div class="v">${totQ?((1-totOk/totQ)*100).toFixed(0):0}<span style="color:#5b636e;font-size:22px">%</span></div><div class="k">taux d'erreur global</div></div>
       <div class="kpi"><div class="v">${(allAvg/1000).toFixed(2)}<span style="color:#5b636e;font-size:22px">s</span></div><div class="k">temps moyen</div></div>
     </div>
-    <h2>Heatmap des tables (2–12)</h2>
+    <h2>Heatmap des tables (2–20)</h2>
     ${heatmapHtml()}
     <h2>Progression</h2>
     ${curveHtml()}
@@ -856,8 +968,15 @@ document.addEventListener("keydown", e=>{
   if(screen==="home")  return homeKey(e);
   if(screen==="stats") return statsKey(e);
   if(screen==="play"){
-    if(e.key==="Escape"){ finish(); e.preventDefault(); }
-    else if(document.activeElement!==elA){ elA.focus(); }
+    if(e.key==="Escape"){ finish(); e.preventDefault(); return; }
+    if(S && S.vf){
+      const k = e.key.toLowerCase();
+      if(k==="v"||k==="arrowleft"||k==="1")       answerVF(true);
+      else if(k==="f"||k==="arrowright"||k==="0"||k==="2") answerVF(false);
+      else return;
+      e.preventDefault(); return;
+    }
+    if(document.activeElement!==elA) elA.focus();
     return;
   }
   if(screen==="end"){

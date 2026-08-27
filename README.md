@@ -32,10 +32,18 @@ psychotechnique de la sélection.
 
 | Jeu de données | Contenu |
 |---|---|
-| Tables | `a × b` de 2 à 12, sous-filtre « zone chaude » 6–12 × 6–12 |
+| Tables | `a × b` de 2 à 20, sous-filtre « zone chaude » 6–20 × 6–20 |
 | Carrés | `n²` de 1 à 30, et la reconnaissance inverse (441 → 21) |
 | Puissances | 2¹–2¹⁴, 3¹–3⁷, 4¹–4⁶, 5¹–5⁵, 6¹–6⁵, 7¹–7⁴, 8¹–8⁴, 9¹–9⁴, et leur inverse |
 | Chaînes | additions et chaînes `+ / −` à 2, 3 ou 4 termes, générées à la volée |
+| Chaînes × et n² | `7×8+23`, `9²−24`, `5²+8×7` — produits et carrés intégrés aux chaînes |
+
+Deux formats de réponse, applicables à n'importe quel jeu de données : **réponse
+chiffrée** (on tape le résultat) ou **vrai / faux** (une égalité est affichée,
+`5+19+17 = 41`, on juge si elle est exacte). En vrai/faux, une proposition sur
+deux est fausse, et la valeur erronée est un leurre crédible — erreur de retenue,
+transposition de chiffres, multiple voisin — de sorte qu'il faut réellement
+calculer.
 
 Sessions de 60 / 120 / 300 s ou séries de 20 / 50 / 100 questions. Chaque item
 garde son propre historique de latences : le tirage est pondéré par
