@@ -58,6 +58,40 @@ et `3 × 17` étant le même fait — puis lance un exercice sur cette seule tab
 Utilisable au clavier seul sur ordinateur (chiffres + Entrée, jamais de souris)
 et au doigt sur téléphone (pavé numérique intégré, pas de clavier logiciel).
 
+## Révision PPL
+
+Module séparé (`ppl.html`), accessible depuis l'accueil : la préparation complète
+du **théorique PPL(A)**, indépendante de la banque culture générale.
+
+- **12 matières** couvrant tout le programme : réglementation, radiotéléphonie,
+  principes du vol, cellule et systèmes, motorisation, instruments, masse et
+  performances, préparation du vol, navigation, météorologie, facteurs humains,
+  procédures et urgences
+- **95 sections de cours** (~290 min de lecture), avec encadrés de points clés et
+  tableaux de synthèse
+- **413 questions** avec correction expliquée
+- **71 mnémotechniques** (PANNE, FREDA, IMSAFE, PAVE, GUMPS, PARE, SCAP, ANDS,
+  RAMPE, VSTOP, FORDEC, 1-en-60…), consultables par matière et marquables « acquis »
+
+### Profils par pseudo
+
+À l'ouverture, l'onglet demande un **pseudo** et retrouve la progression associée :
+sections lues, mnémos acquis, statistiques question par question et **carte de
+reprise** pointant sur la première section non lue. Plusieurs pseudos cohabitent
+sur le même appareil, chacun avec son propre historique et son export JSON.
+
+| Mode | Description |
+|---|---|
+| Série standard | 20 questions, toutes matières, tirage adaptatif |
+| Examen blanc | 60 questions en 1 h 30, correction à la fin |
+| Mes erreurs | Les questions ratées et non consolidées |
+| Révision espacée | Les questions dont l'échéance est arrivée (boîtes de Leitner : 1, 3, 7, 16, 35, 90 jours) |
+| Difficile | Uniquement les questions de niveau 3 |
+| Par matière | Depuis la fiche de cours, entraînement ciblé |
+
+Un **score de préparation** agrège cours lus, couverture de la banque, questions
+acquises et régularité.
+
 ## Suivi
 
 Scores, courbe de progression, maîtrise par thème et historique de sessions sont
@@ -101,6 +135,13 @@ data/bank.js            registre de la banque de questions
 data/q-*.js             les 22 thèmes de questions
 data/cours-*.js         les 22 fiches de cours
 drill-calcul.html       drill de calcul mental (autonome, sans dépendance)
+ppl.html                module PPL (cours, QCM, mnémos, profils par pseudo)
+css/ppl.css             styles du module PPL
+js/ppl-core.js          registre des matières PPL
+js/ppl-store.js         profils par pseudo et progression
+js/ppl-quiz.js          sélection adaptative et moteur de session PPL
+js/ppl-app.js           navigation et rendu du module PPL
+data/ppl-*.js           les 12 matières (cours + mnémos + questions)
 sw.js                   service worker (cache hors-ligne)
 tools/gen-icons.js      génération des icônes PNG, sans dépendance
 ```

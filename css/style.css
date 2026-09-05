@@ -349,6 +349,11 @@ a.cours-cta { text-decoration: none; color: inherit; }
 .drill-cta .cta-body small { color: #a8b8d6; }
 .drill-cta .cta-go { color: #8fb0e2; }
 
+.ppl-cta { background: linear-gradient(145deg, #123f31, #0e2b25); border-color: #1f7a5c; }
+.ppl-cta:hover { border-color: #2fd39a; }
+.ppl-cta .cta-body small { color: #9fd4c0; }
+.ppl-cta .cta-go { color: #2fd39a; }
+
 .cours-progress {
   display: flex; align-items: center; gap: 14px; margin-top: 18px;
   background: var(--surface); border: 1px solid var(--line);
