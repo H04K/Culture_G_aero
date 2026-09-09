@@ -485,3 +485,9 @@ a.cours-cta { text-decoration: none; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Bandeau du module PASS (accueil) */
+.pass-cta { background: linear-gradient(145deg, #2b2150, #1c1636); border-color: #5b46a8; }
+.pass-cta:hover { border-color: #a78bfa; }
+.pass-cta .cta-body small { color: #c3b5f2; }
+.pass-cta .cta-go { color: #a78bfa; }
