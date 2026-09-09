@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1628">
+<meta name="description" content="Révision PASS Bordeaux : cours, fiches, mnémotechniques, exercices et QCM sur les 19 UE du programme">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PASS Prep">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/pass.css">
+<title>PASS Bordeaux — Cours, exercices et QCM</title>
+</head>
+<body>
+
+<!-- ══════════════ PSEUDO ══════════════ -->
+<section class="screen active gate" id="screen-gate">
+  <div class="gate-card">
+    <div class="gate-mark">🩺</div>
+    <h1>Révision PASS</h1>
+    <p class="sub">Cours, fiches, mnémotechniques, exercices et QCM — les UE du PASS de l'Université de Bordeaux, dans l'ordre du planning de révision.</p>
+
+    <div id="gate-known"></div>
+
+    <label for="gate-input">Ton pseudo</label>
+    <input class="field" id="gate-input" type="text" maxlength="24" autocomplete="off"
+           autocapitalize="off" spellcheck="false" placeholder="Ex. Camille">
+    <div class="gate-err" id="gate-err"></div>
+    <button class="btn primary wide" id="gate-go" style="width:100%">Commencer</button>
+    <p class="disclaimer">
+      Ta progression est enregistrée dans ce navigateur, sous ton pseudo.
+      Plusieurs pseudos peuvent cohabiter sur le même appareil.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ ACCUEIL ══════════════ -->
+<section class="screen" id="screen-home">
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-top">
+        <div class="hero-mark">🩺</div>
+        <div>
+          <h1 id="hello">PASS</h1>
+          <p class="sub" id="hello-sub"></p>
+        </div>
+        <div class="hero-actions">
+          <button class="chip-btn" data-nav="switch">Changer</button>
+        </div>
+      </div>
+      <div class="ready" id="ready"></div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div id="resume-slot"></div>
+
+    <button class="plan-cta" data-nav="plan">
+      <span class="cta-icon">🗓️</span>
+      <span class="cta-body">
+        <b>Le planning de révision</b>
+        <small>Semaine par semaine, S1 et S2 — coche ce que tu as bouclé</small>
+      </span>
+      <span class="cta-go">→</span>
+    </button>
+
+    <h2 class="section-title">S'entraîner</h2>
+    <div class="mode-grid" id="mode-grid"></div>
+
+    <h2 class="section-title">Le programme — les UE</h2>
+    <div id="mat-list"></div>
+
+    <div class="home-actions">
+      <button class="btn ghost" data-nav="exos">✍️ Exercices</button>
+      <button class="btn ghost" data-nav="mnemo">🧠 Mnémos</button>
+      <button class="btn ghost" data-nav="stats">📊 Stats</button>
+      <button class="btn ghost" data-nav="settings">⚙️ Réglages</button>
+    </div>
+    <p class="disclaimer" id="home-foot"></p>
+  </div>
+</section>
+
+<!-- ══════════════ PLANNING ══════════════ -->
+<section class="screen" id="screen-plan">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1>Planning de révision</h1>
+    </div>
+    <p class="fiche-intro" id="plan-sub"></p>
+    <div id="plan-list"></div>
+    <h2 class="section-title">À savoir</h2>
+    <ul class="plan-notes" id="plan-notes"></ul>
+  </div>
+</section>
+
+<!-- ══════════════ FICHE ══════════════ -->
+<section class="screen" id="screen-fiche">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1 id="fiche-title">Fiche</h1>
+    </div>
+    <div id="fiche-body"></div>
+  </div>
+</section>
+
+<!-- ══════════════ EXERCICES ══════════════ -->
+<section class="screen" id="screen-exos">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1>Exercices</h1>
+    </div>
+    <p class="fiche-intro" id="exos-sub"></p>
+    <div class="filters" id="exos-filters"></div>
+    <div id="exos-list"></div>
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section class="screen" id="screen-quiz">
+  <div class="quiz-top">
+    <button class="icon-btn" id="quiz-quit" aria-label="Quitter">✕</button>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <span class="progress-label" id="progress-label"></span>
+    </div>
+    <div class="quiz-timer" id="quiz-timer"></div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-meta">
+      <span class="chip" id="q-mat"></span>
+      <span class="chip" id="q-diff"></span>
+    </div>
+    <h2 class="q-text" id="q-text"></h2>
+    <div class="options" id="options"></div>
+    <div class="explain" id="explain" hidden>
+      <div class="verdict" id="explain-verdict"></div>
+      <p id="explain-text"></p>
+      <div class="src" id="explain-src"></div>
+    </div>
+  </div>
+  <div class="quiz-foot">
+    <div class="inner"><button class="btn primary wide" id="btn-next" disabled>Valider</button></div>
+  </div>
+</section>
+
+<!-- ══════════════ RÉSULTAT ══════════════ -->
+<section class="screen" id="screen-result">
+  <div class="wrap">
+    <div class="score-hero" id="score-hero"></div>
+    <div class="tiles" id="result-tiles"></div>
+    <h2 class="section-title">Par UE</h2>
+    <div class="bars" id="result-bars"></div>
+    <h2 class="section-title">Correction détaillée</h2>
+    <div id="review"></div>
+    <div class="sticky-actions">
+      <button class="btn primary wide" id="btn-replay">↻ Rejouer</button>
+      <button class="btn ghost wide" data-nav="home">Accueil</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ MNÉMOS ══════════════ -->
+<section class="screen" id="screen-mnemo">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1>Mnémotechniques</h1>
+    </div>
+    <p class="fiche-intro" id="mnemo-sub"></p>
+    <div class="filters" id="mnemo-filters"></div>
+    <div id="mnemo-list"></div>
+  </div>
+</section>
+
+<!-- ══════════════ STATS ══════════════ -->
+<section class="screen" id="screen-stats">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1>Statistiques</h1>
+    </div>
+    <div class="tiles" id="stat-tiles"></div>
+    <h2 class="section-title">Maîtrise par UE</h2>
+    <div class="bars" id="stats-bars"></div>
+    <h2 class="section-title">Historique</h2>
+    <div id="history"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RÉGLAGES ══════════════ -->
+<section class="screen" id="screen-settings">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1>Réglages</h1>
+    </div>
+    <div class="setting-list">
+      <label class="setting">
+        <div><strong>QCM par série</strong><small>Hors concours blanc</small></div>
+        <select id="set-count">
+          <option>10</option><option selected>20</option><option>30</option><option>50</option>
+        </select>
+      </label>
+      <label class="setting">
+        <div><strong>Correction immédiate</strong><small>Voir la réponse après chaque QCM</small></div>
+        <input type="checkbox" id="set-instant" class="switch" checked>
+      </label>
+      <label class="setting">
+        <div><strong>Chronomètre</strong><small>Afficher le temps écoulé</small></div>
+        <input type="checkbox" id="set-timer" class="switch">
+      </label>
+    </div>
+
+    <h2 class="section-title">Profil</h2>
+    <div class="setting-list">
+      <div class="setting">
+        <div><strong>Pseudo</strong><small id="cur-pseudo"></small></div>
+        <button class="btn ghost" id="btn-rename">Renommer</button>
+      </div>
+      <button class="setting" data-nav="switch"><div><strong>Changer de pseudo</strong><small>Revenir à l'écran d'accueil</small></div><span>↔</span></button>
+      <button class="setting" id="btn-export"><div><strong>Exporter ma progression</strong><small>Fichier JSON de sauvegarde</small></div><span>⬇</span></button>
+      <button class="setting" id="btn-import"><div><strong>Importer une sauvegarde</strong><small>Restaure un fichier exporté</small></div><span>⬆</span></button>
+      <button class="setting" id="btn-reset"><div><strong style="color:var(--ko)">Réinitialiser ma progression</strong><small>Efface cours lus, exercices, mnémos et statistiques</small></div><span>🗑</span></button>
+    </div>
+    <input type="file" id="file-import" accept="application/json" hidden>
+    <p class="disclaimer" id="build-info"></p>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<!-- Noyau -->
+<script src="js/pass-core.js"></script>
+
+<!-- UE — Semestre 1 -->
+<script src="data/pass-ue14-chimie.js"></script>
+<script src="data/pass-ue6-cellule.js"></script>
+<script src="data/pass-ue7-biochimie.js"></script>
+<script src="data/pass-ue8-physiologie.js"></script>
+<script src="data/pass-ue9-biophysique.js"></script>
+<script src="data/pass-ue10-anatomie.js"></script>
+<script src="data/pass-ue4-shs.js"></script>
+<script src="data/pass-ue5-sante-publique.js"></script>
+
+<!-- UE — Semestre 2 -->
+<script src="data/pass-ue15-biomol.js"></script>
+<script src="data/pass-ue12-histologie.js"></script>
+<script src="data/pass-ue11-reproduction.js"></script>
+<script src="data/pass-ue21-locomoteur.js"></script>
+<script src="data/pass-ue17-bassin.js"></script>
+<script src="data/pass-ue18-cranio-facial.js"></script>
+<script src="data/pass-ue13-methodes.js"></script>
+<script src="data/pass-ue16-medicament.js"></script>
+<script src="data/pass-ue20-initiation-medicament.js"></script>
+<script src="data/pass-ue19-biomateriaux.js"></script>
+
+<!-- UE — fond continu -->
+<script src="data/pass-ue1-anglais.js"></script>
+
+<!-- Application -->
+<script src="js/pass-store.js"></script>
+<script src="js/pass-quiz.js"></script>
+<script src="js/pass-app.js"></script>
+</body>
+</html>

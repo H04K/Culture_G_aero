@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════════════
+   Cadets Prep — Module PASS (Université de Bordeaux)
+
+   Reprend la charte du module PPL et la décline en violet
+   « santé », puis ajoute les composants propres au PASS :
+   planning hebdomadaire, exercices d'application, codes d'UE.
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('ppl.css');
+
+:root {
+  --ppl:     #a78bfa;   /* accent principal du module */
+  --ppl-2:   #7c5cf0;
+  --ppl-dim: #241a4a;
+  --accent:  #4ad6e8;
+}
+
+.gate-mark { box-shadow: 0 6px 20px rgba(167,139,250,.32); }
+.field:focus { border-color: var(--ppl); box-shadow: 0 0 0 3px rgba(167,139,250,.18); }
+
+/* ───────── Code d'UE et UE lourdes ───────── */
+
+.ue-code {
+  display: inline-block; margin-right: 6px; padding: 1px 7px;
+  font-size: 11.5px; font-weight: 800; letter-spacing: .04em;
+  color: var(--ppl); background: var(--ppl-dim);
+  border: 1px solid rgba(167,139,250,.35); border-radius: 6px;
+  vertical-align: 1px;
+}
+.heavy {
+  display: inline-block; padding: 1px 7px; border-radius: 6px;
+  font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--warn); background: rgba(255,176,32,.12);
+  border: 1px solid rgba(255,176,32,.32);
+}
+.tag.heavy { text-transform: none; }
+
+/* ───────── Bandeau d'accès au planning ───────── */
+
+.plan-cta {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  margin-top: 16px; padding: 16px 18px;
+  background: linear-gradient(135deg, var(--ppl-dim), var(--surface));
+  border: 1px solid rgba(167,139,250,.35); border-radius: var(--radius);
+  color: var(--text); text-decoration: none;
+}
+.plan-cta .cta-icon { font-size: 26px; }
+.plan-cta .cta-body { flex: 1; display: block; }
+.plan-cta b { display: block; font-size: 16px; }
+.plan-cta small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.plan-cta .cta-go { color: var(--ppl); font-size: 20px; }
+
+/* ───────── Planning ───────── */
+
+.plan-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px; margin-bottom: 10px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.plan-row.done { border-color: rgba(34,198,107,.4); background: linear-gradient(180deg, var(--ok-dim), var(--surface)); }
+.plan-check {
+  flex: 0 0 auto; width: 28px; height: 28px; margin-top: 2px;
+  border-radius: 9px; border: 1.5px solid var(--line); background: var(--bg-2);
+  color: var(--ok); font-weight: 800; line-height: 1;
+}
+.plan-row.done .plan-check { border-color: var(--ok); background: rgba(34,198,107,.16); }
+.plan-body { flex: 1; min-width: 0; }
+.plan-when {
+  font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ppl); margin-bottom: 3px;
+}
+.plan-txt { font-size: 15px; }
+.plan-ues { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.plan-ue {
+  padding: 5px 10px; font-size: 12.5px; color: var(--muted);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 999px;
+}
+.plan-ue:hover { color: var(--text); border-color: var(--ppl); }
+.plan-notes { margin: 12px 0 0; padding-left: 20px; color: var(--muted); font-size: 13.5px; }
+.plan-notes li { margin-bottom: 8px; }
+.plan-notes b { color: var(--text); }
+
+/* ───────── Exercices d'application ───────── */
+
+.exo {
+  padding: 16px; margin-bottom: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.exo.done { border-color: rgba(34,198,107,.4); }
+.exo-q { font-size: 15.5px; line-height: 1.6; }
+.exo-q b { color: var(--ppl); }
+.exo-hint {
+  margin-top: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--muted);
+  background: var(--bg-2); border-left: 3px solid var(--ppl); border-radius: 0 8px 8px 0;
+}
+.exo-hint b { color: var(--ppl); }
+.exo-reveal {
+  margin-top: 12px; padding: 8px 14px; font-size: 13.5px; font-weight: 600;
+  color: var(--ppl); background: var(--ppl-dim);
+  border: 1px solid rgba(167,139,250,.35); border-radius: 10px;
+}
+.exo-sol {
+  margin-top: 12px; padding: 13px 15px; font-size: 14.5px; line-height: 1.65;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+}
+.exo-sol p { margin-bottom: 9px; }
+.exo-sol p:last-child { margin-bottom: 0; }
+.exo-sol b { color: var(--ok); }
+.exo-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line);
+}
+.exo-mark { font-size: 12.5px; color: var(--faint); }
+.exo.done .exo-mark { color: var(--ok); font-weight: 700; }
+.exo-foot .from { font-size: 12px; color: var(--faint); }
