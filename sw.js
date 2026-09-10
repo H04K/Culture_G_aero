@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'cadets-prep-v5';
+const VERSION = 'cadets-prep-v6';
 
 const ASSETS = [
   './',
@@ -76,6 +76,14 @@ const ASSETS = [
   './data/pass-ue15-biomol.js',
   './data/pass-ue12-histologie.js',
   './data/pass-ue11-reproduction.js',
+  './data/pass-ue21-locomoteur.js',
+  './data/pass-ue17-bassin.js',
+  './data/pass-ue18-cranio-facial.js',
+  './data/pass-ue13-methodes.js',
+  './data/pass-ue16-medicament.js',
+  './data/pass-ue20-initiation-medicament.js',
+  './data/pass-ue19-biomateriaux.js',
+  './data/pass-ue1-anglais.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'

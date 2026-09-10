@@ -92,6 +92,39 @@ sur le même appareil, chacun avec son propre historique et son export JSON.
 Un **score de préparation** agrège cours lus, couverture de la banque, questions
 acquises et régularité.
 
+## Révision PASS
+
+Module séparé (`pass.html`), accessible depuis l'accueil : la préparation des
+**19 UE du PASS de l'Université de Bordeaux**, calée sur le planning de révision
+officieux du parcours (13 semaines au S1, 10 semaines au S2).
+
+- **Planning hebdomadaire** reprenant le découpage réel — UE14 puis UE6, UE7 et
+  UE8 (les deux UE lourdes du S1), UE9, UE10, UE4 et UE5, puis les dix UE du S2 —
+  avec validation semaine par semaine et accès direct à la fiche concernée
+- **97 sections de cours** (~534 min de lecture), points clés et tableaux de synthèse
+- **608 QCM** avec correction expliquée et niveau de difficulté
+- **65 exercices d'application** corrigés en détail : calculs de pH et de tampon
+  bicarbonate, bilans ATP, VPP et prévalence, gaz du sang, arbres généalogiques,
+  ventilation alvéolaire, adaptation posologique
+- **98 mnémotechniques** (KLECHKOWSKI, FONClBrISCH, HH-6140, SnNout/SpPin,
+  ACCÉLÉRATEUR-FREINS, SITS, TORCH, ADME, IMRaD…), marquables « acquis »
+
+L'**UE1 d'anglais** est classée à part, en « fond continu » : le planning ne lui
+accorde aucune semaine dédiée mais 20 à 30 minutes par semaine sur toute l'année.
+
+| Mode | Description |
+|---|---|
+| Série standard | 20 QCM, toutes UE, tirage adaptatif |
+| Concours blanc | 50 QCM en 1 h 15, correction à la fin |
+| Mes erreurs | Les QCM ratés et non consolidés |
+| Révision espacée | Les QCM dont l'échéance est arrivée (boîtes de Leitner) |
+| Difficile | Uniquement les QCM de niveau 3 |
+| Réviser le S1 / le S2 | Restreint le tirage à un semestre |
+| Par UE | Depuis la fiche de cours, entraînement ciblé |
+
+Le module partage l'architecture du module PPL : profils par pseudo, carte de
+reprise, score de préparation, export JSON.
+
 ## Suivi
 
 Scores, courbe de progression, maîtrise par thème et historique de sessions sont
@@ -142,6 +175,13 @@ js/ppl-store.js         profils par pseudo et progression
 js/ppl-quiz.js          sélection adaptative et moteur de session PPL
 js/ppl-app.js           navigation et rendu du module PPL
 data/ppl-*.js           les 12 matières (cours + mnémos + questions)
+pass.html               module PASS (cours, QCM, exercices, mnémos, planning)
+css/pass.css            styles du module PASS (charte PPL déclinée)
+js/pass-core.js         registre des UE et planning hebdomadaire S1/S2
+js/pass-store.js        profils par pseudo, exercices faits, semaines validées
+js/pass-quiz.js         sélection adaptative et moteur de session PASS
+js/pass-app.js          navigation, écrans planning et exercices
+data/pass-ue*.js        les 19 UE (cours + mnémos + exercices + QCM)
 sw.js                   service worker (cache hors-ligne)
 tools/gen-icons.js      génération des icônes PNG, sans dépendance
 ```
@@ -152,3 +192,8 @@ Les questions ne sont **pas** des annales officielles : Air France ne publie pas
 ses sujets. Elles sont bâties sur le programme réel de l'épreuve et sur des faits
 vérifiables. Le thème « Actualité » reflète l'état du secteur à la date de
 rédaction et demande une mise à jour avant les épreuves.
+
+Le module PASS est un **support de révision personnel**. Le découpage du planning
+est une estimation fondée sur le poids habituel de chaque UE : le livret des
+enseignements 2026-2027 et les cours de la faculté font foi, et les dates comme
+les ECTS exacts sont à recaler dès sa parution.
