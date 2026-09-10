@@ -26,6 +26,7 @@ sections:[
        "Critères de renoncement chiffrés et écrits avant le départ"]},
 
  {h:"Carburant et réserves",
+  fig:'carburant',
   p:["Le calcul se fait en **temps de vol**, pas en litres : **roulage**, **trajet** (avec le vent réel du jour, pas un vent moyen optimiste), **dégagement**, **réserve finale**, plus une **marge pour imprévus**.",
      "Pour un vol VFR de jour en aviation générale, on retient une **réserve finale d'au moins 30 minutes** au régime de croisière — beaucoup d'exploitants et d'écoles imposent **45 minutes**, et c'est la valeur raisonnable à adopter. Pour un vol de nuit, on compte **45 minutes** au minimum.",
      "La **panne sèche** reste une cause d'accident récurrente, et ses causes sont toujours les mêmes : vent contraire sous-estimé, déroutement non prévu, attente à l'arrivée, jauge crue sur parole, sélecteur mal géré, ou simple refus d'admettre qu'il faut faire une escale.",

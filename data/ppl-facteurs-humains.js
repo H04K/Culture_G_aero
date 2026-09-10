@@ -59,6 +59,7 @@ sections:[
        "La fatigue attaque le jugement avant la vigilance"]},
 
  {h:"Attention, charge de travail et erreurs",
+  fig:'fromage-suisse',
   p:["L'attention humaine est **sélective et limitée** : on ne traite qu'un canal à la fois consciemment. Trois phénomènes reviennent dans tous les rapports d'accident : la **fixation attentionnelle** (l'équipage entier concentré sur une ampoule de train pendant que l'avion descend), la **saturation** (trop de tâches, plus rien n'est fait correctement) et la **complaisance** (l'automatisme prend le pas sur la surveillance).",
      "La **charge de travail** doit être **anticipée** : on prépare les fréquences, les cartes et les calculs **avant** la phase chargée. Un pilote qui cherche une fréquence en finale est déjà en retard sur son avion.",
      "Les erreurs se classent en **erreurs de routine** (on a fait le geste habituel dans un contexte inhabituel), **erreurs de règle** (on a appliqué la mauvaise règle) et **erreurs de connaissance** (on ne savait pas). Les **violations** sont différentes : ce sont des écarts délibérés, et elles précèdent une grande partie des accidents.",

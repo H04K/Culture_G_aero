@@ -38,6 +38,7 @@ sections:[
        "Le demi-tour se décide au sol, jamais en l'air"]},
 
  {h:"Panne moteur en croisière",
+  fig:'panne-moteur',
   p:["La séquence est immuable. **1. Vitesse de finesse maximale** — on pousse d'abord, l'avion doit voler avant tout. **2. Terrain** — choisir tôt, en fonction du vent connu, et se placer. **3. Causes** — parcourir carburant, allumage, air (sélecteur, pompe, richesse, magnétos, réchauffage carburateur). **4. Radio** — 121,5 ou la fréquence en cours, message de détresse, 7700. **5. Sécurité** — coupures, ceintures, porte entrouverte, briefing passagers.",
      "Le **choix du terrain** obéit à cinq critères : **Vent** (se poser face au vent si possible), **Surface** (labour, herbe rase, chaume, sol dur ; éviter les cultures hautes et les lignes d'eau), **Taille** (assez long, en gardant en tête que le terrain paraît toujours plus grand vu d'en haut), **Obstacles** (lignes électriques — souvent invisibles, on les déduit des poteaux — arbres, clôtures), **Pente** (se poser dans le sens de la montée si la pente est marquée).",
      "On construit ensuite un **circuit** autour du terrain choisi, comme un tour de piste, en gardant le terrain visible et en gérant la hauteur par la position et les volets — jamais en tirant sur le manche.",

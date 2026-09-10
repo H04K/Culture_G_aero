@@ -47,6 +47,7 @@ sections:[
        "Pilote : licence + médical + pièce d'identité"]},
 
  {h:"La classification des espaces aériens",
+  fig:'espaces',
   p:["Les espaces vont de **A** (le plus contraignant) à **G** (non contrôlé). La question à se poser est toujours la même : **le VFR est-il admis ? faut-il une clairance ? qui est séparé de qui ?**",
      "En France, on rencontre surtout les classes **A, C, D, E et G**. La classe A interdit purement et simplement le VFR. En C et D, la clairance et le contact radio sont obligatoires. En **E**, l'espace est contrôlé pour l'IFR mais le VFR y entre **sans clairance ni contact radio** — d'où le danger : un IFR peut y déboucher sans que personne ne vous ait annoncé.",
      "En classe **G**, aucun contrôle : seul le **service d'information de vol** (FIS, rendu par les SIV) et l'**alerte** sont assurés. Le pilote reste responsable de l'anticollision, en VFR comme en IFR, par le principe **« voir et éviter »**."],
@@ -69,6 +70,7 @@ sections:[
        "SFC = surface, AMSL = par rapport au niveau de la mer"]},
 
  {h:"Les règles de priorité et l'anticollision",
+  fig:['priorites','feux-nav'],
   p:["Un aéronef **en détresse** a priorité sur tous les autres. Ensuite, la règle générale : **le plus manœuvrant s'écarte**. L'ordre de priorité est **ballon, planeur, dirigeable, aéronef motopropulsé**, et tout aéronef remorquant ou ravitaillant a priorité sur les autres motorisés.",
      "**Routes convergentes** : celui qui voit l'autre **à sa droite** s'écarte (on dit : *priorité à droite*). **Face à face** : chacun dégage **vers la droite**. **Dépassement** : le dépassant passe **par la droite** de l'aéronef dépassé, qui conserve sa route.",
      "**À l'atterrissage** : l'aéronef le plus bas a priorité, mais il ne doit pas en profiter pour se rabattre ou couper la finale de celui qui le précède. Au sol, on s'écarte des aéronefs qui décollent ou atterrissent.",
@@ -78,6 +80,7 @@ sections:[
        "Rouge = bâbord (gauche), vert = tribord (droite)"]},
 
  {h:"Altimétrie, niveaux et règle semi-circulaire",
+  fig:'semi-circulaire',
   p:["Trois calages : **QNH** (l'altimètre indique l'**altitude**, zéro au niveau de la mer), **QFE** (il indique la **hauteur** au-dessus du terrain, zéro à l'atterrissage) et **1013,25 hPa** (il indique un **niveau de vol**, FL).",
      "On passe au calage standard en montant en franchissant l'**altitude de transition**, et au QNH en descendant en franchissant le **niveau de transition**. Entre les deux se trouve la couche de transition, dans laquelle on ne vole pas en croisière.",
      "**Règle semi-circulaire VFR**, applicable au-dessus de **3 000 ft AMSL** (ou de la surface si le relief impose) : route magnétique **000° à 179°** → niveaux **impairs + 500 ft** (FL 35, 55, 75, 95) ; route magnétique **180° à 359°** → niveaux **pairs + 500 ft** (FL 45, 65, 85, 105). L'IFR occupe les niveaux « ronds », le VFR se glisse 500 ft au-dessus.",
@@ -113,6 +116,7 @@ sections:[
        "Plan de vol obligatoire au franchissement de frontière"]},
 
  {h:"Aérodrome : circuit, marques et signaux au sol",
+  fig:'circuit-piste',
   p:["Le **tour de piste** est par défaut à **main gauche**, sauf publication contraire sur la carte VAC. La **vent arrière** se vole généralement à **1 000 ft AAL** (hauteur au-dessus de l'aérodrome), et l'intégration se fait selon la procédure publiée : verticale terrain puis descente à l'écart, ou intégration directe en vent arrière quand elle est autorisée.",
      "Le **numéro de piste** correspond à sa **direction magnétique arrondie à la dizaine, divisée par 10** : une piste au cap 265° devient la **27**. Chaque piste a donc deux numéros opposés de **18** d'écart.",
      "Sur l'aire à signaux : une **croix blanche** signale une aire inutilisable, un **damier rouge et blanc** identifie la vigie, un **T d'atterrissage** indique le sens du circuit, deux **chiffres côte à côte** donnent la direction du circuit en dizaines de degrés.",

@@ -26,6 +26,7 @@ sections:[
        "Stable = stratus, pluie continue, mauvaise visibilité, air lisse"]},
 
  {h:"Les nuages",
+  fig:'nuages',
   p:["Trois étages aux latitudes moyennes : **inférieur** (jusqu'à environ 2 km) — stratus, stratocumulus, nimbostratus, cumulus ; **moyen** (2 à 7 km) — préfixe **alto** : altocumulus, altostratus ; **supérieur** (5 à 13 km) — préfixe **cirro** : cirrus, cirrocumulus, cirrostratus, formés de cristaux de glace.",
      "Deux familles de forme : les **cumuliformes**, en bourgeons, signe d'instabilité et de convection, et les **stratiformes**, en couches, signe de stabilité. Le préfixe **nimbo** ou le suffixe **nimbus** indique la pluie.",
      "Le **cumulonimbus** est le seul nuage à éviter **absolument**, sans exception : il concentre ascendances et rabattants violents, grêle, givrage, foudre, cisaillement et turbulence sévère. On l'évite d'au moins **20 NM latéralement**, jamais par-dessous, jamais par le travers de l'enclume.",
@@ -44,6 +45,7 @@ sections:[
        "Frottement : le vent au sol est plus faible et rentre d'environ 30° dans la dépression"]},
 
  {h:"Masses d'air, fronts et perturbations",
+  fig:'fronts',
   p:["Une **masse d'air** prend les caractéristiques de sa région d'origine : polaire ou tropicale, maritime ou continentale. Son évolution dépend de la surface qu'elle survole : réchauffée par le bas, elle devient **instable** ; refroidie par le bas, elle devient **stable** et brumeuse.",
      "Un **front chaud** avance en pente douce : la séquence classique est cirrus, cirrostratus, altostratus, nimbostratus, avec **précipitations continues**, plafond bas, visibilité réduite sur une large zone et un passage lent. Derrière lui, dans le **secteur chaud**, l'air est doux et souvent brumeux.",
      "Un **front froid** avance en pente raide et soulève brutalement l'air chaud : **cumulonimbus**, averses, grains, orages, cisaillement, mais un passage **rapide** suivi d'une nette amélioration, d'un ciel de traîne à cumulus et d'une excellente visibilité.",
@@ -65,6 +67,7 @@ sections:[
        "Microburst : vent de face, puis vent arrière brutal"]},
 
  {h:"Orages, turbulence et montagne",
+  fig:'orage',
   p:["Un orage naît de trois ingrédients : **instabilité**, **humidité** et un **déclencheur** (réchauffement, relief, front). Trois stades : **cumulus** (ascendances seules), **maturité** (ascendances **et** rabattants coexistent, précipitations, foudre — le stade le plus dangereux), **dissipation** (rabattants dominants).",
      "Dangers : turbulence sévère, grêle projetée parfois **hors** du nuage, givrage massif, foudre, cisaillement, front de rafales précédant l'orage de plusieurs kilomètres, pluie battante réduisant la visibilité à néant.",
      "La **turbulence** a trois origines : **thermique** (convection, maximale en début d'après-midi), **mécanique** (relief, obstacles, croît avec le vent et la rugosité du sol), **de cisaillement** (fronts, inversions, jet stream — la turbulence en air clair est indétectable au radar).",

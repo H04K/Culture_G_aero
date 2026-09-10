@@ -15,6 +15,7 @@ sections:[
        "Chaud + haut + humide = air moins dense = performances dégradées"]},
 
  {h:"Les quatre forces et l'équilibre",
+  fig:'forces',
   p:["Quatre forces agissent : la **portance (Fz)** perpendiculaire au **vent relatif**, le **poids** vertical vers le bas, la **traction** du groupe motopropulseur, la **traînée (Rx)** opposée au déplacement.",
      "En **vol rectiligne uniforme**, portance = poids et traction = traînée. Rompre l'un de ces équilibres, c'est monter, descendre, accélérer ou ralentir.",
      "Piège classique d'examen : la portance est perpendiculaire au **vent relatif**, jamais à l'horizon. En virage, elle est inclinée : seule sa **composante verticale** compense encore le poids, d'où la nécessité d'augmenter l'incidence — et donc la portance totale — pour ne pas descendre.",
@@ -31,6 +32,7 @@ sections:[
        "Finesse = Cz/Cx = distance / hauteur perdue"]},
 
  {h:"Incidence, décrochage et vrille",
+  fig:'cz-incidence',
   p:["Ne pas confondre : l'**incidence** est l'angle entre la corde de l'aile et le vent relatif ; l'**assiette** est l'angle entre l'axe de l'avion et l'horizon ; la **pente** est l'angle de la trajectoire par rapport à l'horizon.",
      "Le **décrochage** survient **toujours à la même incidence**, typiquement **15 à 16°**, quelles que soient la vitesse, la masse, l'assiette ou l'inclinaison. On peut donc décrocher **à n'importe quelle vitesse** — une ressource brutale suffit.",
      "La **vitesse de décrochage** varie, elle : elle augmente avec la **masse** (en racine carrée), avec le **facteur de charge** (Vs × √n), avec un **centrage avant**, et diminue avec les **volets sortis** et la **puissance affichée**.",
@@ -41,6 +43,7 @@ sections:[
        "Vrille = décrochage + dérapage → récupération PARE"]},
 
  {h:"Les deux traînées et la polaire",
+  fig:'trainees',
   p:["La **traînée parasite** (frottement, forme, interaction, train sorti) croît en **V²**. La **traînée induite**, sous-produit direct de la portance et des **tourbillons marginaux** de bout d'aile, décroît en **1/V²**.",
      "Leur somme dessine une **courbe en U**. Son minimum correspond à la **finesse maximale**, donc à la vitesse de **plané le plus long** et, sur un avion à hélice, approximativement à la vitesse de **meilleure distance franchissable**.",
      "La **traînée induite** est maximale à basse vitesse et à forte incidence : c'est le domaine du vol lent, où elle domine tout. Elle augmente aussi avec la **masse** et diminue avec un **grand allongement** — d'où les longues ailes fines des planeurs et les **winglets** des avions de ligne.",
@@ -54,6 +57,7 @@ sections:[
        "Second régime : plus lent = plus de puissance nécessaire"]},
 
  {h:"Virage et facteur de charge",
+  fig:'virage-n',
   p:["Un avion vire parce que sa portance est **inclinée** : la composante horizontale fournit la force centripète. Le palonnier ne fait pas tourner l'avion, il **contre le lacet inverse** créé par les ailerons et maintient la **symétrie** (bille au centre).",
      "**Facteur de charge n = 1/cos φ**. À 30° d'inclinaison, n = 1,15 ; à 45°, n = 1,41 ; à 60°, **n = 2** ; à 75°, n ≈ 3,9. La vitesse de décrochage est multipliée par **√n** : à 60°, Vs est multipliée par **1,41**.",
      "Le **rayon de virage** croît avec le carré de la vitesse et décroît avec l'inclinaison : voler vite et peu incliné, c'est virer large. Un **virage à taux 1** correspond à 3°/s, soit 360° en deux minutes ; l'inclinaison approximative se calcule par **(vitesse en kt ÷ 10) + 7**.",
@@ -65,6 +69,7 @@ sections:[
        "Inclinaison taux 1 ≈ (kt/10) + 7"]},
 
  {h:"Le domaine de vol et les vitesses caractéristiques",
+  fig:'domaine-vn',
   p:["Le **diagramme V-n** délimite le domaine de vol : à gauche, la limite de décrochage ; en haut et en bas, les limites structurales. Un avion école de catégorie normale accepte **+3,8 g / −1,52 g** ; en catégorie utilitaire, **+4,4 g** ; en voltige, **+6 g / −3 g**.",
      "**Va, vitesse de manœuvre** : au-delà, un braquage brutal d'une gouverne peut casser la structure ; en dessous, l'avion décroche avant de casser. **Va diminue quand la masse diminue** — un avion léger doit être piloté plus doucement, contre l'intuition.",
      "**Vno** : limite du fonctionnement normal, à ne dépasser qu'en air calme. **Vne** : à ne jamais dépasser, trait rouge. **Vfe** : volets sortis. **Vs0** : décrochage en configuration d'atterrissage. **Vs1** : décrochage en lisse. **Vx** : meilleure pente de montée. **Vy** : meilleur taux de montée.",

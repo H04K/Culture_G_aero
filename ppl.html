@@ -66,6 +66,7 @@
 
     <div class="home-actions">
       <button class="btn ghost" data-nav="mnemo">🧠 Mnémos</button>
+      <button class="btn ghost" data-nav="schemas">📐 Schémas</button>
       <button class="btn ghost" data-nav="stats">📊 Stats</button>
       <button class="btn ghost" data-nav="settings">⚙️ Réglages</button>
     </div>
@@ -141,6 +142,18 @@
   </div>
 </section>
 
+<!-- ══════════════ SCHÉMAS ══════════════ -->
+<section class="screen" id="screen-schemas">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <h1>Schémas</h1>
+    </div>
+    <p class="fiche-intro" id="schemas-sub"></p>
+    <div id="schemas-list"></div>
+  </div>
+</section>
+
 <!-- ══════════════ STATS ══════════════ -->
 <section class="screen" id="screen-stats">
   <div class="wrap">
@@ -196,10 +209,16 @@
   </div>
 </section>
 
+<div class="fig-zoom" id="fig-zoom">
+  <div id="fig-zoom-body"></div>
+  <p class="fig-zoom-hint">Touche l'écran pour fermer</p>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <!-- Noyau -->
 <script src="js/ppl-core.js"></script>
+<script src="js/ppl-figures.js"></script>
 
 <!-- Matières -->
 <script src="data/ppl-reglementation.js"></script>

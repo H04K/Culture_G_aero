@@ -17,6 +17,7 @@ sections:[
        "Quatre adultes et le plein : presque jamais compatible"]},
 
  {h:"Le centrage : bras de levier et moments",
+  fig:'centrage',
   p:["Le **centre de gravité (CG)** est le point d'application du poids. On le calcule en **moments** : chaque masse est multipliée par son **bras de levier**, c'est-à-dire sa distance à une **référence** arbitraire fixée par le constructeur (souvent le pare-feu ou la pointe avant).",
      "**CG = somme des moments ÷ somme des masses.** Le résultat s'exprime en mètres ou en pouces depuis la référence, ou en **pourcentage de la corde aérodynamique moyenne (CAM)**.",
      "Le résultat doit tomber dans l'**enveloppe de centrage** publiée dans le manuel de vol : un domaine dont l'axe horizontal est la position du CG et l'axe vertical la masse. **Il ne suffit pas d'être sous la masse maximale : il faut aussi être dans l'enveloppe.**",
@@ -71,6 +72,7 @@ sections:[
        "Plafond de propulsion : taux de montée résiduel de 100 ft/min"]},
 
  {h:"Montée, croisière et atterrissage",
+  fig:'vent-travers',
   p:["**Vx** donne la meilleure **pente** — le maximum d'altitude par unité de distance, pour franchir un obstacle. **Vy** donne le meilleur **taux** — le maximum d'altitude par unité de temps. Vx et Vy se rapprochent quand l'altitude augmente ; elles se rejoignent au plafond théorique.",
      "En **croisière**, le manuel propose des réglages en pourcentage de puissance : 75 % pour la vitesse, 65 % pour un bon compromis, 55 % pour l'économie et la distance franchissable. Voler plus haut réduit la consommation horaire mais impose une montée coûteuse en carburant : sur un trajet court, cela ne se rentabilise pas.",
      "À l'**atterrissage**, les mêmes facteurs jouent : masse, altitude-densité, vent, pente, état de piste. Une **approche trop rapide** est la cause majeure de sortie de piste : **10 kt de trop en finale, c'est environ 20 % de distance d'atterrissage en plus**, et le risque de rebond.",

@@ -8,6 +8,7 @@ intro:"Six instruments, trois principes physiques : pression, gyroscope, magnét
 sections:[
 
  {h:"Le circuit anémobarométrique",
+  fig:'pitot-statique',
   p:["Trois instruments dépendent des prises de pression : l'**anémomètre**, l'**altimètre** et le **variomètre**.",
      "La **prise Pitot**, face au vent relatif, mesure la **pression totale** (statique + dynamique). Les **prises statiques**, affleurantes sur le flanc du fuselage, mesurent la **pression statique** seule.",
      "L'**anémomètre** est le seul instrument à recevoir **les deux** : il mesure la différence entre pression totale et pression statique, c'est-à-dire la **pression dynamique ½ρV²**. L'altimètre et le variomètre ne reçoivent que la **statique**.",
@@ -17,6 +18,7 @@ sections:[
        "Statique de secours (cabine) : altimètre trop haut, anémomètre trop rapide"]},
 
  {h:"L'anémomètre et la famille des vitesses",
+  fig:'anemo-arcs',
   p:["L'anémomètre affiche l'**IAS** (vitesse indiquée). Corrigée des erreurs d'installation et d'instrument, elle devient la **CAS** (vitesse conventionnelle) ; corrigée de la compressibilité, l'**EAS** ; corrigée de la **densité de l'air**, la **TAS** (vitesse vraie).",
      "Règle de terrain : la **TAS augmente d'environ 2 % par 1 000 ft** par rapport à l'IAS. À 6 000 ft, 100 kt indiqués valent à peu près 112 kt vrais. En combinant avec le vent, on obtient la **vitesse sol (GS)**, la seule qui compte pour la navigation.",
      "Point capital : l'avion **vole à l'IAS**. Le décrochage, les limites structurales, l'approche : tout se raisonne en vitesse indiquée, parce que l'IAS traduit directement la pression dynamique, donc la portance. En altitude, on décroche à la même IAS mais à une TAS bien plus élevée.",

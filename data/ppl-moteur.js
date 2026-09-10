@@ -8,6 +8,7 @@ intro:"Le moteur à pistons d'aviation : un quatre temps refroidi par air, allum
 sections:[
 
  {h:"Le cycle quatre temps",
+  fig:'cycle-4t',
   p:["Le moteur d'avion léger — **Lycoming**, **Continental**, **Rotax** — est un **quatre temps à cylindres opposés à plat**, refroidi par air, avec entraînement direct de l'hélice sur la plupart des modèles.",
      "Les quatre temps : **Admission** (le piston descend, la soupape d'admission ouverte aspire le mélange air-essence), **Compression** (les deux soupapes fermées, le piston remonte), **Détente** ou temps moteur (l'étincelle enflamme le mélange, la pression pousse le piston), **Échappement** (le piston remonte, la soupape d'échappement expulse les gaz brûlés).",
      "Un cycle complet demande **deux tours de vilebrequin** : chaque cylindre ne produit donc de la puissance qu'une fois sur deux tours. C'est pourquoi un quatre-cylindres ne s'arrête jamais à un point mort et tourne rond.",
@@ -35,6 +36,7 @@ sections:[
        "Plein riche avant l'atterrissage et la remise de gaz"]},
 
  {h:"Le givrage du carburateur",
+  fig:'carbu-givrage',
   p:["C'est **la panne moteur la plus fréquente en aviation légère**, et elle survient par temps doux. La détente de l'air dans le venturi et l'**évaporation du carburant** font chuter la température de **20 à 30 °C** dans le carburateur : si l'air contient assez d'humidité, du givre se forme sur le papillon et étrangle progressivement l'admission.",
      "Le domaine à risque est large : de **−10 °C à +30 °C** de température extérieure, avec une **humidité relative supérieure à 50 %**, et c'est **entre +10 et +20 °C par forte humidité** que le risque est maximal. Les conditions les plus dangereuses sont donc… un joli jour de printemps brumeux, pas un jour de gel.",
      "Symptômes, à moteur à **pas fixe** : **baisse progressive du régime** et de la pression d'admission, moteur qui devient rugueux, puis arrêt. À **hélice à vitesse constante** : le régime ne bouge pas, seule la **pression d'admission** chute — d'où un diagnostic plus difficile.",

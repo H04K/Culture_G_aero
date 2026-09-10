@@ -72,6 +72,7 @@ sections:[
        "Glass cockpit : en cas de doute, assiette + puissance et instruments de secours"]},
 
  {h:"La visite prévol : méthode",
+  fig:'prevol',
   p:["Le principe est toujours le même : **une boucle unique autour de l'avion, toujours dans le même sens**, sans jamais s'interrompre. Une prévol interrompue se reprend depuis le début.",
      "**Documents et masse** d'abord, puis **cabine** : commandes libres, contact coupé, magnétos sur OFF, sélecteur carburant, extincteur, sécurités.",
      "**Extérieur** : niveaux huile et carburant à l'œil, purges effectuées, hélice sans entaille ni jeu, capot fermé et verrouillé, entrées d'air libres, Pitot et statiques débouchés et sans cache, antennes intactes, gouvernes libres, charnières, pneus et freins, jambes de train, feux, absence de fuite au sol.",

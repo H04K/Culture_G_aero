@@ -52,6 +52,7 @@ function nav(dest) {
   switch (dest) {
     case 'home':     renderHome(); show('home'); break;
     case 'mnemo':    renderMnemo(); show('mnemo'); break;
+    case 'schemas':  renderSchemas(); show('schemas'); break;
     case 'stats':    renderStats(); show('stats'); break;
     case 'settings': renderSettings(); show('settings'); break;
     case 'switch':   PplStore.logout(); renderGate(); show('gate'); break;
@@ -267,6 +268,7 @@ function openFiche(matId, scrollTo) {
     let html = `<article class="sec ${read ? 'read' : ''}" id="sec-${i}" data-sec="${i}">
       <h3>${esc(s.h)}<button class="sec-check" data-check="${i}" title="Marquer comme lu">✓</button></h3>`;
     (s.p || []).forEach(p => html += `<p>${rich(p)}</p>`);
+    if (s.fig) html += Figs.renderAll(s.fig);
     if (s.list) html += `<ul>${s.list.map(l => `<li>${rich(l)}</li>`).join('')}</ul>`;
     if (s.table) {
       html += `<div class="tbl-wrap"><table><thead><tr>` +
@@ -318,6 +320,7 @@ function openFiche(matId, scrollTo) {
   });
 
   $('#fiche-body').querySelectorAll('[data-mnemo]').forEach(b => bindMnemo(b));
+  bindFigs($('#fiche-body'));
 
   show('fiche');
   if (scrollTo) {
@@ -377,6 +380,36 @@ function renderMnemo() {
   $('#mnemo-list').innerHTML = items.length ? items.join('')
     : `<p class="empty">Rien ici. ${mnemoFilter === 'todo' ? 'Tous les mnémos sont marqués acquis — belle affaire.' : ''}</p>`;
   $$('#mnemo-list [data-mnemo]').forEach(bindMnemo);
+}
+
+/* ═══════════════ SCHÉMAS ═══════════════ */
+
+/** Ouvre un schéma en plein écran — indispensable sur téléphone. */
+function bindFigs(root) {
+  root.querySelectorAll('.fig').forEach(f => {
+    f.onclick = () => {
+      $('#fig-zoom-body').innerHTML = Figs.render(f.dataset.fig);
+      $('#fig-zoom').classList.add('on');
+    };
+  });
+}
+
+function renderSchemas() {
+  $('#schemas-sub').textContent =
+    `${Figs.count()} schémas, classés par matière. Touche un schéma pour l'agrandir.`;
+
+  const groups = PPL.all().map(m => {
+    const figs = Figs.byMat(m.id);
+    if (!figs.length) return '';
+    return `<section class="fig-group">
+      <h3>${m.icon} ${esc(m.short || m.name)}</h3>
+      <p>${figs.length} schéma${figs.length > 1 ? 's' : ''}</p>
+      ${figs.map(f => Figs.render(f.id)).join('')}
+    </section>`;
+  }).join('');
+
+  $('#schemas-list').innerHTML = groups;
+  bindFigs($('#schemas-list'));
 }
 
 /* ═══════════════ QUIZ ═══════════════ */
@@ -645,6 +678,14 @@ $('#btn-reset').addEventListener('click', () => {
 });
 
 /* ═══════════════ DÉMARRAGE ═══════════════ */
+
+/* Marqueurs de flèches partagés par tous les schémas */
+document.body.insertAdjacentHTML('beforeend', Figs.defs());
+$('#fig-zoom').addEventListener('click', () => $('#fig-zoom').classList.remove('on'));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') $('#fig-zoom').classList.remove('on');
+});
+
 
 if (PplStore.isLogged()) {
   PplStore.touch();

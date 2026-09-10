@@ -427,3 +427,77 @@ td { color: #dbe6f5; }
 }
 .home-actions { display: flex; gap: 10px; margin-top: 24px; }
 .home-actions .btn { flex: 1; }
+
+/* ───────── Schémas (SVG inline) ─────────
+   Tout le dessin passe par ces classes : les fichiers de figures
+   ne portent donc aucune couleur en dur et suivent le thème. */
+
+.fig {
+  margin: 18px 0; padding: 14px 12px 10px;
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+}
+.fig svg {
+  display: block; width: 100%; max-width: 560px; height: auto;
+  margin: 0 auto; fill: none; stroke: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.fig-head {
+  font-size: 12px; font-weight: 700; letter-spacing: .01em;
+  color: var(--text); margin-bottom: 10px;
+  padding-left: 9px; border-left: 3px solid var(--ppl);
+}
+.fig-cap {
+  font-size: 12.5px; line-height: 1.6; color: var(--muted);
+  margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line);
+}
+.fig-cap b { color: var(--text); font-weight: 600; }
+.fig-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.fig svg text { font-size: 10.5px; font-weight: 500; fill: var(--muted); }
+.fig .t   { fill: var(--text); font-weight: 700; }
+.fig .g   { font-size: 9.5px; fill: var(--faint); }
+.fig .mid { text-anchor: middle; }
+.fig .end { text-anchor: end; }
+.fig text b { font-weight: 700; }
+
+.fig .s  { stroke: var(--line);    stroke-width: 1; }
+.fig .o  { stroke: var(--muted);   stroke-width: 1.4; }
+.fig .a  { stroke: var(--ppl);     stroke-width: 2; }
+.fig .b  { stroke: var(--accent);  stroke-width: 2; }
+.fig .w  { stroke: var(--warn);    stroke-width: 2; }
+.fig .k  { stroke: var(--ko);      stroke-width: 2; }
+.fig .dash { stroke-dasharray: 5 4; }
+.fig .fill { fill: var(--surface-2); }
+
+.fig .af, .fig-defs .af { fill: var(--ppl); }
+.fig .bf, .fig-defs .bf { fill: var(--accent); }
+.fig .wf, .fig-defs .wf { fill: var(--warn); }
+.fig .kf, .fig-defs .kf { fill: var(--ko); }
+.fig .mf, .fig-defs .mf { fill: var(--muted); }
+
+/* Agrandissement au tap — indispensable sur téléphone */
+.fig { cursor: zoom-in; }
+.fig-zoom {
+  position: fixed; inset: 0; z-index: 90; display: none;
+  background: rgba(4, 10, 20, .94); padding: calc(18px + var(--safe-top)) 14px;
+  overflow-y: auto; cursor: zoom-out;
+}
+.fig-zoom.on { display: block; }
+.fig-zoom .fig {
+  max-width: 900px; margin: 0 auto; cursor: zoom-out;
+  background: var(--surface); box-shadow: var(--shadow);
+}
+.fig-zoom .fig svg { max-width: 100%; }
+.fig-zoom-hint {
+  text-align: center; color: var(--faint); font-size: 12px;
+  margin: 14px 0 calc(20px + var(--safe-bottom));
+}
+
+/* Galerie de schémas */
+.fig-group { margin-bottom: 30px; }
+.fig-group > h3 {
+  font-size: 14px; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.fig-group > p { color: var(--faint); font-size: 12px; margin-bottom: 6px; }

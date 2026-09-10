@@ -27,6 +27,7 @@ sections:[
        "VAC obligatoires et à jour · cycle AIRAC 28 jours"]},
 
  {h:"Caps, routes et déclinaison",
+  fig:'chaine-caps',
   p:["Distinguer soigneusement : la **route** est la trajectoire suivie **par rapport au sol** ; le **cap** est la direction dans laquelle **pointe le nez** de l'avion. Le vent les sépare : l'écart s'appelle la **dérive**.",
      "Trois nords : le **nord vrai (géographique)**, le **nord magnétique** — l'écart est la **déclinaison magnétique (Dm)**, indiquée sur la carte et variant lentement — et le **nord compas**, faussé par la **déviation** propre à l'avion.",
      "La chaîne complète : **Route vraie → (± dérive) → Cap vrai → (± déclinaison) → Cap magnétique → (± déviation) → Cap compas.**",
@@ -37,6 +38,7 @@ sections:[
        "On corrige la dérive en pointant le nez vers le vent"]},
 
  {h:"Le triangle des vitesses et les calculs de base",
+  fig:['triangle-vitesses','un-en-60'],
   p:["Le **triangle des vitesses** combine trois vecteurs : la **vitesse propre (TAS)** dans la direction du cap, le **vent** (direction d'où il vient, force), et la résultante **vitesse sol (GS)** dans la direction de la route. On le résout au **règle à calcul circulaire** (computer de vol), sur tablette, ou par approximation mentale.",
      "**Approximations mentales** utiles : la **dérive maximale**, vent perpendiculaire, vaut environ **vitesse du vent × 60 ÷ TAS**. Pour un vent oblique, on applique la même règle des sinus que pour le vent traversier : 30° → moitié, 45° → 0,7, 60° → 0,9.",
      "**Vitesse et temps** : à **60 kt on parcourt 1 NM par minute** ; à 120 kt, 2 NM par minute. Le temps en minutes vaut **distance × 60 ÷ vitesse sol**.",

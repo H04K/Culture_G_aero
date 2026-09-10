@@ -44,6 +44,7 @@ const ASSETS = [
   './ppl.html',
   './css/ppl.css',
   './js/ppl-core.js',
+  './js/ppl-figures.js',
   './js/ppl-store.js',
   './js/ppl-quiz.js',
   './js/ppl-app.js',
