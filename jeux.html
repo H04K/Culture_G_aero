@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1628">
+<meta name="description" content="Jeux de pause — Tri de vis : dévisse les plaques et range les vis par couleur, 40 niveaux">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jeux">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/jeux.css">
+<title>Jeux — Tri de vis</title>
+</head>
+<body>
+
+<!-- ══════════════ ACCUEIL DES JEUX ══════════════ -->
+<section class="screen active" id="screen-hub">
+  <header class="hero">
+    <div class="hero-inner">
+      <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <div>
+        <h1>Jeux</h1>
+        <p class="sub">La pause entre deux séries de QCM</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <button class="game-card" data-nav="levels">
+      <span class="game-art" aria-hidden="true">
+        <i class="bolt c1"></i><i class="bolt c2"></i><i class="bolt c3"></i>
+      </span>
+      <span class="game-body">
+        <b>Tri de vis</b>
+        <small>Dévisse les plaques et range les vis par couleur, trois par boîte. 40 niveaux.</small>
+        <span class="game-meta" id="game-meta"></span>
+      </span>
+      <span class="game-go">→</span>
+    </button>
+
+    <h2 class="section-title">Comment jouer</h2>
+    <ol class="rules">
+      <li><b>Touche une vis</b> pour la dévisser : elle file dans la boîte de sa couleur.</li>
+      <li>Une vis <b>recouverte par une plaque</b> n'est pas accessible. Libère d'abord la plaque du dessus.</li>
+      <li>Quand une plaque perd sa dernière vis, elle <b>tombe</b> et découvre ce qu'elle cachait.</li>
+      <li><b>Trois vis de la même couleur</b> remplissent une boîte : elle part et une nouvelle arrive.</li>
+      <li>Sans boîte compatible, la vis attend dans la <b>réserve</b>. Réserve pleine, plus rien ne se
+          dévisse tant qu'une boîte ne se complète pas — et si plus aucune vis accessible n'entre dans
+          une boîte ouverte, la partie est <b>bloquée</b>.</li>
+    </ol>
+    <p class="rules-note">
+      Chaque niveau a au moins une solution qui n'utilise jamais la réserve. Rien ne se perd sur un
+      mauvais appui : un coup impossible est simplement refusé. La difficulté est dans les étoiles —
+      trois étoiles demandent une partie presque parfaite, sans annulation ni boîte de secours.
+    </p>
+
+    <div class="setting-list">
+      <label class="setting">
+        <div><strong>Sons</strong><small>Petits bruitages de vissage</small></div>
+        <input type="checkbox" id="set-sound" class="switch" checked>
+      </label>
+      <button class="setting as-btn danger" id="btn-reset-jeux">
+        <div><strong>Réinitialiser la progression</strong><small>Efface étoiles et niveaux débloqués</small></div><span>🗑</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CHOIX DU NIVEAU ══════════════ -->
+<section class="screen" id="screen-levels">
+  <div class="wrap">
+    <div class="page-head">
+      <button class="icon-btn" data-nav="hub" aria-label="Retour">←</button>
+      <h1>Tri de vis</h1>
+    </div>
+    <div class="lvl-stats" id="lvl-stats"></div>
+    <div class="lvl-grid" id="lvl-grid"></div>
+    <p class="disclaimer">
+      Les plateaux sont générés à partir du numéro de niveau : le niveau 12 est le même
+      plateau sur tous les appareils, et le restera.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ PARTIE ══════════════ -->
+<section class="screen" id="screen-play">
+  <div class="play-bar">
+    <button class="icon-btn" id="play-back" aria-label="Quitter">←</button>
+    <div class="play-info">
+      <b id="play-title">Niveau 1</b>
+      <small id="play-sub"></small>
+    </div>
+    <div class="play-time" id="play-time">0:00</div>
+  </div>
+
+  <div class="play-stage"><canvas id="board" aria-label="Plateau de jeu : touche une vis pour la dévisser"></canvas></div>
+
+  <div class="play-tools">
+    <button class="tool" id="tool-undo"><span>↺</span><em>Annuler</em><i id="undo-left">3</i></button>
+    <button class="tool" id="tool-box"><span>＋</span><em>Boîte</em><i id="box-left">1</i></button>
+    <button class="tool" id="tool-restart"><span>⟳</span><em>Rejouer</em></button>
+    <button class="tool" id="tool-sound"><span id="sound-icon">🔊</span><em>Son</em></button>
+  </div>
+
+  <!-- victoire -->
+  <div class="overlay" id="ov-win" hidden>
+    <div class="sheet">
+      <div class="sheet-stars" id="win-stars"></div>
+      <h2 id="win-title">Niveau terminé</h2>
+      <p class="sheet-sub" id="win-sub"></p>
+      <div class="sheet-facts" id="win-facts"></div>
+      <button class="btn primary wide" id="win-next">Niveau suivant →</button>
+      <div class="sheet-row">
+        <button class="btn ghost" id="win-again">↻ Rejouer</button>
+        <button class="btn ghost" id="win-levels">Niveaux</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- blocage -->
+  <div class="overlay" id="ov-stuck" hidden>
+    <div class="sheet">
+      <div class="sheet-mark">⚠️</div>
+      <h2>Plus aucun coup possible</h2>
+      <p class="sheet-sub">La réserve est pleine et aucune vis accessible n'entre dans une boîte ouverte.</p>
+      <div class="sheet-row" id="stuck-helps"></div>
+      <button class="btn primary wide" id="stuck-restart">↻ Recommencer le niveau</button>
+      <button class="btn ghost wide" id="stuck-levels">Choisir un autre niveau</button>
+    </div>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/jeux-levels.js"></script>
+<script src="js/jeux-store.js"></script>
+<script src="js/jeux-screw.js"></script>
+<script src="js/jeux-app.js"></script>
+</body>
+</html>

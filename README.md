@@ -125,6 +125,50 @@ accorde aucune semaine dédiée mais 20 à 30 minutes par semaine sur toute l'an
 Le module partage l'architecture du module PPL : profils par pseudo, carte de
 reprise, score de préparation, export JSON.
 
+## Jeux
+
+Module séparé (`jeux.html`), accessible depuis l'accueil : la pause entre deux
+séries de QCM.
+
+### Tri de vis
+
+Des plaques métalliques empilées sur un plateau, chacune tenue par des vis de
+couleur. Une vis recouverte par une plaque posée au-dessus n'est pas accessible ;
+quand une plaque perd sa dernière vis elle tombe et découvre ce qu'elle cachait.
+Les vis se rangent trois par trois dans des boîtes d'une seule couleur, et la vis
+qui n'a pas de boîte ouverte à sa couleur attend dans la **réserve**. Réserve
+pleine, le moteur refuse le coup plutôt que de faire perdre la partie : on ne
+perd pas sur un mauvais appui, on se retrouve seulement à devoir compléter une
+boîte pour libérer de la place. La partie n'est déclarée bloquée que si plus
+aucune vis accessible n'entre dans une boîte ouverte.
+
+**40 niveaux**, de 9 vis et 2 couleurs sur 4 plaques à 42 vis et 7 couleurs sur
+15 plaques, avec la part de vis bloquées au départ qui monte de 0 à 30 %.
+
+Chaque plateau est **généré à partir du numéro de niveau** : pas de fichier de
+données, et le niveau 12 est le même plateau sur tous les appareils. Les couleurs
+ne sont pas tirées au hasard : le générateur rejoue d'abord un démontage valide,
+puis pose les couleurs par groupes de trois en suivant cet ordre, comme s'il
+remplissait les boîtes au fur et à mesure. Le niveau est ensuite **rejoué par le
+générateur avec les règles exactes du moteur** et n'est retenu que s'il se termine
+sans jamais passer par la réserve — il existe donc toujours au moins une solution
+parfaite.
+
+| Aide | Effet |
+|---|---|
+| Annuler | Remet la dernière vis en place (3 à 5 fois selon le niveau) |
+| ＋ Boîte | Ouvre une quatrième boîte pour le reste de la partie |
+
+La difficulté est donc dans les étoiles, pas dans la sanction : trois étoiles
+récompensent une partie qui n'a jamais mis plus d'une vis en réserve, sans aide ;
+utiliser une annulation ou une boîte de secours plafonne à deux étoiles.
+
+La forme de l'empreinte (fente, cruciforme, six pans, Torx…) double la couleur de
+chaque vis, pour rester lisible en cas de daltonisme.
+
+Tout est dessiné dans un seul canvas — plateau, boîtes et réserve — et tout se
+joue au doigt : une vis, un appui.
+
 ## Suivi
 
 Scores, courbe de progression, maîtrise par thème et historique de sessions sont
@@ -182,6 +226,12 @@ js/pass-store.js        profils par pseudo, exercices faits, semaines validées
 js/pass-quiz.js         sélection adaptative et moteur de session PASS
 js/pass-app.js          navigation, écrans planning et exercices
 data/pass-ue*.js        les 19 UE (cours + mnémos + exercices + QCM)
+jeux.html               onglet Jeux (accueil, choix du niveau, partie)
+css/jeux.css            styles de l'onglet Jeux
+js/jeux-levels.js       génération et vérification des 40 niveaux de Tri de vis
+js/jeux-store.js        étoiles, records et niveaux débloqués
+js/jeux-screw.js        moteur du jeu : rendu canvas, animations, règles
+js/jeux-app.js          navigation de l'onglet Jeux
 sw.js                   service worker (cache hors-ligne)
 tools/gen-icons.js      génération des icônes PNG, sans dépendance
 ```

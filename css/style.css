@@ -354,6 +354,11 @@ a.cours-cta { text-decoration: none; color: inherit; }
 .ppl-cta .cta-body small { color: #9fd4c0; }
 .ppl-cta .cta-go { color: #2fd39a; }
 
+.jeux-cta { background: linear-gradient(145deg, #4a2a18, #2c1a10); border-color: #955a2c; }
+.jeux-cta:hover { border-color: #ff8a3d; }
+.jeux-cta .cta-body small { color: #e6c2a2; }
+.jeux-cta .cta-go { color: #ff8a3d; }
+
 .cours-progress {
   display: flex; align-items: center; gap: 14px; margin-top: 18px;
   background: var(--surface); border: 1px solid var(--line);
