@@ -86,7 +86,7 @@
 
     $('#play-title').textContent = 'Niveau ' + n;
     $('#play-sub').textContent =
-      level.screws.length + ' vis · ' + level.colors + ' couleurs · ' + level.plates.length + ' plaques';
+      level.screws.length + ' vis · ' + level.colors + ' couleurs · ' + level.parts.length + ' pièces';
     $('#ov-win').hidden = true;
     $('#ov-stuck').hidden = true;
     show('play');

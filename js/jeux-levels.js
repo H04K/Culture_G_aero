@@ -1,33 +1,28 @@
 /* ═══════════════════════════════════════════════════════════
    jeux-levels.js — génération des niveaux de « Tri de vis »
 
-   Un niveau = des plaques métalliques empilées sur un plateau,
-   chacune tenue par des vis de couleur. Une vis n'est dévissable
-   que si aucune plaque posée au-dessus ne la recouvre ; quand une
-   plaque perd sa dernière vis elle tombe et libère ce qu'elle
-   cachait. Les vis se rangent dans des boîtes de trois, d'une
-   seule couleur.
+   Un niveau = une petite scène d'objets 3D (chaises, tables,
+   maisons…) posés au sol, vus en isométrie. Chaque pièce d'un objet
+   est tenue par des vis de couleur ; une vis n'est accessible que si
+   aucune pièce plus proche de la caméra ne la recouvre à l'écran, et
+   une pièce qui perd sa dernière vis s'envole en découvrant ce
+   qu'elle masquait.
 
    Tout est généré à partir d'une graine : même numéro de niveau,
-   même plateau sur tous les appareils, sans fichier de données.
-   Les couleurs sont posées à l'envers, en rejouant une partie
-   valide, puis la solution est vérifiée — un niveau ne sort
-   du générateur que s'il est résoluble sans jamais déborder.
+   même scène sur tous les appareils, sans fichier de données. Les
+   couleurs sont posées à l'envers, en rejouant une partie valide,
+   puis la solution est vérifiée — un niveau ne sort du générateur
+   que s'il est résoluble sans jamais déborder.
    ═══════════════════════════════════════════════════════════ */
 
 const JeuxLevels = (() => {
 
   const COUNT = 40;
 
-  /* ───── espace de conception du plateau (unités arbitraires) ───── */
-  const BOARD_W  = 100;
-  const BOARD_H  = 118;
-  const SCREW_R  = 3.05;   // rayon d'une tête de vis
-  const PLATE_HW = 5.6;    // demi-largeur d'une plaque
-  const PLATE_R  = 3.4;    // arrondi des coins
-  const SPACING  = 10.6;   // entraxe des vis sur une plaque
-  const EDGE_M   = 2.7;    // bande morte : aucune vis ne s'arrête sur un bord
-  const GAP_MIN  = 7.6;    // écart minimal entre deux vis visibles en même temps
+  const SCREW_R = 0.8;     // rayon d'une tête de vis, unités du monde
+  const CLEAR   = 0.8;     // = SCREW_R : une vis gardée est soit franchement
+                           //   visible, soit franchement masquée, jamais à moitié
+  const GAP     = 0.9;     // écart minimal entre deux objets au sol
 
   /* ───── règles de jeu ───── */
   const SLOTS   = 3;       // boîtes ouvertes en même temps
@@ -43,6 +38,13 @@ const JeuxLevels = (() => {
     { key: 'violet', hex: '#b07cff', dark: '#432873', glyph: 'triangle' },
     { key: 'orange', hex: '#ff8a3d', dark: '#7a360d', glyph: 'star'     },
     { key: 'cyan',   hex: '#22d3d3', dark: '#0a5457', glyph: 'torx'     }
+  ];
+
+  /* ───── objets disponibles, par palier de complexité ───── */
+  const TIERS = [
+    ['caisse', 'niche', 'tabouret', 'table'],
+    ['banc', 'commode', 'etagere', 'chaise'],
+    ['maison', 'armoire', 'lit']
   ];
 
   /* ───── générateur pseudo-aléatoire reproductible ───── */
@@ -61,11 +63,11 @@ const JeuxLevels = (() => {
     const t = (n - 1) / (COUNT - 1);
     return {
       n,
-      plates : Math.round(4 + 11 * Math.pow(t, 0.82)),
+      objects: Math.round(1 + 4 * Math.pow(t, 0.75)),
+      minVis : Math.round(6 + 30 * Math.pow(t, 0.95)),
       colors : Math.min(COLORS.length, 2 + Math.round(5 * Math.pow(t, 0.7))),
-      maxK   : n < 6 ? 3 : n < 16 ? 4 : 5,
-      overlap: 0.44 + 0.38 * t,
-      stack  : n <= 3 ? 0 : n <= 6 ? 0.11 : n < 25 ? 0.18 : 0.22,
+      tiers  : n < 8 ? 1 : n < 20 ? 2 : 3,
+      stack  : n <= 3 ? 0 : n <= 6 ? 0.10 : n < 25 ? 0.16 : 0.20,
       buffer : n <= 8 ? 6 : n <= 24 ? 5 : 4,
       undos  : n <= 10 ? 5 : 3,
       extra  : n >= 20 ? 2 : 1,
@@ -73,153 +75,114 @@ const JeuxLevels = (() => {
     };
   }
 
-  /* ═════════ géométrie ═════════ */
+  /* ═════════ composition de la scène ═════════ */
 
-  /* distance signée à un rectangle arrondi centré sur l'origine */
-  function sdBox(x, y, hl, hw, r) {
-    const qx = Math.abs(x) - hl + r;
-    const qy = Math.abs(y) - hw + r;
-    return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
-  }
-
-  /* distance signée d'un point au corps d'une plaque (négatif = dessous) */
-  function plateSd(p, x, y) {
-    const dx = x - p.cx, dy = y - p.cy;
-    const c = Math.cos(p.a), s = Math.sin(p.a);
-    return sdBox(dx * c + dy * s, -dx * s + dy * c, p.hl, p.hw, PLATE_R);
-  }
-
-  /* positions des trous d'une plaque, dans le repère du plateau */
-  function holesOf(p) {
-    const c = Math.cos(p.a), s = Math.sin(p.a);
-    return p.offs.map(lx => ({ x: p.cx + lx * c, y: p.cy + lx * s }));
-  }
-
-  function fitsBoard(p) {
-    const ca = Math.abs(Math.cos(p.a)), sa = Math.abs(Math.sin(p.a));
-    const ex = p.hl * ca + p.hw * sa;
-    const ey = p.hl * sa + p.hw * ca;
-    return p.cx - ex >= 1.5 && p.cx + ex <= BOARD_W - 1.5
-        && p.cy - ey >= 1.5 && p.cy + ey <= BOARD_H - 1.5;
-  }
-
-  /* La nouvelle plaque se pose au-dessus de toutes les autres :
-     elle ne doit laisser aucune vis existante à cheval sur son bord
-     (sinon on ne saurait pas si la vis est accessible), et ses
-     propres vis ne doivent pas chevaucher une vis restée visible. */
-  function clears(cand, plates) {
-    const mine = holesOf(cand);
-    let covered = 0;
-    for (const p of plates) {
-      for (const h of holesOf(p)) {
-        const d = plateSd(cand, h.x, h.y);
-        if (Math.abs(d) < EDGE_M) return false;
-        if (d < 0) { covered++; continue; }
-        for (const m of mine) if (Math.hypot(m.x - h.x, m.y - h.y) < GAP_MIN) return false;
-      }
-    }
-    return covered <= 6;
-  }
-
-  function pickK(rng, sp) {
-    const w = [0.30, 0.36, 0.22, 0.12].slice(0, sp.maxK - 1);
-    const tot = w.reduce((a, b) => a + b, 0);
-    let r = rng() * tot;
-    for (let i = 0; i < w.length; i++) { r -= w[i]; if (r <= 0) return i + 2; }
-    return 2;
-  }
-
-  function buildPlates(rng, sp) {
-    const plates = [];
-    for (let i = 0; i < sp.plates; i++) {
-      let placed = null;
-      for (let tries = 0; tries < 300 && !placed; tries++) {
-        const k = pickK(rng, sp);
-        const hl = (k - 1) / 2 * SPACING + PLATE_HW;
-        const a = rng() * Math.PI;
-        let cx, cy;
-        if (plates.length && rng() < sp.overlap) {
-          const base = plates[(rng() * plates.length) | 0];
-          const ang = rng() * Math.PI * 2, d = 4 + rng() * 14;
-          cx = base.cx + Math.cos(ang) * d;
-          cy = base.cy + Math.sin(ang) * d;
-        } else {
-          cx = 10 + rng() * (BOARD_W - 20);
-          cy = 10 + rng() * (BOARD_H - 20);
-        }
-        const offs = [];
-        for (let j = 0; j < k; j++) offs.push((j - (k - 1) / 2) * SPACING);
-        const cand = { cx, cy, a, hl, hw: PLATE_HW, offs, tint: rng() };
-        if (!fitsBoard(cand)) continue;
-        if (!clears(cand, plates)) continue;
-        placed = cand;
-      }
-      if (placed) { placed.id = plates.length; placed.z = plates.length; plates.push(placed); }
-    }
-    return plates;
-  }
-
-  /* Les plaques se posent en tas autour des premières : on recentre
-     l'ensemble sur le plateau. Une translation ne change ni les
-     recouvrements ni les distances, donc le puzzle reste identique. */
-  function centerPlates(plates) {
+  function footprint(parts) {
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (const p of plates) {
-      const ca = Math.abs(Math.cos(p.a)), sa = Math.abs(Math.sin(p.a));
-      const ex = p.hl * ca + p.hw * sa, ey = p.hl * sa + p.hw * ca;
-      x0 = Math.min(x0, p.cx - ex); x1 = Math.max(x1, p.cx + ex);
-      y0 = Math.min(y0, p.cy - ey); y1 = Math.max(y1, p.cy + ey);
+    for (const p of parts) for (const v of p.verts) {
+      if (v[0] < x0) x0 = v[0]; if (v[0] > x1) x1 = v[0];
+      if (v[1] < y0) y0 = v[1]; if (v[1] > y1) y1 = v[1];
     }
-    const dx = (BOARD_W - (x1 - x0)) / 2 - x0;
-    const dy = (BOARD_H - (y1 - y0)) / 2 - y0;
-    plates.forEach(p => { p.cx += dx; p.cy += dy; });
+    return { x0, y0, x1, y1 };
   }
 
-  /* Le total de vis doit être un multiple de 3 : on retire les vis
-     en trop, de préférence au milieu d'une longue plaque — retirer
-     une vis ne peut jamais rendre un niveau insoluble. */
-  function trimToTriples(plates, rng) {
-    let total = plates.reduce((a, p) => a + p.offs.length, 0);
+  const overlaps = (a, b) =>
+    a.x0 < b.x1 + GAP && b.x0 < a.x1 + GAP && a.y0 < b.y1 + GAP && b.y0 < a.y1 + GAP;
+
+  /* Les objets sont posés en quinconce le long de l'axe de la caméra :
+     un pas de côté, un pas vers l'avant. Deux objets voisins se masquent
+     alors largement à l'écran — c'est de là que vient l'essentiel des vis
+     inaccessibles — tout en gardant la scène étroite, donc de grosses vis
+     à l'écran sur un téléphone.
+
+     `lat` est le décalage latéral (x − y), `prof` l'avancée vers la
+     caméra (x + y) : c'est dans ce repère que la scène se compose. */
+  const LAT = 13, PROF = 11;
+
+  function compose(rng, sp) {
+    const pool = TIERS.slice(0, sp.tiers).flat();
+    const parts = [];
+    const spots = [];
+    for (let i = 0; i < sp.objects; i++) {
+      const lat = (sp.objects > 1 ? (i % 2 ? 1 : -1) * LAT / 2 : 0) + (rng() - 0.5) * 2.4;
+      const prof = (i - (sp.objects - 1) / 2) * PROF + (rng() - 0.5) * 2.4;
+      const cx = (prof + lat) / 2, cy = (prof - lat) / 2;
+      let done = false;
+      for (let tries = 0; tries < 40 && !done; tries++) {
+        const key = pool[(rng() * pool.length) | 0];
+        const rots = JeuxSolids.ROTS[key];
+        const cand = JeuxSolids.place(key, cx, cy, rots[(rng() * rots.length) | 0]);
+        const fp = footprint(cand);
+        if (spots.some(s => overlaps(s, fp))) continue;
+        spots.push(fp);
+        cand.forEach(p => { p.id = parts.length; parts.push(p); });
+        done = true;
+      }
+      if (!done) return null;
+    }
+    return parts;
+  }
+
+  /* ═════════ masquages ═════════
+     Une vis portée par la pièce P est bloquée par toute pièce Q
+     dessinée après P dont la silhouette la recouvre.
+
+     Une vis qui tombe pile sur le bord d'une silhouette serait
+     ambiguë — à moitié visible, accessible ou non sans qu'on puisse
+     le deviner. Plutôt que de jeter la scène, on retire simplement
+     cette vis-là, tant que sa pièce en garde au moins une. */
+  function computeBlockers(parts) {
+    const order = JeuxSolids.depthSort(parts);
+    const rank = new Array(parts.length);
+    order.forEach((idx, k) => { rank[idx] = k; });
+    const sil = parts.map(p => JeuxSolids.silhouette(p));
+
+    for (const p of parts) {
+      for (const s of p.screws) {
+        s.blockers = [];
+        s.edge = Infinity;
+        const pt = JeuxSolids.project(s.p);
+        for (const q of parts) {
+          if (q.id === p.id || rank[q.id] < rank[p.id]) continue;
+          const d = JeuxSolids.inset(sil[q.id], pt);
+          s.edge = Math.min(s.edge, Math.abs(d));
+          if (d > 0) s.blockers.push(q.id);
+        }
+      }
+      /* on sacrifie les vis ambiguës, les plus douteuses d'abord */
+      const doubtful = p.screws.filter(s => s.edge < CLEAR).sort((a, b) => a.edge - b.edge);
+      for (const s of doubtful) {
+        if (p.screws.length <= 1) break;
+        p.screws.splice(p.screws.indexOf(s), 1);
+      }
+    }
+    return { order, rank };
+  }
+
+  /* Le total de vis doit être un multiple de 3 : on en retire, jamais
+     la dernière d'une pièce — retirer une vis ne peut pas rendre un
+     niveau insoluble. */
+  function trimToTriples(parts, rng) {
+    let total = parts.reduce((a, p) => a + p.screws.length, 0);
     let excess = total % 3;
     while (excess > 0) {
       let best = null;
-      for (const p of plates) if (p.offs.length >= 3 && (!best || p.offs.length > best.offs.length)) best = p;
-      if (best) best.offs.splice(1 + ((rng() * (best.offs.length - 2)) | 0), 1);
-      else {
-        const p = plates.find(q => q.offs.length >= 2);
-        if (!p) break;
-        p.offs.splice(rng() < 0.5 ? 0 : p.offs.length - 1, 1);
-      }
+      for (const p of parts) if (p.screws.length >= 2 && (!best || p.screws.length > best.screws.length)) best = p;
+      if (!best) return false;
+      best.screws.splice((rng() * best.screws.length) | 0, 1);
       excess--;
     }
+    return true;
   }
 
-  /* ═════════ vis, blocages, ordre de démontage ═════════ */
-
-  function buildScrews(plates) {
-    const screws = [];
-    plates.forEach(p => {
-      holesOf(p).forEach(h => {
-        screws.push({ id: screws.length, x: h.x, y: h.y, plate: p.id, blockers: [], color: 0 });
-      });
-    });
-    /* une vis est bloquée par toute plaque plus haute qui la recouvre */
-    screws.forEach(s => {
-      for (const q of plates) {
-        if (q.z <= plates[s.plate].z) continue;
-        if (plateSd(q, s.x, s.y) < 0) s.blockers.push(q.id);
-      }
-    });
-    return screws;
-  }
-
-  /* Rejoue une partie valide : à chaque pas on dévisse une vis
-     accessible au hasard. La plaque la plus haute n'est jamais
-     recouverte, donc la boucle se termine toujours. */
-  function solveOrder(plates, screws, rng) {
+  /* ═════════ ordre de démontage ═════════
+     À chaque pas on dévisse une vis accessible au hasard. La pièce la
+     plus proche de la caméra n'étant jamais masquée, la boucle se
+     termine toujours. */
+  function solveOrder(parts, screws, rng) {
     const gone = new Array(screws.length).fill(false);
-    const pGone = new Array(plates.length).fill(false);
-    const left = plates.map(p => p.offs.length);
+    const pGone = new Array(parts.length).fill(false);
+    const left = parts.map(p => p.screws.length);
     const order = [];
     while (order.length < screws.length) {
       const free = [];
@@ -232,7 +195,7 @@ const JeuxLevels = (() => {
       const s = free[(rng() * free.length) | 0];
       gone[s.id] = true;
       order.push(s.id);
-      if (--left[s.plate] <= 0) pGone[s.plate] = true;
+      if (--left[s.part] <= 0) pGone[s.part] = true;
     }
     return order;
   }
@@ -246,9 +209,9 @@ const JeuxLevels = (() => {
     return src[(rng() * src.length) | 0];
   }
 
-  /* Trois groupes ouverts au maximum, soit exactement les trois
-     boîtes du jeu : jouer dans l'ordre « order » range donc chaque
-     vis directement, sans jamais passer par la réserve. */
+  /* Trois groupes ouverts au maximum, soit exactement les trois boîtes
+     du jeu : jouer dans l'ordre « order » range donc chaque vis
+     directement, sans jamais passer par la réserve. */
   function assignColors(order, sp, rng) {
     const N = order.length;
     const slots = new Array(SLOTS).fill(null);
@@ -321,23 +284,42 @@ const JeuxLevels = (() => {
     return buffer.length === 0 && boxes.every(b => !b);
   }
 
+  /* Taille d'une tête de vis, en pixels, sur un écran de référence :
+     c'est ce qui décide si une scène est jouable au doigt. */
+  const REF_W = 366, REF_H = 430, MIN_SCREW_PX = 9.5;
+  const screwPixels = (w, h) => Math.min(REF_W / w, REF_H / h) * SCREW_R;
+
   /* ═════════ assemblage ═════════ */
 
   function tryBuild(sp, rng) {
-    const plates = buildPlates(rng, sp);
-    if (plates.length < 3) return null;
-    centerPlates(plates);
-    trimToTriples(plates, rng);
-    if (plates.some(p => !p.offs.length)) return null;
+    const parts = compose(rng, sp);
+    if (!parts || parts.length < 3) return null;
+    if (!trimToTriples(parts, rng)) return null;
 
-    const screws = buildScrews(plates);
-    if (screws.length < 6 || screws.length % 3 !== 0) return null;
+    const depth = computeBlockers(parts);
+    if (!depth) return null;
+
+    const screws = [];
+    parts.forEach(p => p.screws.forEach(s => {
+      screws.push({ id: screws.length, part: p.id, p: s.p, e1: s.e1, e2: s.e2, n: s.n, blockers: s.blockers, color: 0 });
+    }));
+    if (screws.length < sp.minVis || screws.length % 3 !== 0) return null;
 
     const blocked = screws.filter(s => s.blockers.length).length / screws.length;
-    if (blocked < sp.stack || blocked > 0.62) return null;
+    if (blocked < sp.stack || blocked > 0.65) return null;
 
-    const order = solveOrder(plates, screws, rng);
+    const order = solveOrder(parts, screws, rng);
     if (!order) return null;
+
+    /* cadrage : boîte englobante de la scène projetée */
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of parts) for (const v of p.verts) {
+      const q = JeuxSolids.project(v);
+      if (q[0] < x0) x0 = q[0]; if (q[0] > x1) x1 = q[0];
+      if (q[1] < y0) y0 = q[1]; if (q[1] > y1) y1 = q[1];
+    }
+    /* une vis doit rester visable au doigt sur un écran de téléphone */
+    if (screwPixels(x1 - x0, y1 - y0) < MIN_SCREW_PX) return null;
 
     for (let attempt = 0; attempt < 24; attempt++) {
       const col = assignColors(order, sp, rng);
@@ -345,9 +327,10 @@ const JeuxLevels = (() => {
       screws.forEach(s => { s.color = col.colorOf[s.id]; });
       const level = {
         n: sp.n,
-        board: { w: BOARD_W, h: BOARD_H, r: SCREW_R, plateR: PLATE_R },
-        plates: plates.map(p => ({ id: p.id, z: p.z, cx: p.cx, cy: p.cy, a: p.a, hl: p.hl, hw: p.hw, tint: p.tint })),
-        screws: screws.map(s => ({ id: s.id, x: s.x, y: s.y, plate: s.plate, color: s.color, blockers: s.blockers })),
+        parts: parts.map(p => ({ id: p.id, verts: p.verts, faces: p.faces, tone: p.tone, obj: p.obj })),
+        drawOrder: depth.order,
+        screws,
+        view: { x0, y0, x1, y1, r: SCREW_R },
         queue: col.queue,
         order,
         slots: SLOTS,
@@ -356,6 +339,7 @@ const JeuxLevels = (() => {
         undos: sp.undos,
         extraBoxes: sp.extra,
         colors: sp.colors,
+        objects: new Set(parts.map(p => p.obj)).size,
         blocked
       };
       if (verify(level)) return level;
@@ -365,20 +349,26 @@ const JeuxLevels = (() => {
 
   function build(n) {
     const sp = spec(Math.max(1, Math.min(COUNT, n | 0)));
-    for (let attempt = 0; attempt < 40; attempt++) {
-      const lvl = tryBuild(sp, rngFrom((sp.seed + attempt * 7919) >>> 0));
-      if (lvl) return lvl;
-    }
-    /* filet de sécurité : on rabaisse les exigences plutôt que de rendre null */
-    const easy = { ...sp, plates: Math.max(3, sp.plates - 3), overlap: 0.35 };
-    for (let attempt = 0; attempt < 60; attempt++) {
-      const lvl = tryBuild(easy, rngFrom((sp.seed ^ (attempt * 2246822519)) >>> 0));
-      if (lvl) return lvl;
+    /* On tente d'abord le cahier des charges du niveau, puis on relâche
+       une exigence à la fois — jamais le nombre d'objets avant le nombre
+       de vis, sinon les deux se contredisent. */
+    const plans = [
+      sp,
+      { ...sp, stack: 0 },
+      { ...sp, stack: 0, minVis: Math.max(6, sp.minVis - 6) },
+      { ...sp, stack: 0, minVis: 6 },
+      { ...sp, stack: 0, minVis: 6, objects: Math.max(1, sp.objects - 1) }
+    ];
+    for (let i = 0; i < plans.length; i++) {
+      for (let attempt = 0; attempt < 60; attempt++) {
+        const lvl = tryBuild(plans[i], rngFrom((sp.seed + i * 2246822519 + attempt * 7919) >>> 0));
+        if (lvl) return lvl;
+      }
     }
     return null;
   }
 
-  return { COUNT, COLORS, SLOTS, BOX_CAP, BOARD_W, BOARD_H, SCREW_R, spec, build, verify };
+  return { COUNT, COLORS, SLOTS, BOX_CAP, SCREW_R, spec, build, verify };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = JeuxLevels;

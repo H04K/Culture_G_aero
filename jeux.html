@@ -35,7 +35,7 @@
       </span>
       <span class="game-body">
         <b>Tri de vis</b>
-        <small>Dévisse les plaques et range les vis par couleur, trois par boîte. 40 niveaux.</small>
+        <small>Démonte des meubles et des maisons en 3D : dévisse les pièces et range les vis par couleur, trois par boîte. 40 niveaux.</small>
         <span class="game-meta" id="game-meta"></span>
       </span>
       <span class="game-go">→</span>
@@ -44,8 +44,8 @@
     <h2 class="section-title">Comment jouer</h2>
     <ol class="rules">
       <li><b>Touche une vis</b> pour la dévisser : elle file dans la boîte de sa couleur.</li>
-      <li>Une vis <b>recouverte par une plaque</b> n'est pas accessible. Libère d'abord la plaque du dessus.</li>
-      <li>Quand une plaque perd sa dernière vis, elle <b>tombe</b> et découvre ce qu'elle cachait.</li>
+      <li>Une vis <b>masquée par une pièce plus proche</b> n'est pas accessible. Dégage d'abord ce qui est devant.</li>
+      <li>Quand une pièce perd sa dernière vis, elle <b>s'envole</b> et découvre ce qu'elle cachait.</li>
       <li><b>Trois vis de la même couleur</b> remplissent une boîte : elle part et une nouvelle arrive.</li>
       <li>Sans boîte compatible, la vis attend dans la <b>réserve</b>. Réserve pleine, plus rien ne se
           dévisse tant qu'une boîte ne se complète pas — et si plus aucune vis accessible n'entre dans
@@ -135,6 +135,7 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="js/jeux-solids.js"></script>
 <script src="js/jeux-levels.js"></script>
 <script src="js/jeux-store.js"></script>
 <script src="js/jeux-screw.js"></script>

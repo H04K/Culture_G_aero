@@ -1,9 +1,11 @@
 /* ═══════════════════════════════════════════════════════════
    jeux-screw.js — moteur du jeu « Tri de vis »
 
-   Tout est dessiné dans un seul canvas : le plateau, les boîtes
-   et la réserve. Les vis volent donc d'un bout à l'autre sans
-   jamais changer de repère.
+   La scène 3D, les boîtes et la réserve sont dessinées dans un seul
+   canvas : les vis volent donc de l'objet à sa boîte sans jamais
+   changer de repère. Le rendu est isométrique, par l'algorithme du
+   peintre — une pièce dessinée après une autre la masque, ce qui est
+   exactement la règle d'accessibilité des vis.
 
    Modèle : l'état logique est mis à jour tout de suite au clic,
    l'animation ne fait que rattraper le modèle. Chaque vis rangée
@@ -25,7 +27,7 @@ function ScrewGame(canvas, level, hooks) {
   const FALL_MS  = 520;   // chute d'une plaque libérée
 
   /* ─────────── état ─────────── */
-  let plates, screws, boxes, buffer, queue, qi;
+  let parts, screws, boxes, buffer, queue, qi, rank;
   let undosLeft, boxesLeft, usedHelp, peak, moves, startedAt, pausedAt, over, won;
   let hist, nudge, shake, raf = 0, running = false, lastHud = 0;
   const L = {};                      // gabarit en pixels
@@ -33,9 +35,20 @@ function ScrewGame(canvas, level, hooks) {
   /* ═════════ mise en place ═════════ */
 
   function reset() {
-    plates = level.plates.map(p => ({ ...p, left: 0, gone: false, fall: 0 }));
+    parts = level.parts.map((p, i) => {
+      let cx = 0, cy = 0;
+      p.verts.forEach(v => { cx += v[0]; cy += v[1]; });
+      return {
+        ...p, left: 0, gone: false, fall: 0,
+        pivot: [cx / p.verts.length, cy / p.verts.length],
+        spin: (i % 2 ? 1 : -1) * (0.7 + (i % 3) * 0.25),
+        sil: JeuxSolids.silhouette(p)
+      };
+    });
     screws = level.screws.map(s => ({ ...s, gone: false }));
-    screws.forEach(s => plates[s.plate].left++);
+    screws.forEach(s => parts[s.part].left++);
+    rank = [];
+    level.drawOrder.forEach((idx, k) => { rank[idx] = k; });
     queue = level.queue.slice(); qi = 0;
     buffer = [];
     boxes = [];
@@ -80,15 +93,17 @@ function ScrewGame(canvas, level, hooks) {
     L.boxY = L.buf.y - 11 - bh;
     L.box = { w: bw, h: bh, r: rs, gap, x0: (w - rowW) / 2 };
 
-    const boardBot = L.boxY - 10;
-    const bd = level.board;
-    L.s = Math.min((w - 2 * pad) / bd.w, Math.max(40, boardBot - pad) / bd.h);
-    L.ox = (w - bd.w * L.s) / 2;
-    L.oy = pad + (boardBot - pad - bd.h * L.s) / 2;
+    const boardBot = L.boxY - 8;
+    const v = level.view;
+    const vw = v.x1 - v.x0, vh = v.y1 - v.y0;
+    L.s = Math.min((w - 2 * pad) / vw, Math.max(40, boardBot - pad) / vh);
+    L.ox = (w - vw * L.s) / 2 - v.x0 * L.s;
+    L.oy = pad + (boardBot - pad - vh * L.s) / 2 - v.y0 * L.s;
   }
 
-  const X = x => L.ox + x * L.s;
-  const Y = y => L.oy + y * L.s;
+  /* monde → pixels, et direction du monde → vecteur écran */
+  function PX(p) { const q = JeuxSolids.project(p); return [L.ox + q[0] * L.s, L.oy + q[1] * L.s]; }
+  function DIR(d, k) { const q = JeuxSolids.project(d); return [q[0] * k, q[1] * k]; }
 
   function boxRect(i) {
     return { x: L.box.x0 + i * (L.box.w + L.box.gap), y: L.boxY, w: L.box.w, h: L.box.h };
@@ -122,7 +137,7 @@ function ScrewGame(canvas, level, hooks) {
 
   function isFree(s) {
     if (s.gone) return false;
-    for (const b of s.blockers) if (!plates[b].gone) return false;
+    for (const b of s.blockers) if (!parts[b].gone) return false;
     return true;
   }
 
@@ -134,8 +149,8 @@ function ScrewGame(canvas, level, hooks) {
   function snapshot() {
     hist.push({
       sg: screws.map(s => (s.gone ? 1 : 0)),
-      pg: plates.map(p => (p.gone ? 1 : 0)),
-      pl: plates.map(p => p.left),
+      pg: parts.map(p => (p.gone ? 1 : 0)),
+      pl: parts.map(p => p.left),
       bx: boxes.map(b => (b ? [b.color, b.items.length] : null)),
       bf: buffer.map(it => it.color),
       qi, peak, moves, bl: boxesLeft
@@ -153,10 +168,11 @@ function ScrewGame(canvas, level, hooks) {
     }
     snapshot();
     s.gone = true; moves++;
-    const p = plates[s.plate];
+    const p = parts[s.part];
     if (--p.left <= 0 && !p.gone) { p.gone = true; p.fall = t; }
 
-    const it = { color: s.color, fx: X(s.x), fy: Y(s.y), t0: t, t1: t + FLY_MS };
+    const from = PX(s.p);
+    const it = { color: s.color, fx: from[0], fy: from[1], t0: t, t1: t + FLY_MS };
     if (b) { b.items.push(it); sfx('pick'); }
     else { buffer.push(it); peak = Math.max(peak, buffer.length); sfx('drop'); }
     hud();
@@ -186,7 +202,7 @@ function ScrewGame(canvas, level, hooks) {
   function settled(t) {
     if (boxes.some(b => b && (b.done || t < b.born + BORN_MS || b.items.some(it => t < it.t1)))) return false;
     if (buffer.some(it => t < it.t1)) return false;
-    if (plates.some(p => p.gone && p.fall && t < p.fall + FALL_MS)) return false;
+    if (parts.some(p => p.gone && p.fall && t < p.fall + FALL_MS)) return false;
     return true;
   }
 
@@ -232,23 +248,25 @@ function ScrewGame(canvas, level, hooks) {
   /* ═════════ actions du joueur ═════════ */
 
   function pick(px, py) {
-    let best = null, bestD = Infinity, bestZ = -1;
-    const hit = level.board.r * L.s * 1.45;
+    let best = null, bestD = Infinity, bestRank = -1;
+    const hit = level.view.r * L.s * 1.5;
     for (const s of screws) {
       if (!isFree(s)) continue;
-      const d = Math.hypot(px - X(s.x), py - Y(s.y));
+      const o = PX(s.p);
+      const d = Math.hypot(px - o[0], py - o[1]);
       if (d > hit) continue;
-      const z = plates[s.plate].z;
-      if (z > bestZ || (z === bestZ && d < bestD)) { best = s; bestD = d; bestZ = z; }
+      const rank = rankOf(s.part);
+      if (rank > bestRank || (rank === bestRank && d < bestD)) { best = s; bestD = d; bestRank = rank; }
     }
     if (best) return place(best);
 
-    /* rien sous le doigt : si une plaque masque une vis à cet endroit,
+    /* rien sous le doigt : si une pièce masque une vis à cet endroit,
        on la fait tressaillir pour montrer qui bloque */
-    for (let i = plates.length - 1; i >= 0; i--) {
-      const p = plates[i];
+    const vp = [(px - L.ox) / L.s, (py - L.oy) / L.s];
+    for (let k = level.drawOrder.length - 1; k >= 0; k--) {
+      const p = parts[level.drawOrder[k]];
       if (p.gone) continue;
-      if (sdPlate(p, (px - L.ox) / L.s, (py - L.oy) / L.s) < 0) {
+      if (JeuxSolids.inset(p.sil, vp) > 0) {
         const hidden = screws.some(s => !s.gone && s.blockers.includes(p.id));
         if (hidden) { nudge = { id: p.id, t0: now() }; sfx('err'); }
         break;
@@ -257,13 +275,15 @@ function ScrewGame(canvas, level, hooks) {
     return false;
   }
 
+  const rankOf = id => rank[id];
+
   function undo() {
     if (won || !hist.length || undosLeft <= 0) return false;
     const s = hist.pop();
     const t = now();
     undosLeft--; usedHelp = true;
     screws.forEach((x, i) => { x.gone = !!s.sg[i]; });
-    plates.forEach((p, i) => { p.gone = !!s.pg[i]; p.left = s.pl[i]; p.fall = 0; });
+    parts.forEach((p, i) => { p.gone = !!s.pg[i]; p.left = s.pl[i]; p.fall = 0; });
     boxes = s.bx.map(b => (b ? {
       color: b[0],
       items: Array.from({ length: b[1] }, () => mkItem(b[0], t)),
@@ -335,15 +355,6 @@ function ScrewGame(canvas, level, hooks) {
 
   /* ═════════ dessin ═════════ */
 
-  function sdPlate(p, x, y) {
-    const dx = x - p.cx, dy = y - p.cy;
-    const c = Math.cos(p.a), s = Math.sin(p.a);
-    const lx = dx * c + dy * s, ly = -dx * s + dy * c;
-    const r = level.board.plateR;
-    const qx = Math.abs(lx) - p.hl + r, qy = Math.abs(ly) - p.hw + r;
-    return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
-  }
-
   function rr(x, y, w, h, r) {
     const k = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -363,181 +374,189 @@ function ScrewGame(canvas, level, hooks) {
                     Math.round(b + (target - b) * amt) + ')';
   }
 
-  function drawBg() {
-    const g = ctx.createLinearGradient(0, 0, 0, L.h);
-    g.addColorStop(0, '#0d1d36'); g.addColorStop(1, '#081123');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, L.w, L.h);
-
-    /* établi : panneau rivé sous les plaques */
-    const bd = level.board;
-    const bx = X(0) - 6, by = Y(0) - 6, bw = bd.w * L.s + 12, bh = bd.h * L.s + 12;
-    ctx.fillStyle = 'rgba(255,255,255,.028)';
-    rr(bx, by, bw, bh, 18); ctx.fill();
-    ctx.strokeStyle = 'rgba(120,170,235,.13)'; ctx.lineWidth = 1;
-    rr(bx, by, bw, bh, 18); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.055)';
-    [[bx + 14, by + 14], [bx + bw - 14, by + 14], [bx + 14, by + bh - 14], [bx + bw - 14, by + bh - 14]]
-      .forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 7); ctx.fill(); });
+  /* teinte d'une face : la couleur du matériau, éclairée par sa normale */
+  function litFace(tone, n) {
+    const f = JeuxSolids.shade(n);
+    const v = parseInt(tone.slice(1), 16);
+    const r = Math.min(255, (v >> 16 & 255) * f) | 0;
+    const g = Math.min(255, (v >> 8 & 255) * f) | 0;
+    const b = Math.min(255, (v & 255) * f) | 0;
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
 
-  function drawPlate(p, t) {
+  function drawBg() {
+    const g = ctx.createLinearGradient(0, 0, 0, L.h);
+    g.addColorStop(0, '#10233f'); g.addColorStop(1, '#081123');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, L.w, L.h);
+  }
+
+  /* Ombres portées : l'empreinte au sol de chaque pièce encore là,
+     réunies en un seul tracé pour qu'elles ne se cumulent pas. */
+  function drawShadows() {
+    ctx.beginPath();
+    for (const p of parts) {
+      if (p.gone) continue;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const v of p.verts) {
+        if (v[0] < x0) x0 = v[0]; if (v[0] > x1) x1 = v[0];
+        if (v[1] < y0) y0 = v[1]; if (v[1] > y1) y1 = v[1];
+      }
+      const q = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(c => PX([c[0], c[1], 0]));
+      ctx.moveTo(q[0][0], q[0][1]);
+      for (let i = 1; i < 4; i++) ctx.lineTo(q[i][0], q[i][1]);
+      ctx.closePath();
+    }
+    ctx.fillStyle = 'rgba(0,0,0,.26)';
+    ctx.fill();
+  }
+
+  /* ───────── une pièce ───────── */
+
+  function drawPart(p, t) {
     const fall = p.gone && p.fall ? Math.min(1, (t - p.fall) / FALL_MS) : 0;
     if (p.gone && (!p.fall || fall >= 1)) return;
-    const S = L.s;
-    let dx = 0, dy = 0, rot = 0, alpha = 1, sc = 1;
+
+    let ang = 0, dz = 0, alpha = 1, sx = 0, sy = 0;
     if (fall > 0) {
-      const e = fall * fall;
-      dy = e * 150; dx = (p.id % 2 ? 1 : -1) * e * 34;
-      rot = (p.id % 2 ? 1 : -1) * e * 0.9;
-      alpha = 1 - Math.max(0, (fall - 0.35) / 0.65);
-      sc = 1 + fall * 0.16;
+      ang = fall * 2.3 * p.spin;
+      dz = fall * fall * 9;
+      alpha = 1 - Math.max(0, (fall - 0.3) / 0.7);
     }
     if (nudge && nudge.id === p.id) {
       const k = (t - nudge.t0) / 260;
       if (k >= 1) nudge = null;
-      else dx += Math.sin(k * Math.PI * 6) * (1 - k) * 5;
+      else sx = Math.sin(k * Math.PI * 6) * (1 - k) * 5;
     }
 
-    const hl = p.hl * S, hw = p.hw * S, r = level.board.plateR * S;
-    const depth = Math.max(3, S * 1.25);
+    const ca = Math.cos(ang), sa = Math.sin(ang);
+    const px = p.pivot[0], py = p.pivot[1];
+    const xf = v => {
+      if (!fall) return PX(v);
+      const dx = v[0] - px, dy = v[1] - py;
+      const q = PX([px + dx * ca - dy * sa, py + dx * sa + dy * ca, v[2] + dz]);
+      return q;
+    };
+    const nf = n => (fall ? [n[0] * ca - n[1] * sa, n[0] * sa + n[1] * ca, n[2]] : n);
 
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.translate(X(p.cx) + dx, Y(p.cy) + dy);
-    ctx.rotate(p.a + rot);
-    ctx.scale(sc, sc);
-
-    /* ombre portée */
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.5)';
-    ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
-    ctx.fillStyle = '#1d2c46';
-    rr(-hl, -hw, hl * 2, hw * 2, r); ctx.fill();
+    if (sx || sy) ctx.translate(sx, sy);
+    const pts = p.verts.map(xf);
+    for (const f of p.faces) {
+      const n = nf(f.n);
+      if (!JeuxSolids.facing(n)) continue;
+      ctx.beginPath();
+      for (let i = 0; i < f.idx.length; i++) {
+        const q = pts[f.idx[i]];
+        if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = litFace(p.tone, n);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(12,22,40,.34)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
     ctx.restore();
-
-    /* tranche : deux couches suffisent à donner l'épaisseur */
-    ctx.fillStyle = '#3b4c68';
-    rr(-hl, -hw + depth * 0.5, hl * 2, hw * 2, r); ctx.fill();
-    ctx.fillStyle = '#55688a';
-    rr(-hl, -hw + depth * 0.22, hl * 2, hw * 2, r); ctx.fill();
-
-    /* face supérieure : dégradé orienté vers la lumière du plateau,
-       pas vers celle de la plaque, sinon l'éclairage tourne avec elle */
-    const ca = Math.cos(p.a), sa = Math.sin(p.a);
-    const lx = -0.42 * ca + -1 * sa, ly = 0.42 * sa + -1 * ca;
-    const k = Math.abs(lx) * hl + Math.abs(ly) * hw;
-    const nl = Math.hypot(lx, ly) || 1;
-    const g = ctx.createLinearGradient(lx / nl * k, ly / nl * k, -lx / nl * k, -ly / nl * k);
-    const tint = 0.10 * (p.tint - 0.5);
-    g.addColorStop(0, mix('#d6e0ee', 255, tint));
-    g.addColorStop(0.42, mix('#a3b4cc', 255, tint));
-    g.addColorStop(1, mix('#78899f', 0, -tint));
-    ctx.fillStyle = g;
-    rr(-hl, -hw, hl * 2, hw * 2, r); ctx.fill();
-
-    /* biseau et rayures de brossage */
-    ctx.strokeStyle = 'rgba(255,255,255,.30)'; ctx.lineWidth = 1.2;
-    rr(-hl + 1.2, -hw + 1.2, hl * 2 - 2.4, hw * 2 - 2.4, Math.max(1, r - 1.2)); ctx.stroke();
-    ctx.strokeStyle = 'rgba(12,22,40,.30)'; ctx.lineWidth = 1;
-    rr(-hl, -hw, hl * 2, hw * 2, r); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,.055)'; ctx.lineWidth = Math.max(1, hw * 0.12);
-    ctx.beginPath();
-    ctx.moveTo(-hl + r, -hw * 0.42); ctx.lineTo(hl - r, -hw * 0.42);
-    ctx.moveTo(-hl + r, hw * 0.38); ctx.lineTo(hl - r, hw * 0.38);
-    ctx.stroke();
-
-    ctx.restore();
+    return { xf, nf, alpha };
   }
 
-  function glyph(kind, x, y, r, color) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.strokeStyle = color; ctx.fillStyle = color;
-    ctx.lineWidth = Math.max(1.4, r * 0.30);
+  /* ───────── une vis ─────────
+     Dessinée dans le repère de sa face : le cercle unité y devient
+     l'ellipse correcte, et l'empreinte suit la surface. */
+
+  function glyph(kind, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 0.3;
     ctx.lineCap = 'round';
-    const a = r * 0.56;
+    const a = 0.56;
     ctx.beginPath();
     switch (kind) {
-      case 'slot': ctx.moveTo(-a, 0); ctx.lineTo(a, 0); ctx.stroke(); break;
-      case 'cross':
-        ctx.moveTo(-a, 0); ctx.lineTo(a, 0); ctx.moveTo(0, -a); ctx.lineTo(0, a); ctx.stroke(); break;
-      case 'hex': case 'torx': {
-        const n = kind === 'hex' ? 6 : 3;
-        if (kind === 'hex') {
-          for (let i = 0; i < 6; i++) {
-            const t2 = i / 6 * Math.PI * 2 + 0.26;
-            const px = Math.cos(t2) * a, py = Math.sin(t2) * a;
-            i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-          }
-          ctx.closePath(); ctx.stroke();
-        } else {
-          for (let i = 0; i < n; i++) {
-            const t2 = i / n * Math.PI;
-            ctx.moveTo(-Math.cos(t2) * a, -Math.sin(t2) * a);
-            ctx.lineTo(Math.cos(t2) * a, Math.sin(t2) * a);
-          }
-          ctx.stroke();
+      case 'slot': ctx.moveTo(-a, 0); ctx.lineTo(a, 0); break;
+      case 'cross': ctx.moveTo(-a, 0); ctx.lineTo(a, 0); ctx.moveTo(0, -a); ctx.lineTo(0, a); break;
+      case 'hex':
+        for (let i = 0; i < 6; i++) {
+          const t2 = i / 6 * Math.PI * 2 + 0.26;
+          const x = Math.cos(t2) * a, y = Math.sin(t2) * a;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.closePath(); break;
+      case 'torx':
+        for (let i = 0; i < 3; i++) {
+          const t2 = i / 3 * Math.PI;
+          ctx.moveTo(-Math.cos(t2) * a, -Math.sin(t2) * a);
+          ctx.lineTo(Math.cos(t2) * a, Math.sin(t2) * a);
         }
         break;
-      }
-      case 'square': ctx.rect(-a * 0.78, -a * 0.78, a * 1.56, a * 1.56); ctx.stroke(); break;
+      case 'square': ctx.rect(-a * 0.78, -a * 0.78, a * 1.56, a * 1.56); break;
       case 'triangle':
         ctx.moveTo(0, -a); ctx.lineTo(a * 0.88, a * 0.6); ctx.lineTo(-a * 0.88, a * 0.6);
-        ctx.closePath(); ctx.stroke(); break;
+        ctx.closePath(); break;
       case 'star':
         for (let i = 0; i < 10; i++) {
           const rr2 = i % 2 ? a * 0.45 : a;
           const t2 = i / 10 * Math.PI * 2 - Math.PI / 2;
-          const px = Math.cos(t2) * rr2, py = Math.sin(t2) * rr2;
-          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+          const x = Math.cos(t2) * rr2, y = Math.sin(t2) * rr2;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
         }
-        ctx.closePath(); ctx.stroke(); break;
+        ctx.closePath(); break;
     }
-    ctx.restore();
+    ctx.stroke();
   }
 
-  function drawScrew(x, y, ci, r, opts) {
+  /* la tête, dans un repère où le cercle unité est la vis */
+  function screwShape(ci) {
     const c = PAL[ci] || PAL[0];
-    const o = opts || {};
-    ctx.save();
-    if (o.alpha != null) ctx.globalAlpha = o.alpha;
+    ctx.fillStyle = 'rgba(6,12,24,.34)';
+    ctx.beginPath(); ctx.arc(0.05, 0.1, 1.2, 0, 7); ctx.fill();
 
-    /* logement : creux sombre sous la tête */
-    ctx.fillStyle = 'rgba(6,12,24,.42)';
-    ctx.beginPath(); ctx.arc(x, y + r * 0.16, r * 1.16, 0, 7); ctx.fill();
-
-    /* tête bombée */
-    const g = ctx.createRadialGradient(x - r * 0.36, y - r * 0.42, r * 0.12, x, y, r * 1.02);
-    g.addColorStop(0, mix(c.hex, 255, 0.52));
-    g.addColorStop(0.52, c.hex);
+    const g = ctx.createRadialGradient(-0.34, -0.4, 0.1, 0, 0, 1.04);
+    g.addColorStop(0, mix(c.hex, 255, 0.5));
+    g.addColorStop(0.55, c.hex);
     g.addColorStop(1, c.dark);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, 1, 0, 7); ctx.fill();
 
-    ctx.strokeStyle = mix(c.dark, 0, 0.25); ctx.lineWidth = Math.max(1, r * 0.13);
-    ctx.beginPath(); ctx.arc(x, y, r - r * 0.06, 0, 7); ctx.stroke();
+    ctx.strokeStyle = mix(c.dark, 0, 0.25);
+    ctx.lineWidth = 0.13;
+    ctx.beginPath(); ctx.arc(0, 0, 0.94, 0, 7); ctx.stroke();
 
-    glyph(c.glyph, x, y, r, 'rgba(10,16,30,.55)');
+    glyph(c.glyph, 'rgba(10,16,30,.55)');
 
-    /* éclat spéculaire */
     ctx.fillStyle = 'rgba(255,255,255,.45)';
-    ctx.beginPath();
-    ctx.ellipse(x - r * 0.33, y - r * 0.44, r * 0.30, r * 0.17, -0.65, 0, 7);
-    ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-0.33, -0.42, 0.3, 0.17, -0.65, 0, 7); ctx.fill();
+  }
+
+  /* posée sur sa face, dans la scène */
+  function screwOnFace(s, xf, nf, r) {
+    const o = xf(s.p);
+    const e1 = DIR(nf(s.e1), r), e2 = DIR(nf(s.e2), r);
+    ctx.save();
+    ctx.transform(e1[0], e1[1], e2[0], e2[1], o[0], o[1]);
+    screwShape(s.color);
     ctx.restore();
   }
 
-  function drawSocket(x, y, r, ci, filled) {
+  /* à plat, dans les boîtes ou en vol */
+  function screwFlat(x, y, ci, r) {
+    ctx.save();
+    ctx.transform(r, 0, 0, r, x, y);
+    screwShape(ci);
+    ctx.restore();
+  }
+
+  function drawSocket(x, y, r, ci) {
     ctx.fillStyle = 'rgba(4,10,20,.55)';
     ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
-    if (filled) return;
     const c = PAL[ci];
     if (!c) return;
     ctx.strokeStyle = mix(c.hex, 0, 0.42); ctx.lineWidth = Math.max(1.2, r * 0.13);
     ctx.beginPath(); ctx.arc(x, y, r * 0.82, 0, 7); ctx.stroke();
+    ctx.save();
     ctx.globalAlpha = 0.5;
-    glyph(c.glyph, x, y, r * 0.9, mix(c.hex, 0, 0.3));
-    ctx.globalAlpha = 1;
+    ctx.transform(r * 0.9, 0, 0, r * 0.9, x, y);
+    glyph(c.glyph, mix(c.hex, 0, 0.3));
+    ctx.restore();
   }
 
   function drawBox(b, i, t) {
@@ -582,13 +601,12 @@ function ScrewGame(canvas, level, hooks) {
     ctx.strokeStyle = mix(c.hex, 0, 0.12); ctx.lineWidth = 2;
     rr(1.5, 1.5, r.w - 3, r.h - 3, 12); ctx.stroke();
 
-    /* liseré de couleur en haut de la caisse */
     ctx.fillStyle = c.hex;
     rr(r.w * 0.26, 5, r.w * 0.48, 4, 2); ctx.fill();
 
     for (let k = 0; k < level.boxCap; k++) {
       const s = boxSlot(i, k);
-      drawSocket(s.x - r.x, s.y - r.y, L.box.r, b.color, false);
+      drawSocket(s.x - r.x, s.y - r.y, L.box.r, b.color);
     }
     if (flash > 0) {
       ctx.globalAlpha = flash * 0.8;
@@ -625,48 +643,54 @@ function ScrewGame(canvas, level, hooks) {
 
   function draw(t) {
     drawBg();
+    drawShadows();
 
-    /* plaques puis leurs vis, dans l'ordre d'empilement : une plaque
-       posée au-dessus masque naturellement les vis qu'elle bloque */
-    const fallen = [];
-    for (const p of plates) {
-      if (p.gone && p.fall) { fallen.push(p); continue; }
+    /* La scène est peinte du fond vers l'avant : une pièce dessinée
+       après une autre la masque, et masque donc ses vis. */
+    const rWorld = level.view.r;
+    const flying = [];
+    for (const idx of level.drawOrder) {
+      const p = parts[idx];
       if (p.gone) continue;
-      drawPlate(p, t);
+      const fr = drawPart(p, t);
+      if (!fr) continue;
       for (const s of screws) {
-        if (s.gone || s.plate !== p.id) continue;
-        drawScrew(X(s.x), Y(s.y), s.color, level.board.r * L.s);
+        if (s.gone || s.part !== p.id) continue;
+        screwOnFace(s, fr.xf, fr.nf, rWorld * L.s);
       }
     }
-    /* les plaques libérées s'envolent par-dessus le reste */
-    fallen.forEach(p => drawPlate(p, t));
+    /* les pièces libérées s'envolent par-dessus le reste */
+    for (const idx of level.drawOrder) {
+      const p = parts[idx];
+      if (p.gone && p.fall) drawPart(p, t);
+    }
 
     boxes.forEach((b, i) => drawBox(b, i, t));
     drawBuffer(t);
 
     /* vis rangées : posées dans leur logement, ou encore en vol */
-    const flying = [];
     boxes.forEach((b, i) => {
       if (!b) return;
       b.items.forEach((it, k) => {
         const target = boxSlot(i, k);
-        const p = itemPos(it, target, t);
-        if (t < it.t1) { flying.push([p, it.color]); return; }
+        const q = itemPos(it, target, t);
+        if (t < it.t1) { flying.push([q, it.color]); return; }
         if (b.done) {
           const u = Math.min(1, (t - b.done) / POP_MS);
           ctx.save(); ctx.globalAlpha = Math.max(0, 1 - u * 2);
-          drawScrew(p.x, p.y - u * 10, it.color, L.box.r * 0.86);
+          screwFlat(q.x, q.y - u * 10, it.color, L.box.r * 0.86);
           ctx.restore();
-        } else drawScrew(p.x, p.y, it.color, L.box.r * 0.86);
+        } else screwFlat(q.x, q.y, it.color, L.box.r * 0.86);
       });
     });
     buffer.forEach((it, k) => {
-      const p = itemPos(it, bufSlot(k), t);
-      if (t < it.t1) flying.push([p, it.color]);
-      else drawScrew(p.x, p.y, it.color, L.buf.r * 0.86);
+      const q = itemPos(it, bufSlot(k), t);
+      if (t < it.t1) flying.push([q, it.color]);
+      else screwFlat(q.x, q.y, it.color, L.buf.r * 0.86);
     });
-    flying.forEach(([p, c]) => drawScrew(p.x, p.y, c, level.board.r * L.s * 0.92));
+    flying.forEach(([q, c]) => screwFlat(q.x, q.y, c, rWorld * L.s * 0.95));
   }
+
 
   /* ═════════ boucle ═════════ */
 

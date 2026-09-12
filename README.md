@@ -132,27 +132,67 @@ séries de QCM.
 
 ### Tri de vis
 
-Des plaques métalliques empilées sur un plateau, chacune tenue par des vis de
-couleur. Une vis recouverte par une plaque posée au-dessus n'est pas accessible ;
-quand une plaque perd sa dernière vis elle tombe et découvre ce qu'elle cachait.
-Les vis se rangent trois par trois dans des boîtes d'une seule couleur, et la vis
-qui n'a pas de boîte ouverte à sa couleur attend dans la **réserve**. Réserve
-pleine, le moteur refuse le coup plutôt que de faire perdre la partie : on ne
-perd pas sur un mauvais appui, on se retrouve seulement à devoir compléter une
-boîte pour libérer de la place. La partie n'est déclarée bloquée que si plus
-aucune vis accessible n'entre dans une boîte ouverte.
+Une petite scène d'objets en volume — chaises, tables, maisons, armoires,
+commodes, lits, étagères — vue en **isométrie**. Chaque pièce d'un objet est
+tenue par des vis de couleur : un plateau, un pied, une porte de placard, un pan
+de toit. Une vis **masquée par une pièce plus proche de la caméra** n'est pas
+accessible ; quand une pièce perd sa dernière vis, elle s'envole et découvre ce
+qu'elle cachait. Les vis se rangent trois par trois dans des boîtes d'une seule
+couleur, et la vis qui n'a pas de boîte ouverte à sa couleur attend dans la
+**réserve**. Réserve pleine, le moteur refuse le coup plutôt que de faire perdre
+la partie : on ne perd pas sur un mauvais appui, on se retrouve seulement à
+devoir compléter une boîte pour libérer de la place. La partie n'est déclarée
+bloquée que si plus aucune vis accessible n'entre dans une boîte ouverte.
 
-**40 niveaux**, de 9 vis et 2 couleurs sur 4 plaques à 42 vis et 7 couleurs sur
-15 plaques, avec la part de vis bloquées au départ qui monte de 0 à 30 %.
+**11 objets** au catalogue — tabouret, chaise, table, banc, étagère, commode,
+armoire, lit, caisse, niche et maison — pour **40 niveaux**, d'une table seule
+(5 pièces, 9 vis, 2 couleurs) à cinq meubles imbriqués (jusqu'à 33 pièces,
+42 vis, 7 couleurs).
 
-Chaque plateau est **généré à partir du numéro de niveau** : pas de fichier de
-données, et le niveau 12 est le même plateau sur tous les appareils. Les couleurs
-ne sont pas tirées au hasard : le générateur rejoue d'abord un démontage valide,
-puis pose les couleurs par groupes de trois en suivant cet ordre, comme s'il
-remplissait les boîtes au fur et à mesure. Le niveau est ensuite **rejoué par le
-générateur avec les règles exactes du moteur** et n'est retenu que s'il se termine
-sans jamais passer par la réserve — il existe donc toujours au moins une solution
-parfaite.
+### Le rendu
+
+Isométrie en canvas 2D, sans dépendance ni WebGL. Les objets sont assemblés à
+partir de solides convexes — pavés et coins pour les pans de toit — et peints par
+l'**algorithme du peintre** : l'ordre de dessin vient d'un tri topologique sur
+« ce solide est-il entièrement du côté +x, +y ou +z de cet autre », qui est exact
+pour des volumes séparés.
+
+Cet ordre *est* la règle du jeu : une vis est accessible tant qu'aucune pièce
+peinte après la sienne ne recouvre son point à l'écran. Ce qu'on voit et ce qui
+est jouable ne peuvent donc pas diverger. Et comme la pièce la plus proche de la
+caméra n'est jamais masquée, tout objet est toujours démontable.
+
+Chaque vis est dessinée dans le repère de sa face : le cercle unité y devient
+l'ellipse correcte et l'empreinte épouse la surface, qu'elle soit sur un dessus
+de table, sur le flanc d'un pied ou sur une pente de toit. Les membrures sont
+dimensionnées pour leurs vis — une tête ne déborde jamais de la pièce qu'elle
+tient — et un quart de tour qui retournerait une face vers l'arrière fait passer
+sa vis sur la face opposée, par symétrie de la pièce.
+
+Un objet ne pivote que dans les orientations qui gardent sa façade tournée vers
+la caméra : une armoire de dos ne serait qu'un caisson, ses portes cachées
+derrière.
+
+### La génération
+
+Chaque scène est **générée à partir du numéro de niveau** : pas de fichier de
+données, et le niveau 12 est la même scène sur tous les appareils. Les objets
+sont posés en quinconce le long de l'axe de la caméra — un pas de côté, un pas
+vers l'avant — ce qui les fait se masquer largement tout en gardant la scène
+étroite, donc de grosses vis sur un écran de téléphone. Une scène dont les vis
+descendraient sous 9,5 pixels de rayon est rejetée.
+
+Une vis qui tomberait pile sur le bord d'une silhouette serait ambiguë, à moitié
+visible sans qu'on puisse deviner si elle est accessible : elle est simplement
+retirée, tant que sa pièce en garde une. Une vis conservée est donc soit
+franchement visible, soit franchement masquée.
+
+Les couleurs ne sont pas tirées au hasard : le générateur rejoue d'abord un
+démontage valide, puis pose les couleurs par groupes de trois en suivant cet
+ordre, comme s'il remplissait les boîtes au fur et à mesure. La scène est ensuite
+**rejouée avec les règles exactes du moteur** et n'est retenue que si elle se
+termine sans jamais passer par la réserve — il existe donc toujours au moins une
+solution parfaite.
 
 | Aide | Effet |
 |---|---|
@@ -166,8 +206,9 @@ utiliser une annulation ou une boîte de secours plafonne à deux étoiles.
 La forme de l'empreinte (fente, cruciforme, six pans, Torx…) double la couleur de
 chaque vis, pour rester lisible en cas de daltonisme.
 
-Tout est dessiné dans un seul canvas — plateau, boîtes et réserve — et tout se
-joue au doigt : une vis, un appui.
+Scène, boîtes et réserve sont dessinées dans un seul canvas — les vis volent donc
+de l'objet à leur boîte sans jamais changer de repère — et tout se joue au
+doigt : une vis, un appui.
 
 ## Suivi
 
@@ -228,9 +269,10 @@ js/pass-app.js          navigation, écrans planning et exercices
 data/pass-ue*.js        les 19 UE (cours + mnémos + exercices + QCM)
 jeux.html               onglet Jeux (accueil, choix du niveau, partie)
 css/jeux.css            styles de l'onglet Jeux
-js/jeux-levels.js       génération et vérification des 40 niveaux de Tri de vis
+js/jeux-solids.js       isométrie, solides et catalogue d'objets (meubles, maisons)
+js/jeux-levels.js       composition, vérification et couleurs des 40 scènes
 js/jeux-store.js        étoiles, records et niveaux débloqués
-js/jeux-screw.js        moteur du jeu : rendu canvas, animations, règles
+js/jeux-screw.js        moteur du jeu : rendu 3D, animations, règles
 js/jeux-app.js          navigation de l'onglet Jeux
 sw.js                   service worker (cache hors-ligne)
 tools/gen-icons.js      génération des icônes PNG, sans dépendance
