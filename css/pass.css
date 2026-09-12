@@ -9,14 +9,13 @@
 @import url('ppl.css');
 
 :root {
-  --ppl:     #a78bfa;   /* accent principal du module */
-  --ppl-2:   #7c5cf0;
-  --ppl-dim: #241a4a;
-  --accent:  #4ad6e8;
+  --ppl:     var(--mod-pass);      /* accent principal du module */
+  --ppl-2:   var(--mod-pass-2);
+  --ppl-dim: var(--mod-pass-dim);
 }
 
-.gate-mark { box-shadow: 0 6px 20px rgba(167,139,250,.32); }
-.field:focus { border-color: var(--ppl); box-shadow: 0 0 0 3px rgba(167,139,250,.18); }
+.gate-mark { box-shadow: var(--shadow); }
+.field:focus { border-color: var(--ppl); box-shadow: 0 0 0 3px var(--ppl-dim); }
 
 /* ───────── Code d'UE et UE lourdes ───────── */
 
@@ -24,14 +23,14 @@
   display: inline-block; margin-right: 6px; padding: 1px 7px;
   font-size: 11.5px; font-weight: 800; letter-spacing: .04em;
   color: var(--ppl); background: var(--ppl-dim);
-  border: 1px solid rgba(167,139,250,.35); border-radius: 6px;
+  border: 1px solid var(--ppl); border-radius: var(--radius-sm);
   vertical-align: 1px;
 }
 .heavy {
   display: inline-block; padding: 1px 7px; border-radius: 6px;
   font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--warn); background: rgba(255,176,32,.12);
-  border: 1px solid rgba(255,176,32,.32);
+  color: var(--warn); background: var(--surface-2);
+  border: 1px solid var(--warn);
 }
 .tag.heavy { text-transform: none; }
 
@@ -41,7 +40,7 @@
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
   margin-top: 16px; padding: 16px 18px;
   background: linear-gradient(135deg, var(--ppl-dim), var(--surface));
-  border: 1px solid rgba(167,139,250,.35); border-radius: var(--radius);
+  border: 1px solid var(--ppl); border-radius: var(--radius);
   color: var(--text); text-decoration: none;
 }
 .plan-cta .cta-icon { font-size: 26px; }
@@ -57,13 +56,13 @@
   padding: 14px; margin-bottom: 10px;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
 }
-.plan-row.done { border-color: rgba(34,198,107,.4); background: linear-gradient(180deg, var(--ok-dim), var(--surface)); }
+.plan-row.done { border-color: var(--ok); background: var(--ok-dim); }
 .plan-check {
   flex: 0 0 auto; width: 28px; height: 28px; margin-top: 2px;
   border-radius: 9px; border: 1.5px solid var(--line); background: var(--bg-2);
   color: var(--ok); font-weight: 800; line-height: 1;
 }
-.plan-row.done .plan-check { border-color: var(--ok); background: rgba(34,198,107,.16); }
+.plan-row.done .plan-check { border-color: var(--ok); background: var(--ok-dim); }
 .plan-body { flex: 1; min-width: 0; }
 .plan-when {
   font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
@@ -86,7 +85,7 @@
   padding: 16px; margin-bottom: 12px;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
 }
-.exo.done { border-color: rgba(34,198,107,.4); }
+.exo.done { border-color: var(--ok); }
 .exo-q { font-size: 15.5px; line-height: 1.6; }
 .exo-q b { color: var(--ppl); }
 .exo-hint {
@@ -97,7 +96,7 @@
 .exo-reveal {
   margin-top: 12px; padding: 8px 14px; font-size: 13.5px; font-weight: 600;
   color: var(--ppl); background: var(--ppl-dim);
-  border: 1px solid rgba(167,139,250,.35); border-radius: 10px;
+  border: 1px solid var(--ppl); border-radius: 4px;
 }
 .exo-sol {
   margin-top: 12px; padding: 13px 15px; font-size: 14.5px; line-height: 1.65;

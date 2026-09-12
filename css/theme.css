@@ -1,0 +1,173 @@
+/* ═══════════════════════════════════════════════════════════
+   theme.css — charte commune à toute l'application
+
+   Un cahier d'écolier : papier quadrillé, réglure, marge rouge,
+   et une romaine à empattements pour le texte. Deux ambiances,
+   jour et nuit, choisies par js/theme.js selon l'horloge de
+   l'appareil — ou forcées par l'utilisateur.
+
+   Toutes les pages définissent leurs couleurs à partir de ces
+   jetons : changer de mode ne touche qu'à ce fichier.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ───── typographie ───── */
+  --serif: "Times New Roman", Times, "Liberation Serif", Tinos, "Nimbus Roman", Georgia, serif;
+  --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* ───── papier ───── */
+  --sq:     23px;          /* pas du petit carreau */
+  --radius:    5px;        /* le papier ne fait pas de gros arrondis */
+  --radius-sm: 3px;
+
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ───── jour ───── */
+  color-scheme: light;
+  --bg:        #f4efe1;
+  --bg-2:      #eae2cf;
+  --surface:   #fffdf6;
+  --surface-2: #f5efe0;
+  --line:      #cabb9c;
+  --line-soft: #e0d6bf;
+  --text:      #1c2733;
+  --muted:     #4e5a66;
+  --faint:     #6b757f;
+
+  --accent:    #1a5ea8;
+  --accent-2:  #113f74;
+  --af-red:    #c11226;
+  --ok:        #1b7245;
+  --ok-dim:    #dfeee4;
+  --ko:        #ad2a2f;
+  --ko-dim:    #f8e0e0;
+  --warn:      #8f6405;
+  --gold:      #a97a06;
+
+  --grid:  rgba(46,98,160,.17);   /* petits carreaux */
+  --rule:  rgba(46,98,160,.30);   /* gros carreaux, tous les 5 */
+  --marge: rgba(186,62,62,.42);   /* filet de marge */
+
+  --shadow:    0 2px 10px rgba(78,63,36,.16);
+  --shadow-sm: 0 1px 4px rgba(78,63,36,.14);
+
+  /* accents des modules */
+  --mod-ppl:      #10794f;
+  --mod-ppl-2:    #0b5c3c;
+  --mod-ppl-dim:  #dcefe5;
+  --mod-pass:     #5c3fb8;
+  --mod-pass-2:   #452d90;
+  --mod-pass-dim: #e7e0f8;
+  --mod-jeux:     #a1541a;
+  --mod-drill:    #2f4f7a;
+}
+
+:root[data-theme="nuit"] {
+  color-scheme: dark;
+  --bg:        #10151b;
+  --bg-2:      #161c23;
+  --surface:   #1a2129;
+  --surface-2: #232b35;
+  --line:      #333e4b;
+  --line-soft: #262f3a;
+  --text:      #e9e5d9;
+  --muted:     #98a3ae;
+  --faint:     #6a747f;
+
+  --accent:    #74b3f7;
+  --accent-2:  #4a8fdc;
+  --af-red:    #ef4457;
+  --ok:        #4fca8c;
+  --ok-dim:    #113020;
+  --ko:        #ff7d84;
+  --ko-dim:    #3a151a;
+  --warn:      #e7b44f;
+  --gold:      #e8bb4a;
+
+  --grid:  rgba(150,190,240,.075);
+  --rule:  rgba(150,190,240,.15);
+  --marge: rgba(230,120,120,.22);
+
+  --shadow:    0 4px 18px rgba(0,0,0,.5);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,.4);
+
+  --mod-ppl:      #3fd9a3;
+  --mod-ppl-2:    #1caa7c;
+  --mod-ppl-dim:  #0e3a2e;
+  --mod-pass:     #b295ff;
+  --mod-pass-2:   #7f5ff2;
+  --mod-pass-dim: #241a4a;
+  --mod-jeux:     #ff9a52;
+  --mod-drill:    #8fb0e2;
+}
+
+/* Sans JavaScript, on suit au moins la préférence du système. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #10151b; --bg-2: #161c23; --surface: #1a2129; --surface-2: #232b35;
+    --line: #333e4b; --line-soft: #262f3a;
+    --text: #e9e5d9; --muted: #98a3ae; --faint: #6a747f;
+    --accent: #74b3f7; --accent-2: #4a8fdc; --af-red: #ef4457;
+    --ok: #4fca8c; --ok-dim: #113020; --ko: #ff7d84; --ko-dim: #3a151a;
+    --warn: #e7b44f; --gold: #e8bb4a;
+    --grid: rgba(150,190,240,.075); --rule: rgba(150,190,240,.15);
+    --marge: rgba(230,120,120,.22);
+    --shadow: 0 4px 18px rgba(0,0,0,.5); --shadow-sm: 0 2px 6px rgba(0,0,0,.4);
+    --mod-ppl: #3fd9a3; --mod-ppl-2: #1caa7c; --mod-ppl-dim: #0e3a2e;
+    --mod-pass: #b295ff; --mod-pass-2: #7f5ff2; --mod-pass-dim: #241a4a;
+    --mod-jeux: #ff9a52; --mod-drill: #8fb0e2;
+  }
+}
+
+/* ═════════ le papier ═════════ */
+
+html {
+  background-color: var(--bg);
+  /* petits carreaux, puis gros carreaux tous les cinq */
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size:
+    var(--sq) var(--sq),
+    var(--sq) var(--sq),
+    calc(var(--sq) * 5) calc(var(--sq) * 5),
+    calc(var(--sq) * 5) calc(var(--sq) * 5);
+  background-position: -1px -1px;
+  background-attachment: fixed;
+}
+
+body {
+  background: transparent;
+  font-family: var(--serif);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Les chiffres doivent s'aligner : tableaux, chronos, scores. */
+body { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ═════════ feuilles et réglure ═════════ */
+
+/* une feuille posée sur le cahier */
+.sheet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ═════════ bouton de mode jour / nuit ═════════ */
+
+.theme-btn {
+  background: var(--surface); border: 1px solid var(--line);
+  width: 38px; height: 38px; border-radius: var(--radius);
+  display: grid; place-items: center; flex: 0 0 38px;
+  font-size: 16px; cursor: pointer; color: inherit;
+  font-family: var(--serif);
+}
+.theme-btn:active { transform: scale(.95); }

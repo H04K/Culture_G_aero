@@ -15,8 +15,19 @@
   let lastLaunch = { mode: 'mixed', cat: null };
 
   /* ───────────────── Navigation ───────────────── */
+  /* Les cinq écrans de premier niveau sont atteints par la barre
+     d'onglets ; les autres (quiz, résultat, fiche) s'ouvrent par-dessus. */
+  const ONGLETS = ['home', 'cours', 'modules', 'stats', 'settings'];
+
   function show(id) {
     $$('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + id));
+    const bar = $('#tabbar');
+    const onglet = ONGLETS.includes(id);
+    if (bar) {
+      bar.hidden = !onglet;
+      $$('#tabbar .tab').forEach(t => t.classList.toggle('on', t.dataset.nav === id));
+    }
+    document.body.classList.toggle('with-tabs', onglet);
     window.scrollTo(0, 0);
   }
 
@@ -85,11 +96,6 @@
         <small>${verdict[1]}</small>
         <small>Couverture de la banque : ${cov}% (${seen}/${Bank.count()})</small>
       </div>`;
-
-    const readCount = Cours.all().filter(f => Store.coursRead()[f.id]).length;
-    $('#cta-cours-sub').textContent = readCount
-      ? `${readCount}/${Cours.count()} fiches lues · reprends où tu t'es arrêté`
-      : `${Cours.count()} fiches · ${Cours.totalMin()} min pour couvrir tout le programme`;
 
     const errs = Quiz.available('errors');
     const badge = $('#errors-count');
@@ -460,11 +466,32 @@
       if (!b) return;
       const to = b.dataset.nav;
       if (to === 'home')      { renderHome(); show('home'); }
+      else if (to === 'modules')  { show('modules'); }
       else if (to === 'stats')    { renderStats(); show('stats'); }
       else if (to === 'settings') { renderSettings(); show('settings'); }
       else if (to === 'cours')    { CoursUI.renderList(); show('cours'); }
       else if (to === 'replay')   { start(lastLaunch.mode, lastLaunch.cat); }
     });
+
+    /* ───── ambiance jour / nuit ───── */
+    const majTheme = () => {
+      const t = $('#theme-toggle');
+      if (t) t.textContent = Theme.ICONE[Theme.pref()];
+      $$('#theme-seg button').forEach(b => b.classList.toggle('on', b.dataset.themePref === Theme.pref()));
+      const sub = $('#theme-sub');
+      if (sub) {
+        sub.textContent = Theme.pref() === 'auto'
+          ? 'Suit l\'horloge de l\'appareil — jour de ' + Theme.JOUR_DEBUT + ' h à ' + Theme.JOUR_FIN + ' h (actuellement : ' + Theme.LIBELLE[Theme.mode()].toLowerCase() + ')'
+          : 'Forcé en mode ' + Theme.LIBELLE[Theme.pref()].toLowerCase();
+      }
+    };
+    $('#theme-seg').addEventListener('click', e => {
+      const b = e.target.closest('[data-theme-pref]');
+      if (b) { Theme.set(b.dataset.themePref); majTheme(); }
+    });
+    document.addEventListener('themechange', majTheme);
+    setInterval(majTheme, 60000);
+    majTheme();
 
     /* ───── cours ───── */
     $('#cours-list').addEventListener('click', e => {
@@ -565,13 +592,14 @@
   function init() {
     if (!Bank.count()) {
       document.body.innerHTML =
-        '<p style="padding:40px;text-align:center;color:#8fa6c6">' +
+        '<p style="padding:40px;text-align:center;color:var(--muted)">' +
         'Banque de questions non chargée. Ouvre l\'application via un serveur web ' +
         '(voir README) plutôt qu\'en double-cliquant le fichier.</p>';
       return;
     }
     bind();
     renderHome();
+    show('home');            /* affiche la barre d'onglets dès l'ouverture */
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

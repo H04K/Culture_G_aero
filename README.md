@@ -12,6 +12,45 @@ de la sélection Cadets Air France.
   programme BIA, complétées par les thèmes propres à la sélection
 - Correction expliquée pour chaque question
 
+## Charte et ambiances
+
+Toute l'application — accueil, cours, QCM, calcul mental, PPL, PASS et Jeux —
+partage une seule charte (`css/theme.css`) : **papier quadrillé** en fond, petits
+carreaux doublés d'un gros carreau tous les cinq, une **romaine à empattements**
+(Times) pour le texte, des coins nets et des fiches de cours présentées en pages
+de cahier, feuille blanche et filet de marge rouge.
+
+Deux ambiances, **jour** et **nuit**. Par défaut le mode suit l'**horloge de
+l'appareil** — clair de 7 h à 19 h, sombre le reste du temps — et bascule tout
+seul en cours de session, sans recharger la page. Le bouton ☀ / ☾ / ◑ présent
+dans l'en-tête de chaque page fait le tour des trois réglages (automatique, jour
+forcé, nuit forcée) ; le choix vaut pour toutes les pages et survit à la
+fermeture. Les réglages de l'accueil affichent en clair le mode en cours.
+
+Le moteur (`js/theme.js`) est chargé dans le `<head>`, avant le rendu : la page
+ne s'affiche jamais dans la mauvaise ambiance. Sans JavaScript, la préférence du
+système prend le relais.
+
+Chaque page ne définit plus ses couleurs : elle les prend dans les jetons de la
+charte. Le canvas du jeu les lit lui aussi, et laisse le papier quadrillé
+transparaître sous les objets 3D. Les tons de jour tiennent les contrastes
+recommandés : 13:1 pour le texte courant, 6:1 pour le texte secondaire.
+
+## Organisation de l'accueil
+
+L'accueil est rangé en **cinq onglets** en bas d'écran :
+
+| Onglet | Contenu |
+|---|---|
+| Réviser | Score de préparation, modes de session, entraînement par thème |
+| Cours | Les 22 fiches et leur progression de lecture |
+| Modules | Calcul mental, PASS, PPL et Jeux — les quatre entraînements autonomes |
+| Stats | Courbe de progression, maîtrise par thème, historique |
+| Réglages | Ambiance, paramètres de session, export et import |
+
+La barre disparaît pendant une session de QCM et pendant la lecture d'une fiche,
+pour laisser tout l'écran au contenu.
+
 ## Modes d'entraînement
 
 | Mode | Description |
@@ -243,7 +282,9 @@ node tools/gen-icons.js
 ## Structure
 
 ```
-index.html              interface (écrans accueil, quiz, cours, stats, réglages)
+index.html              interface (onglets accueil, cours, modules, stats, réglages)
+css/theme.css           charte commune : papier quadrillé, romaine, ambiances jour et nuit
+js/theme.js             choix de l'ambiance d'après l'horloge de l'appareil
 css/style.css           styles
 js/storage.js           persistance localStorage
 js/quiz.js              sélection adaptative et moteur de session

@@ -3,28 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0d0f12">
+<meta name="theme-color" content="#f4efe1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
 <title>Drill calcul mental</title>
+<script src="js/theme.js"></script>
 <style>
 :root{
-  --bg:#0d0f12; --panel:#14171c; --line:#242a33;
-  --fg:#e8eaed; --dim:#8b939f; --dimmer:#5b636e;
-  --ok:#1f7a3f; --ko:#8c2020;
-  --okf:#3ddc84; --kof:#ff6b6b;
+  /* noms hérités du drill, branchés sur la charte commune */
+  --panel:var(--surface); --fg:var(--text);
+  --dim:var(--muted); --dimmer:var(--faint);
+  --ok:var(--ok-dim); --ko:var(--ko-dim);
+  --okf:var(--ok); --kof:var(--ko);
 }
 *{box-sizing:border-box}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;touch-action:manipulation}
 html,body{height:100%}
 body{height:100vh;height:100dvh}
 body{
-  margin:0;background:var(--bg);color:var(--fg);
-  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
-  font-size:15px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;
+  margin:0;color:var(--fg);
+  font-size:16px;line-height:1.5;
   overflow:hidden;
 }
 .screen{display:none;height:100%;}
@@ -42,19 +44,19 @@ h2{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
   color:var(--fg);
 }
 .row.sub{padding-left:38px}
-.row.cur{border-color:#3d4757;background:#171b21}
+.row.cur{border-color:var(--line);background:var(--surface-2)}
 .row.off{color:var(--dimmer)}
 .row .key{width:18px;color:var(--dimmer);font-size:12px}
 .row .lbl{flex:1}
-.row .box{width:15px;height:15px;border:1px solid #444d5a;border-radius:3px;display:inline-block;position:relative}
-.row .box.on{background:#2f6f4a;border-color:#3c8a5c}
-.row .box.on::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #d9f7e5;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.row .box{width:15px;height:15px;border:1px solid var(--line);border-radius:3px;display:inline-block;position:relative}
+.row .box.on{background:var(--ok);border-color:var(--ok)}
+.row .box.on::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg)}
 .row .val{color:var(--dim)}
 .row.action{color:var(--fg)}
 .row.action .lbl{letter-spacing:.08em}
 .opts{display:flex;gap:6px;flex-wrap:wrap}
 .opt{padding:2px 9px;border:1px solid var(--line);border-radius:3px;color:var(--dimmer);font-size:13px}
-.opt.on{border-color:#4d6a8f;color:#cfe0f5;background:#1a2331}
+.opt.on{border-color:var(--accent);color:var(--text);background:var(--surface-2)}
 .hint{color:var(--dimmer);font-size:12.5px;margin-top:18px;line-height:1.9}
 .hint kbd{border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--dim);font-size:11.5px}
 .err{color:var(--kof);font-size:13px;min-height:20px;margin-top:8px}
@@ -68,13 +70,13 @@ body.touch .row.opts .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:
 body.touch .row.opts .opts.n2{grid-template-columns:repeat(2,1fr)}
 body.touch .row.opts .opt{text-align:center;padding:10px 2px;font-size:13px}
 body.touch .row.action{
-  justify-content:center;border-color:#333c48;background:#171b21;
+  justify-content:center;border-color:var(--line);background:var(--surface-2);
   margin-top:9px;padding:15px;letter-spacing:.06em
 }
 body.touch .row.action .lbl{flex:none}
-body.touch .row.action.pri{background:#22303f;border-color:#3d5570}
-body.touch .row.action.cur{background:#1b212a}
-body.touch .row.action.pri.cur{background:#26364a}
+body.touch .row.action.pri{background:var(--surface-2);border-color:var(--accent)}
+body.touch .row.action.cur{background:var(--surface-2)}
+body.touch .row.action.pri.cur{background:var(--surface-2)}
 body.touch .row .key{display:none}
 body.touch .opt{padding:8px 12px;font-size:14px}
 body.touch .kbhint{display:none}
@@ -97,10 +99,10 @@ body.touch .touchhint{display:block}
 body.touch .btns.touchhint{display:flex}
 .btn{
   border:1px solid var(--line);border-radius:6px;padding:11px 18px;
-  color:var(--fg);background:#171b21;font-size:14px;letter-spacing:.04em
+  color:var(--fg);background:var(--surface-2);font-size:14px;letter-spacing:.04em
 }
-.btn.pri{background:#22303f;border-color:#3d5570}
-.btn.dgr{color:#e0a0a0;border-color:#3a2b2b;background:#1d1516}
+.btn.pri{background:var(--surface-2);border-color:var(--accent)}
+.btn.dgr{color:var(--ko);border-color:var(--ko);background:var(--ko-dim)}
 
 /* ---------- vrai / faux ---------- */
 #vf{display:none;gap:12px;justify-content:center;max-width:460px;width:100%;
@@ -108,28 +110,28 @@ body.touch .btns.touchhint{display:flex}
 body.vf #vf{display:flex}
 body.vf #ans,body.vf #pad,body.touch.vf #pad{display:none}
 #vf button{
-  flex:1;border-radius:8px;border:1px solid #2c3542;background:#181c23;
+  flex:1;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);
   padding:20px 0;font-size:20px;letter-spacing:.16em;color:var(--fg)
 }
 #vf button small{display:block;font-size:11px;letter-spacing:.1em;color:var(--dimmer);margin-top:5px}
-#vf .v{background:#16281d;border-color:#2f6f4a}
-#vf .f{background:#28191a;border-color:#7a3030}
-#vf .v:active{background:#1e3a2a}
-#vf .f:active{background:#3a2224}
+#vf .v{background:var(--ok-dim);border-color:var(--ok)}
+#vf .f{background:var(--ko-dim);border-color:var(--ko)}
+#vf .v:active{background:var(--ok-dim)}
+#vf .f:active{background:var(--ko-dim)}
 
 /* ---------- pavé numérique ---------- */
 #pad{display:none;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));gap:8px;
   grid-template-columns:repeat(3,1fr);max-width:460px;width:100%;margin:0 auto}
 body.touch #pad{display:grid}
 #pad button{
-  background:#181c23;border:1px solid #262d38;border-radius:8px;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
   font-size:26px;font-weight:500;padding:14px 0;color:var(--fg);
   font-variant-numeric:tabular-nums;user-select:none
 }
-#pad button:active{background:#232a34}
+#pad button:active{background:var(--surface-2)}
 #pad .wide{grid-column:span 2}
-#pad .ok{background:#1e3a2a;border-color:#2f6f4a;font-size:17px;letter-spacing:.1em}
-#pad .ok:active{background:#265138}
+#pad .ok{background:var(--ok-dim);border-color:var(--ok);font-size:17px;letter-spacing:.1em}
+#pad .ok:active{background:var(--ok-dim)}
 #pad .del{font-size:22px;color:var(--dim)}
 #quit{display:none;font-size:17px;color:var(--dimmer);padding:0 6px;line-height:1}
 body.touch #quit{display:block}
@@ -141,7 +143,7 @@ body.touch #quit{display:block}
   display:flex;justify-content:space-between;
   padding:14px 20px;font-size:12.5px;color:var(--dimmer);letter-spacing:.08em
 }
-#bar{position:absolute;top:0;left:0;height:2px;background:#3a4757;width:100%}
+#bar{position:absolute;top:0;left:0;height:2px;background:var(--line);width:100%}
 #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;min-height:0}
 body.touch #center{gap:18px;padding:0 12px}
 body.touch #q{font-size:clamp(44px,12vw,90px)}
@@ -150,9 +152,9 @@ body.touch #ans{font-size:clamp(30px,7vw,52px)}
 #q{font-size:clamp(56px,13vw,130px);font-weight:600;letter-spacing:.02em;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
 #q.sm{font-size:clamp(40px,9.5vw,92px)}
 #ans{
-  width:min(340px,70vw);background:transparent;border:none;border-bottom:2px solid #333c48;
+  width:min(340px,70vw);background:transparent;border:none;border-bottom:2px solid var(--line);
   color:var(--fg);font:inherit;font-size:clamp(34px,7vw,64px);text-align:center;
-  padding:2px 0;outline:none;font-variant-numeric:tabular-nums;caret-color:#6e8bb0
+  padding:2px 0;outline:none;font-variant-numeric:tabular-nums;caret-color:var(--accent)
 }
 #corr{font-size:26px;color:var(--kof);height:34px;letter-spacing:.04em}
 body.fb-ok{background:var(--ok)}
@@ -171,7 +173,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .delta{font-size:12.5px;margin-top:2px}
 .up{color:var(--okf)}.down{color:var(--kof)}.flat{color:var(--dimmer)}
 .tags{display:flex;flex-wrap:wrap;gap:7px}
-.tag{border:1px solid #3a2b2b;background:#1d1516;color:#e6b9b9;padding:2px 9px;border-radius:3px;font-size:13px}
+.tag{border:1px solid var(--ko);background:var(--ko-dim);color:var(--ko);padding:2px 9px;border-radius:3px;font-size:13px}
 .empty{color:var(--dimmer);font-size:13px}
 
 /* ---------- apprendre une table ---------- */
@@ -180,11 +182,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   padding:5px 11px;border:1px solid var(--line);border-radius:3px;
   color:var(--dimmer);font-size:13px;font-variant-numeric:tabular-nums
 }
-.tpick span.on{border-color:#4d6a8f;color:#cfe0f5;background:#1a2331}
+.tpick span.on{border-color:var(--accent);color:var(--text);background:var(--surface-2)}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px 16px}
 .tline{
   display:flex;align-items:center;gap:10px;padding:6px 10px;
-  border-left:3px solid #262d38;border-radius:2px;background:#141821
+  border-left:3px solid var(--line);border-radius:2px;background:var(--surface-2)
 }
 .tline b{font-weight:500;font-variant-numeric:tabular-nums;font-size:15px}
 .tline i{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--dimmer)}
@@ -200,11 +202,11 @@ body.touch .tpick span{padding:8px 13px;font-size:14px}
   width:37px;height:28px;border-radius:3px;text-align:center;font-size:10.5px;
   font-variant-numeric:tabular-nums;color:#0c0f12;font-weight:600;
 }
-.hm td.none{background:#1b1f25;color:#4a525d;font-weight:400}
+.hm td.none{background:var(--surface-2);color:var(--faint);font-weight:400}
 .hmwrap{overflow-x:auto;padding-bottom:6px}
 .legend{display:flex;align-items:center;gap:9px;color:var(--dimmer);font-size:12px;margin-top:10px}
 .grad{width:150px;height:9px;border-radius:2px;background:linear-gradient(90deg,hsl(130,58%,45%),hsl(65,60%,47%),hsl(0,62%,50%))}
-.sw{width:16px;height:9px;border-radius:2px;background:#1b1f25;display:inline-block}
+.sw{width:16px;height:9px;border-radius:2px;background:var(--surface-2);display:inline-block}
 svg{display:block;max-width:100%}
 .confirm{color:var(--kof);font-size:13.5px;margin-top:10px}
 </style>
@@ -868,21 +870,21 @@ function renderEnd(rec, prev){
     .slice(0,10);
 
   const missedHtml = S.missed.length
-    ? `<div class="tags">${S.missed.map(m=>`<span class="tag">${m.q} → ${m.given} <span style="color:#8b939f">(${m.ans})</span></span>`).join("")}</div>`
+    ? `<div class="tags">${S.missed.map(m=>`<span class="tag">${m.q} → ${m.given} <span style="color:var(--muted)">(${m.ans})</span></span>`).join("")}</div>`
     : `<div class="empty">Aucune erreur.</div>`;
 
   document.getElementById("endBody").innerHTML = `
     <div class="kpis">
-      <div class="kpi"><div class="v">${rec.correct}<span style="color:#5b636e;font-size:22px">/${rec.count}</span></div>
+      <div class="kpi"><div class="v">${rec.correct}<span style="color:var(--faint);font-size:22px">/${rec.count}</span></div>
         <div class="k">bonnes réponses</div>
         ${delta(rec.correct, prev?prev.correct:null, false, v=>v)}</div>
-      <div class="kpi"><div class="v">${(rec.avgMs/1000).toFixed(2)}<span style="color:#5b636e;font-size:22px">s</span></div>
+      <div class="kpi"><div class="v">${(rec.avgMs/1000).toFixed(2)}<span style="color:var(--faint);font-size:22px">s</span></div>
         <div class="k">temps moyen / question</div>
         ${delta(rec.avgMs, prev?prev.avgMs:null, true, v=>(v/1000).toFixed(2)+" s")}</div>
-      <div class="kpi"><div class="v">${(errR*100).toFixed(0)}<span style="color:#5b636e;font-size:22px">%</span></div>
+      <div class="kpi"><div class="v">${(errR*100).toFixed(0)}<span style="color:var(--faint);font-size:22px">%</span></div>
         <div class="k">taux d'erreur</div>
         ${delta(errR, prevErr, true, v=>(v*100).toFixed(0)+" pts")}</div>
-      <div class="kpi"><div class="v">${rec.seconds}<span style="color:#5b636e;font-size:22px">s</span></div>
+      <div class="kpi"><div class="v">${rec.seconds}<span style="color:var(--faint);font-size:22px">s</span></div>
         <div class="k">durée</div></div>
     </div>
 
@@ -938,15 +940,15 @@ function curveHtml(){
   const Y = v => P.t + (H-P.t-P.b) * (1 - (v-lo)/((hi-lo)||1));
   const pts = vals.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
   const grid = [lo,(lo+hi)/2,hi].map(v=>
-    `<line x1="${P.l}" y1="${Y(v)}" x2="${W-P.r}" y2="${Y(v)}" stroke="#242a33"/>
-     <text x="${P.l-8}" y="${Y(v)+4}" fill="#5b636e" font-size="10" text-anchor="end">${v.toFixed(1)}s</text>`).join("");
-  const dots = vals.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="2.6" fill="#9ec1ea"/>`).join("");
+    `<line x1="${P.l}" y1="${Y(v)}" x2="${W-P.r}" y2="${Y(v)}" stroke="var(--line)"/>
+     <text x="${P.l-8}" y="${Y(v)+4}" fill="var(--faint)" font-size="10" text-anchor="end">${v.toFixed(1)}s</text>`).join("");
+  const dots = vals.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="2.6" fill="var(--accent)"/>`).join("");
   return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
     ${grid}
-    <polyline points="${pts}" fill="none" stroke="#6e9fd8" stroke-width="1.8"/>
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
     ${dots}
-    <text x="${P.l}" y="${H-6}" fill="#5b636e" font-size="10">session 1</text>
-    <text x="${W-P.r}" y="${H-6}" fill="#5b636e" font-size="10" text-anchor="end">session ${ss.length}</text>
+    <text x="${P.l}" y="${H-6}" fill="var(--faint)" font-size="10">session 1</text>
+    <text x="${W-P.r}" y="${H-6}" fill="var(--faint)" font-size="10" text-anchor="end">session ${ss.length}</text>
   </svg>
   <div class="legend">temps moyen par question, session après session</div>`;
 }
@@ -974,8 +976,8 @@ function renderStats(){
     <div class="kpis">
       <div class="kpi"><div class="v">${ss.length}</div><div class="k">sessions</div></div>
       <div class="kpi"><div class="v">${totQ}</div><div class="k">questions</div></div>
-      <div class="kpi"><div class="v">${totQ?((1-totOk/totQ)*100).toFixed(0):0}<span style="color:#5b636e;font-size:22px">%</span></div><div class="k">taux d'erreur global</div></div>
-      <div class="kpi"><div class="v">${(allAvg/1000).toFixed(2)}<span style="color:#5b636e;font-size:22px">s</span></div><div class="k">temps moyen</div></div>
+      <div class="kpi"><div class="v">${totQ?((1-totOk/totQ)*100).toFixed(0):0}<span style="color:var(--faint);font-size:22px">%</span></div><div class="k">taux d'erreur global</div></div>
+      <div class="kpi"><div class="v">${(allAvg/1000).toFixed(2)}<span style="color:var(--faint);font-size:22px">s</span></div><div class="k">temps moyen</div></div>
     </div>
     <h2>Heatmap des tables (2–20)</h2>
     ${heatmapHtml()}
@@ -1010,7 +1012,7 @@ function renderTable(){
   for(let k=1;k<=TMAX;k++){
     // n × k et k × n sont le même fait à apprendre : on fusionne les deux sens
     const m  = k>=2 ? medPair(n,k) : null;             // n × 1 n'est pas un item du drill
-    const col = m==null ? "#262d38" : heatColor(m);
+    const col = m==null ? "var(--line)" : heatColor(m);
     const lat = m==null ? (k>=2 ? "jamais vu" : "—") : (m/1000).toFixed(1)+" s";
     rows += `<div class="tline" style="border-left-color:${col}">
                <b>${n} × ${k} = ${n*k}</b><i>${lat}</i></div>`;

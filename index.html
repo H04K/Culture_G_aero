@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#f4efe1">
 <meta name="description" content="Entraînement culture générale aéronautique — préparation Cadets Air France 2026">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,8 +11,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/style.css">
 <title>Cadets Prep — Culture Aéro</title>
+<script src="js/theme.js"></script>
 </head>
 <body>
 
@@ -27,57 +29,13 @@
           <h1>Cadets Prep</h1>
           <p class="brand-sub">Culture générale aéronautique · Sélection 2026</p>
         </div>
+        <button class="theme-btn" id="theme-toggle" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
       </div>
       <div class="hero-stats" id="hero-stats"></div>
     </header>
 
     <div class="wrap">
       <div id="readiness" class="readiness"></div>
-
-      <button class="cours-cta" data-nav="cours">
-        <span class="cta-icon">📚</span>
-        <span class="cta-body">
-          <b>Les cours</b>
-          <small id="cta-cours-sub">Fiches complètes pour tout apprendre avant de t'entraîner</small>
-        </span>
-        <span class="cta-go">→</span>
-      </button>
-
-      <a class="cours-cta drill-cta" href="drill-calcul.html">
-        <span class="cta-icon">⌨️</span>
-        <span class="cta-body">
-          <b>Calcul mental</b>
-          <small>Tables, carrés, puissances et chaînes d'opérations — prépa psychotechnique, au clavier</small>
-        </span>
-        <span class="cta-go">→</span>
-      </a>
-
-      <a class="cours-cta pass-cta" href="pass.html">
-        <span class="cta-icon">🩺</span>
-        <span class="cta-body">
-          <b>Révision PASS</b>
-          <small>Programme PASS de l'Université de Bordeaux : planning semaine par semaine, cours, mnémos, exercices corrigés et QCM</small>
-        </span>
-        <span class="cta-go">→</span>
-      </a>
-
-      <a class="cours-cta ppl-cta" href="ppl.html">
-        <span class="cta-icon">🛩️</span>
-        <span class="cta-body">
-          <b>Révision PPL</b>
-          <small>Les 12 matières du théorique PPL(A) : cours complets, QCM, mnémos et suivi par pseudo</small>
-        </span>
-        <span class="cta-go">→</span>
-      </a>
-
-      <a class="cours-cta jeux-cta" href="jeux.html">
-        <span class="cta-icon">🔩</span>
-        <span class="cta-body">
-          <b>Jeux</b>
-          <small>Tri de vis : démonte des meubles et des maisons en 3D, range les vis par couleur — 40 niveaux, la pause entre deux séries</small>
-        </span>
-        <span class="cta-go">→</span>
-      </a>
 
       <h2 class="section-title">Lancer une session</h2>
       <div class="mode-grid">
@@ -107,10 +65,6 @@
       <h2 class="section-title">Par thème</h2>
       <div class="cat-grid" id="cat-grid"></div>
 
-      <div class="home-actions">
-        <button class="btn ghost" data-nav="stats">📊 Mes statistiques</button>
-        <button class="btn ghost" data-nav="settings">⚙️ Réglages</button>
-      </div>
       <p class="disclaimer">
         Banque de questions bâtie sur le programme de l'épreuve de culture aéronautique.
         Ce ne sont pas des annales officielles — Air France ne les publie pas.
@@ -169,7 +123,6 @@
   <section class="screen" id="screen-cours">
     <div class="wrap">
       <div class="page-head">
-        <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
         <h1>Les cours</h1>
       </div>
       <div id="cours-head"></div>
@@ -191,11 +144,57 @@
     <div class="wrap"><div id="fiche-content"></div></div>
   </section>
 
+
+  <!-- ══════════════ MODULES ══════════════ -->
+  <section class="screen" id="screen-modules">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Modules</h1>
+      </div>
+      <p class="lede">Quatre entraînements autonomes, chacun avec sa propre progression.</p>
+
+      <a class="cours-cta drill-cta" href="drill-calcul.html">
+        <span class="cta-icon">⌨️</span>
+        <span class="cta-body">
+          <b>Calcul mental</b>
+          <small>Tables, carrés, puissances et chaînes d'opérations — prépa psychotechnique, au clavier</small>
+        </span>
+        <span class="cta-go">→</span>
+      </a>
+
+      <a class="cours-cta pass-cta" href="pass.html">
+        <span class="cta-icon">🩺</span>
+        <span class="cta-body">
+          <b>Révision PASS</b>
+          <small>Les 19 UE du PASS de l'Université de Bordeaux : planning, cours, mnémos, exercices corrigés et QCM</small>
+        </span>
+        <span class="cta-go">→</span>
+      </a>
+
+      <a class="cours-cta ppl-cta" href="ppl.html">
+        <span class="cta-icon">🛩️</span>
+        <span class="cta-body">
+          <b>Révision PPL</b>
+          <small>Les 12 matières du théorique PPL(A) : cours complets, QCM, mnémos et suivi par pseudo</small>
+        </span>
+        <span class="cta-go">→</span>
+      </a>
+
+      <a class="cours-cta jeux-cta" href="jeux.html">
+        <span class="cta-icon">🔩</span>
+        <span class="cta-body">
+          <b>Jeux</b>
+          <small>Tri de vis : démonte des meubles et des maisons en 3D, range les vis par couleur — 40 niveaux</small>
+        </span>
+        <span class="cta-go">→</span>
+      </a>
+    </div>
+  </section>
+
   <!-- ══════════════ STATS ══════════════ -->
   <section class="screen" id="screen-stats">
     <div class="wrap">
       <div class="page-head">
-        <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
         <h1>Statistiques</h1>
       </div>
       <div class="stat-tiles" id="stat-tiles"></div>
@@ -212,10 +211,17 @@
   <section class="screen" id="screen-settings">
     <div class="wrap">
       <div class="page-head">
-        <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
         <h1>Réglages</h1>
       </div>
       <div class="setting-list">
+        <div class="setting">
+          <div><strong>Ambiance</strong><small id="theme-sub">Jour et nuit selon l'heure de l'appareil</small></div>
+          <div class="seg" id="theme-seg">
+            <button data-theme-pref="auto">Auto</button>
+            <button data-theme-pref="jour">Jour</button>
+            <button data-theme-pref="nuit">Nuit</button>
+          </div>
+        </div>
         <label class="setting">
           <div><strong>Questions par session</strong><small>Défaut : 20</small></div>
           <select id="set-count">
@@ -247,6 +253,14 @@
   </section>
 
 </div>
+
+<nav class="tabbar" id="tabbar" hidden>
+  <button class="tab" data-nav="home">Réviser</button>
+  <button class="tab" data-nav="cours">Cours</button>
+  <button class="tab" data-nav="modules">Modules</button>
+  <button class="tab" data-nav="stats">Stats</button>
+  <button class="tab" data-nav="settings">Réglages</button>
+</nav>
 
 <div id="toast" class="toast"></div>
 
