@@ -356,29 +356,27 @@ function ScrewGame(canvas, level, hooks) {
 
   /* ═════════ dessin ═════════ */
 
-  /* Le canvas emprunte ses couleurs à la charte : il suit donc le
-     mode jour/nuit sans rien savoir de lui. */
+  /* Le canvas emprunte ses couleurs à la charte : il suit donc
+     l'ambiance sans rien savoir d'elle. */
   let pal = {};
   function readPalette() {
     const cs = getComputedStyle(document.documentElement);
     const v = (n, d) => (cs.getPropertyValue(n).trim() || d);
-    const nuit = document.documentElement.getAttribute('data-theme') === 'nuit';
+    const jour = document.documentElement.getAttribute('data-theme') === 'jour';
     pal = {
-      nuit,
-      line:    v('--line', '#333e4b'),
-      surface: v('--surface', '#1a2129'),
-      text:    v('--text', '#e9e5d9'),
-      muted:   v('--muted', '#98a3ae'),
-      trait:   nuit ? 'rgba(10,18,32,.45)' : 'rgba(60,48,28,.42)',
-      ombre:   nuit ? 'rgba(0,0,0,.30)'    : 'rgba(86,70,40,.20)',
-      creux:   nuit ? 'rgba(4,10,20,.55)'  : 'rgba(90,75,45,.28)',
-      bac:     nuit ? 'rgba(8,16,30,.62)'  : 'rgba(255,253,246,.75)',
-      bacTrait:nuit ? 'rgba(130,165,215,.22)' : 'rgba(120,100,60,.35)',
-      vide:    nuit ? 'rgba(140,175,220,.16)' : 'rgba(120,100,60,.28)',
-      puits:   nuit ? 'rgba(6,12,24,.34)'  : 'rgba(90,75,45,.26)'
+      jour,
+      bg1: v('--game-bg-1', '#10233f'),
+      bg2: v('--game-bg-2', '#081123'),
+      trait:   jour ? 'rgba(30,45,70,.38)'    : 'rgba(12,22,40,.34)',
+      ombre:   jour ? 'rgba(40,60,95,.16)'    : 'rgba(0,0,0,.26)',
+      creux:   jour ? 'rgba(40,60,95,.22)'    : 'rgba(4,10,20,.55)',
+      bac:     jour ? 'rgba(255,255,255,.72)' : 'rgba(8,16,30,.62)',
+      bacTrait:jour ? 'rgba(40,60,95,.28)'    : 'rgba(130,165,215,.22)',
+      vide:    jour ? 'rgba(40,60,95,.22)'    : 'rgba(140,175,220,.16)',
+      puits:   jour ? 'rgba(40,60,95,.20)'    : 'rgba(6,12,24,.34)'
     };
   }
-  document.addEventListener('themechange', () => { readPalette(); });
+  document.addEventListener('themechange', readPalette);
 
   function rr(x, y, w, h, r) {
     const k = Math.min(r, w / 2, h / 2);
@@ -409,9 +407,11 @@ function ScrewGame(canvas, level, hooks) {
     return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
 
-  /* Fond transparent : le papier quadrillé de la page reste visible
-     sous la scène. */
-  function drawBg() { ctx.clearRect(0, 0, L.w, L.h); }
+  function drawBg() {
+    const g = ctx.createLinearGradient(0, 0, 0, L.h);
+    g.addColorStop(0, pal.bg1); g.addColorStop(1, pal.bg2);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, L.w, L.h);
+  }
 
   /* Ombres portées : l'empreinte au sol de chaque pièce encore là,
      réunies en un seul tracé pour qu'elles ne se cumulent pas. */
@@ -587,7 +587,7 @@ function ScrewGame(canvas, level, hooks) {
       const r = boxRect(i);
       ctx.setLineDash([5, 5]);
       ctx.strokeStyle = pal.vide; ctx.lineWidth = 1.5;
-      rr(r.x, r.y, r.w, r.h, 4); ctx.stroke();
+      rr(r.x, r.y, r.w, r.h, 13); ctx.stroke();
       ctx.setLineDash([]);
       return;
     }
@@ -615,20 +615,20 @@ function ScrewGame(canvas, level, hooks) {
     ctx.translate(-r.w / 2, -r.h / 2);
 
     /* de jour la caisse est un carton teinté, de nuit une caisse sombre */
-    ctx.fillStyle = pal.nuit ? mix(c.dark, 0, 0.42) : mix(c.hex, 255, 0.86);
-    rr(0, 0, r.w, r.h, 4); ctx.fill();
+    ctx.fillStyle = pal.jour ? mix(c.hex, 255, 0.84) : mix(c.dark, 0, 0.42);
+    rr(0, 0, r.w, r.h, 13); ctx.fill();
     const g = ctx.createLinearGradient(0, 0, 0, r.h);
-    if (pal.nuit) {
+    if (pal.jour) {
+      g.addColorStop(0, mix(c.hex, 255, 0.88));
+      g.addColorStop(1, mix(c.hex, 255, 0.66));
+    } else {
       g.addColorStop(0, mix(c.hex, 0, 0.62));
       g.addColorStop(1, mix(c.dark, 0, 0.45));
-    } else {
-      g.addColorStop(0, mix(c.hex, 255, 0.88));
-      g.addColorStop(1, mix(c.hex, 255, 0.68));
     }
     ctx.fillStyle = g;
-    rr(1.5, 1.5, r.w - 3, r.h - 3, 3); ctx.fill();
-    ctx.strokeStyle = pal.nuit ? mix(c.hex, 0, 0.12) : c.dark; ctx.lineWidth = 2;
-    rr(1.5, 1.5, r.w - 3, r.h - 3, 3); ctx.stroke();
+    rr(1.5, 1.5, r.w - 3, r.h - 3, 12); ctx.fill();
+    ctx.strokeStyle = pal.jour ? c.dark : mix(c.hex, 0, 0.12); ctx.lineWidth = 2;
+    rr(1.5, 1.5, r.w - 3, r.h - 3, 12); ctx.stroke();
 
     ctx.fillStyle = c.hex;
     rr(r.w * 0.26, 5, r.w * 0.48, 4, 2); ctx.fill();
@@ -640,7 +640,7 @@ function ScrewGame(canvas, level, hooks) {
     if (flash > 0) {
       ctx.globalAlpha = flash * 0.8;
       ctx.fillStyle = '#fff';
-      rr(1.5, 1.5, r.w - 3, r.h - 3, 3); ctx.fill();
+      rr(1.5, 1.5, r.w - 3, r.h - 3, 12); ctx.fill();
     }
     ctx.restore();
   }
@@ -656,10 +656,10 @@ function ScrewGame(canvas, level, hooks) {
     ctx.save();
     ctx.translate(dx, 0);
     ctx.fillStyle = pal.bac;
-    rr(b.x, b.y, b.w, b.h, 4); ctx.fill();
+    rr(b.x, b.y, b.w, b.h, 12); ctx.fill();
     ctx.strokeStyle = full ? 'rgba(255,93,108,.9)' : pal.bacTrait;
     ctx.lineWidth = full ? 2 : 1.4;
-    rr(b.x, b.y, b.w, b.h, 4); ctx.stroke();
+    rr(b.x, b.y, b.w, b.h, 12); ctx.stroke();
     for (let k = 0; k < level.buffer; k++) {
       const s = bufSlot(k);
       ctx.fillStyle = pal.creux;

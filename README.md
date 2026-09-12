@@ -12,29 +12,27 @@ de la sélection Cadets Air France.
   programme BIA, complétées par les thèmes propres à la sélection
 - Correction expliquée pour chaque question
 
-## Charte et ambiances
+## Mode jour et mode nuit
 
-Toute l'application — accueil, cours, QCM, calcul mental, PPL, PASS et Jeux —
-partage une seule charte (`css/theme.css`) : **papier quadrillé** en fond, petits
-carreaux doublés d'un gros carreau tous les cinq, une **romaine à empattements**
-(Times) pour le texte, des coins nets et des fiches de cours présentées en pages
-de cahier, feuille blanche et filet de marge rouge.
+L'application a deux ambiances. Le **mode nuit est la charte historique**, à
+l'identique : mêmes bleus, mêmes dégradés, mêmes valeurs. Le **mode jour** en est
+la transposition claire, dans le même langage graphique — mêmes cartes, mêmes
+arrondis, mêmes accents.
 
-Deux ambiances, **jour** et **nuit**. Par défaut le mode suit l'**horloge de
-l'appareil** — clair de 7 h à 19 h, sombre le reste du temps — et bascule tout
-seul en cours de session, sans recharger la page. Le bouton ☀ / ☾ / ◑ présent
-dans l'en-tête de chaque page fait le tour des trois réglages (automatique, jour
-forcé, nuit forcée) ; le choix vaut pour toutes les pages et survit à la
-fermeture. Les réglages de l'accueil affichent en clair le mode en cours.
+Par défaut l'ambiance suit l'**horloge de l'appareil** : claire de 7 h à 19 h,
+sombre le reste du temps, avec bascule automatique en cours de session sans
+recharger la page. Le bouton ☀ / ☾ / ◑ présent dans l'en-tête de chaque page fait
+le tour des trois réglages — automatique, jour forcé, nuit forcée. Le choix vaut
+pour toutes les pages et survit à la fermeture ; les réglages de l'accueil
+affichent en clair l'ambiance en cours.
 
-Le moteur (`js/theme.js`) est chargé dans le `<head>`, avant le rendu : la page
-ne s'affiche jamais dans la mauvaise ambiance. Sans JavaScript, la préférence du
-système prend le relais.
+Le moteur (`js/theme.js`) est chargé dans le `<head>`, avant le rendu : la page ne
+s'affiche jamais dans la mauvaise ambiance. Sans JavaScript, c'est la charte de
+nuit qui s'applique.
 
-Chaque page ne définit plus ses couleurs : elle les prend dans les jetons de la
-charte. Le canvas du jeu les lit lui aussi, et laisse le papier quadrillé
-transparaître sous les objets 3D. Les tons de jour tiennent les contrastes
-recommandés : 13:1 pour le texte courant, 6:1 pour le texte secondaire.
+Aucune page ne définit plus de couleur en propre : toutes lisent les jetons de
+`css/theme.css`, et basculent donc ensemble. Le canvas du jeu les lit lui aussi,
+et le drill garde son ambiance « terminal » déclinée dans les deux modes.
 
 ## Organisation de l'accueil
 
@@ -283,7 +281,7 @@ node tools/gen-icons.js
 
 ```
 index.html              interface (onglets accueil, cours, modules, stats, réglages)
-css/theme.css           charte commune : papier quadrillé, romaine, ambiances jour et nuit
+css/theme.css           jeu de couleurs commun, en deux ambiances (nuit = charte d'origine)
 js/theme.js             choix de l'ambiance d'après l'horloge de l'appareil
 css/style.css           styles
 js/storage.js           persistance localStorage

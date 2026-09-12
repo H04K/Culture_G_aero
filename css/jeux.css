@@ -7,6 +7,8 @@
 
 html, body {
   margin: 0; padding: 0;
+  background: var(--bg); color: var(--text);
+  font-family: var(--font);
   font-size: 16px; line-height: 1.5;
   overscroll-behavior: none;
 }
@@ -23,7 +25,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .btn {
   border: 1px solid var(--line); background: var(--surface);
-  border-radius: 4px; padding: 13px 18px; font-weight: 600; font-size: 15px;
+  border-radius: 12px; padding: 13px 18px; font-weight: 600; font-size: 15px;
   transition: transform .1s, background .15s, opacity .15s;
 }
 .btn:active { transform: scale(.98); }
@@ -33,8 +35,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
 
 .icon-btn {
-  background: var(--surface); border: 1px solid var(--line);
-  width: 38px; height: 38px; border-radius: 4px; display: grid; place-items: center;
+  background: var(--sheen-2); border: 1px solid var(--line);
+  width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
   font-size: 17px; flex: 0 0 38px; text-decoration: none; color: inherit;
 }
 .section-title {
@@ -47,7 +49,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* ═════════ Accueil ═════════ */
 .hero {
-  background: var(--surface); border-bottom: 2px solid var(--line);
+  background: linear-gradient(160deg, var(--mod-jeux-hero-1) 0%, var(--hero-2) 78%);
   border-bottom: 1px solid var(--line);
   padding: calc(24px + var(--safe-top)) 18px 22px;
 }
@@ -58,21 +60,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .game-card {
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
   margin-top: 20px; padding: 16px; border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--mod-jeux);
+  background: linear-gradient(145deg, var(--drill-1), var(--drill-2)); border: 1px solid var(--drill-line);
   transition: transform .12s ease, border-color .12s ease;
 }
 .game-card:active { transform: scale(.985); }
-.game-card:hover { border-color: var(--mod-jeux); }
+.game-card:hover { border-color: var(--jeuxc-go); }
 .game-body { flex: 1; min-width: 0; }
 .game-body b { display: block; font-size: 17px; }
 .game-body small { color: var(--muted); font-size: 12.5px; line-height: 1.35; display: block; margin-top: 3px; }
 .game-meta { display: block; margin-top: 8px; font-size: 12px; color: var(--gold); font-weight: 600; }
-.game-go { font-size: 20px; color: var(--mod-jeux); }
+.game-go { font-size: 20px; color: var(--jeuxc-go); }
 
 /* vignette : trois vis sur une plaque */
 .game-art {
-  flex: 0 0 58px; height: 58px; border-radius: 4px; position: relative;
-  background: linear-gradient(145deg, #d7ceb8, #a2957a);
+  flex: 0 0 58px; height: 58px; border-radius: 13px; position: relative;
+  background: linear-gradient(145deg, #cdd8e7, #7d8ea6);
   box-shadow: inset 0 -3px 0 rgba(0,0,0,.28), 0 4px 12px rgba(0,0,0,.35);
 }
 .game-art .bolt {
@@ -88,8 +90,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .rules b { color: var(--text); font-weight: 650; }
 .rules-note {
   margin-top: 12px; padding: 11px 13px; border-radius: var(--radius-sm);
-  background: var(--surface-2); border: 1px solid var(--line);
-  color: var(--text); font-size: 12.5px; line-height: 1.5;
+  background: var(--sheen); border: 1px solid var(--line);
+  color: var(--text-2); font-size: 12.5px; line-height: 1.5;
 }
 
 .setting-list { margin-top: 22px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
@@ -103,7 +105,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .setting small { display: block; color: var(--muted); font-size: 12px; }
 .setting.as-btn { border-left: 0; border-right: 0; }
 .setting.danger strong { color: var(--ko); }
-.switch { appearance: none; -webkit-appearance: none; width: 46px; height: 27px; border-radius: 5px;
+.switch { appearance: none; -webkit-appearance: none; width: 46px; height: 27px; border-radius: 14px;
   background: var(--surface-2); border: 1px solid var(--line); position: relative; flex: 0 0 46px; cursor: pointer; }
 .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 21px; height: 21px;
   border-radius: 50%; background: var(--muted); transition: transform .18s, background .18s; }
@@ -123,7 +125,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .lvl-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
 .lvl {
-  aspect-ratio: 1 / 1; border-radius: 4px; border: 1px solid var(--line);
+  aspect-ratio: 1 / 1; border-radius: 13px; border: 1px solid var(--line);
   background: var(--surface); display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 2px; padding: 2px;
   transition: transform .1s, border-color .15s;
@@ -158,7 +160,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .tool {
   position: relative; background: var(--surface); border: 1px solid var(--line);
-  border-radius: 4px; padding: 8px 4px 6px; display: flex; flex-direction: column;
+  border-radius: 12px; padding: 8px 4px 6px; display: flex; flex-direction: column;
   align-items: center; gap: 1px; transition: transform .1s, opacity .15s;
 }
 .tool:active { transform: scale(.95); }
@@ -166,7 +168,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tool em { font-style: normal; font-size: 10.5px; color: var(--muted); }
 .tool i {
   position: absolute; top: -6px; right: -4px; font-style: normal;
-  min-width: 19px; height: 19px; border-radius: 4px; padding: 0 5px;
+  min-width: 19px; height: 19px; border-radius: 10px; padding: 0 5px;
   background: var(--accent-2); color: #fff; font-size: 11px; font-weight: 700;
   display: grid; place-items: center; border: 2px solid var(--bg-2);
 }
@@ -176,14 +178,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ═════════ Panneaux de fin ═════════ */
 .overlay {
   position: absolute; inset: 0; z-index: 40;
-  background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(3px);
+  background: var(--veil); backdrop-filter: blur(3px);
   display: flex; align-items: center; justify-content: center; padding: 22px;
   animation: fade .2s ease;
 }
 .overlay[hidden] { display: none; }
 .sheet {
   width: 100%; max-width: 360px; background: var(--surface);
-  border: 1px solid var(--line); border-radius: 6px; padding: 24px 20px;
+  border: 1px solid var(--line); border-radius: 20px; padding: 24px 20px;
   text-align: center; box-shadow: var(--shadow);
   animation: pop .26s cubic-bezier(.2,.9,.3,1.3);
 }
@@ -215,7 +217,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   position: fixed; left: 50%; bottom: calc(96px + var(--safe-bottom));
   transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
   background: var(--surface-2); border: 1px solid var(--line);
-  padding: 11px 18px; border-radius: 4px; font-size: 13.5px; z-index: 100;
+  padding: 11px 18px; border-radius: 12px; font-size: 13.5px; z-index: 100;
   box-shadow: var(--shadow); transition: opacity .2s, transform .2s;
   max-width: 88vw; text-align: center;
 }

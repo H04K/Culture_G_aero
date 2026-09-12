@@ -1,173 +1,144 @@
 /* ═══════════════════════════════════════════════════════════
-   theme.css — charte commune à toute l'application
+   theme.css — jeu de couleurs commun, en deux ambiances
 
-   Un cahier d'écolier : papier quadrillé, réglure, marge rouge,
-   et une romaine à empattements pour le texte. Deux ambiances,
-   jour et nuit, choisies par js/theme.js selon l'horloge de
-   l'appareil — ou forcées par l'utilisateur.
+   Le mode nuit reprend exactement la charte d'origine de
+   l'application : mêmes bleus, mêmes dégradés, mêmes valeurs.
+   Le mode jour en est la transposition claire, dans le même
+   langage graphique.
 
-   Toutes les pages définissent leurs couleurs à partir de ces
-   jetons : changer de mode ne touche qu'à ce fichier.
+   Les pages ne définissent plus de couleur en propre : elles
+   lisent ces jetons, et basculent donc ensemble. js/theme.js
+   choisit l'ambiance d'après l'horloge de l'appareil.
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* ───── typographie ───── */
-  --serif: "Times New Roman", Times, "Liberation Serif", Tinos, "Nimbus Roman", Georgia, serif;
-  --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-
-  /* ───── papier ───── */
-  --sq:     23px;          /* pas du petit carreau */
-  --radius:    5px;        /* le papier ne fait pas de gros arrondis */
-  --radius-sm: 3px;
-
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius:    16px;
+  --radius-sm: 10px;
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-
-  /* ───── jour ───── */
-  color-scheme: light;
-  --bg:        #f4efe1;
-  --bg-2:      #eae2cf;
-  --surface:   #fffdf6;
-  --surface-2: #f5efe0;
-  --line:      #cabb9c;
-  --line-soft: #e0d6bf;
-  --text:      #1c2733;
-  --muted:     #4e5a66;
-  --faint:     #6b757f;
-
-  --accent:    #1a5ea8;
-  --accent-2:  #113f74;
-  --af-red:    #c11226;
-  --ok:        #1b7245;
-  --ok-dim:    #dfeee4;
-  --ko:        #ad2a2f;
-  --ko-dim:    #f8e0e0;
-  --warn:      #8f6405;
-  --gold:      #a97a06;
-
-  --grid:  rgba(46,98,160,.17);   /* petits carreaux */
-  --rule:  rgba(46,98,160,.30);   /* gros carreaux, tous les 5 */
-  --marge: rgba(186,62,62,.42);   /* filet de marge */
-
-  --shadow:    0 2px 10px rgba(78,63,36,.16);
-  --shadow-sm: 0 1px 4px rgba(78,63,36,.14);
-
-  /* accents des modules */
-  --mod-ppl:      #10794f;
-  --mod-ppl-2:    #0b5c3c;
-  --mod-ppl-dim:  #dcefe5;
-  --mod-pass:     #5c3fb8;
-  --mod-pass-2:   #452d90;
-  --mod-pass-dim: #e7e0f8;
-  --mod-jeux:     #a1541a;
-  --mod-drill:    #2f4f7a;
 }
 
+/* ───────────── NUIT — la charte d'origine, à l'identique ───────────── */
 :root[data-theme="nuit"] {
   color-scheme: dark;
-  --bg:        #10151b;
-  --bg-2:      #161c23;
-  --surface:   #1a2129;
-  --surface-2: #232b35;
-  --line:      #333e4b;
-  --line-soft: #262f3a;
-  --text:      #e9e5d9;
-  --muted:     #98a3ae;
-  --faint:     #6a747f;
+  --bg:        #0a1628;
+  --bg-2:      #0f1e35;
+  --surface:   #142744;
+  --surface-2: #1b3255;
+  --line:      #24406b;
+  --text:      #eaf1fb;
+  --text-2:    #d5e3f5;
+  --muted:     #8fa6c6;
+  --faint:     #5d7799;
 
-  --accent:    #74b3f7;
-  --accent-2:  #4a8fdc;
-  --af-red:    #ef4457;
-  --ok:        #4fca8c;
-  --ok-dim:    #113020;
-  --ko:        #ff7d84;
-  --ko-dim:    #3a151a;
-  --warn:      #e7b44f;
-  --gold:      #e8bb4a;
+  --accent:      #4a9eff;
+  --accent-2:    #2b7fe0;
+  --accent-deep: #1256a8;
+  --accent-lite: #7ec8ff;
+  --af-red:  #e5122e;
+  --ok:      #22c66b;
+  --ok-dim:  #123d28;
+  --ko:      #ff5d6c;
+  --ko-dim:  #43151d;
+  --warn:    #ffb020;
+  --gold:    #ffc531;
+  --shadow:  0 8px 28px rgba(0,0,0,.35);
+  --sheen:   rgba(255,255,255,.05);
+  --sheen-2: rgba(255,255,255,.07);
+  --veil:    rgba(6,13,26,.78);
 
-  --grid:  rgba(150,190,240,.075);
-  --rule:  rgba(150,190,240,.15);
-  --marge: rgba(230,120,120,.22);
+  /* bandeaux et cartes en dégradé */
+  --hero-1: #12305c;  --hero-2: #0a1628;
+  --prim-1: #1a4d8f;  --prim-2: #12315e;  --prim-line: #2f6fbd;  --prim-sub: #b9d4f5;
+  --cta-1:  #1d3f6e;  --cta-2:  #14294a;  --cta-line: #2f6fbd;  --cta-sub: #b9d4f5;
 
-  --shadow:    0 4px 18px rgba(0,0,0,.5);
-  --shadow-sm: 0 2px 6px rgba(0,0,0,.4);
+  --drill-1: #2a3550; --drill-2: #171f33; --drill-line: #445a86; --drill-go: #8fb0e2; --drill-sub: #a8b8d6;
+  --pplc-1:  #123f31; --pplc-2:  #0e2b25; --pplc-line: #1f7a5c; --pplc-go:  #2fd39a; --pplc-sub: #9fd4c0;
+  --passc-1: #2b2150; --passc-2: #1c1636; --passc-line: #5b46a8; --passc-go: #a78bfa; --passc-sub: #c3b5f2;
+  --jeuxc-1: #4a2a18; --jeuxc-2: #2c1a10; --jeuxc-line: #955a2c; --jeuxc-go: #ff8a3d; --jeuxc-sub: #e6c2a2;
 
-  --mod-ppl:      #3fd9a3;
-  --mod-ppl-2:    #1caa7c;
-  --mod-ppl-dim:  #0e3a2e;
-  --mod-pass:     #b295ff;
-  --mod-pass-2:   #7f5ff2;
-  --mod-pass-dim: #241a4a;
-  --mod-jeux:     #ff9a52;
-  --mod-drill:    #8fb0e2;
+  /* accents propres aux modules */
+  --mod-ppl:      #2fd39a; --mod-ppl-2:  #17a97a; --mod-ppl-dim:  #0e3a2e;
+  --mod-ppl-hero: #10402f;
+  --mod-pass:     #a78bfa; --mod-pass-2: #7c5cf0; --mod-pass-dim: #241a4a;
+  --mod-jeux-hero-1: #1a2c55;
+  --game-bg-1: #10233f;   --game-bg-2: #081123;
 }
 
-/* Sans JavaScript, on suit au moins la préférence du système. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    color-scheme: dark;
-    --bg: #10151b; --bg-2: #161c23; --surface: #1a2129; --surface-2: #232b35;
-    --line: #333e4b; --line-soft: #262f3a;
-    --text: #e9e5d9; --muted: #98a3ae; --faint: #6a747f;
-    --accent: #74b3f7; --accent-2: #4a8fdc; --af-red: #ef4457;
-    --ok: #4fca8c; --ok-dim: #113020; --ko: #ff7d84; --ko-dim: #3a151a;
-    --warn: #e7b44f; --gold: #e8bb4a;
-    --grid: rgba(150,190,240,.075); --rule: rgba(150,190,240,.15);
-    --marge: rgba(230,120,120,.22);
-    --shadow: 0 4px 18px rgba(0,0,0,.5); --shadow-sm: 0 2px 6px rgba(0,0,0,.4);
-    --mod-ppl: #3fd9a3; --mod-ppl-2: #1caa7c; --mod-ppl-dim: #0e3a2e;
-    --mod-pass: #b295ff; --mod-pass-2: #7f5ff2; --mod-pass-dim: #241a4a;
-    --mod-jeux: #ff9a52; --mod-drill: #8fb0e2;
-  }
+/* ───────────── JOUR — la même charte, en clair ───────────── */
+:root[data-theme="jour"] {
+  color-scheme: light;
+  --bg:        #eef2f8;
+  --bg-2:      #e3eaf4;
+  --surface:   #ffffff;
+  --surface-2: #eef3fa;
+  --line:      #c9d6e6;
+  --text:      #132238;
+  --text-2:    #2a3b53;
+  --muted:     #4f6076;
+  --faint:     #6f8098;
+
+  --accent:      #1667c4;
+  --accent-2:    #11519e;
+  --accent-deep: #0d4585;
+  --accent-lite: #4f9bf0;
+  --af-red:  #c00f24;
+  --ok:      #157c46;
+  --ok-dim:  #dcf0e4;
+  --ko:      #b62630;
+  --ko-dim:  #fadfe1;
+  --warn:    #8a6000;
+  --gold:    #a8780a;
+  --shadow:  0 6px 20px rgba(22,45,80,.13);
+  --sheen:   rgba(19,34,56,.04);
+  --sheen-2: rgba(19,34,56,.06);
+  --veil:    rgba(226,233,244,.86);
+
+  --hero-1: #dbe7f7;  --hero-2: #eef2f8;
+  --prim-1: #1e73d2;  --prim-2: #115aae;  --prim-line: #11519e;  --prim-sub: #d6e8fb;
+  --cta-1:  #ffffff;  --cta-2:  #f2f7fd;  --cta-line: #9dc0e8;  --cta-sub: #4f6076;
+
+  --drill-1: #ffffff; --drill-2: #f1f4fa; --drill-line: #a9bbd4; --drill-go: #3a5f94; --drill-sub: #4f6076;
+  --pplc-1:  #ffffff; --pplc-2:  #eef8f3; --pplc-line: #8ccfb4; --pplc-go:  #0e7a55; --pplc-sub: #4f6076;
+  --passc-1: #ffffff; --passc-2: #f3efff; --passc-line: #b7a4ee; --passc-go: #5a3cc0; --passc-sub: #4f6076;
+  --jeuxc-1: #ffffff; --jeuxc-2: #fdf2e9; --jeuxc-line: #e0b083; --jeuxc-go: #a4530f; --jeuxc-sub: #4f6076;
+
+  --mod-ppl:      #0e7a55; --mod-ppl-2:  #0b5f42; --mod-ppl-dim:  #dcf0e7;
+  --mod-ppl-hero: #dff0e8;
+  --mod-pass:     #5a3cc0; --mod-pass-2: #452d95; --mod-pass-dim: #e8e1fb;
+  --mod-jeux-hero-1: #dde6f6;
+  --game-bg-1: #e7eef8;   --game-bg-2: #f3f6fb;
 }
 
-/* ═════════ le papier ═════════ */
-
-html {
-  background-color: var(--bg);
-  /* petits carreaux, puis gros carreaux tous les cinq */
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-    linear-gradient(var(--rule) 1px, transparent 1px),
-    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
-  background-size:
-    var(--sq) var(--sq),
-    var(--sq) var(--sq),
-    calc(var(--sq) * 5) calc(var(--sq) * 5),
-    calc(var(--sq) * 5) calc(var(--sq) * 5);
-  background-position: -1px -1px;
-  background-attachment: fixed;
+/* Sans JavaScript, on suit la préférence du système ; à défaut, la nuit,
+   qui est l'ambiance historique de l'application. */
+:root:not([data-theme]) {
+  color-scheme: dark;
+  --bg: #0a1628; --bg-2: #0f1e35; --surface: #142744; --surface-2: #1b3255;
+  --line: #24406b; --text: #eaf1fb; --text-2: #d5e3f5; --muted: #8fa6c6; --faint: #5d7799;
+  --accent: #4a9eff; --accent-2: #2b7fe0; --accent-deep: #1256a8; --accent-lite: #7ec8ff;
+  --af-red: #e5122e; --ok: #22c66b; --ok-dim: #123d28; --ko: #ff5d6c; --ko-dim: #43151d;
+  --warn: #ffb020; --gold: #ffc531; --shadow: 0 8px 28px rgba(0,0,0,.35);
+  --sheen: rgba(255,255,255,.05); --sheen-2: rgba(255,255,255,.07); --veil: rgba(6,13,26,.78);
+  --hero-1: #12305c; --hero-2: #0a1628;
+  --prim-1: #1a4d8f; --prim-2: #12315e; --prim-line: #2f6fbd; --prim-sub: #b9d4f5;
+  --cta-1: #1d3f6e; --cta-2: #14294a; --cta-line: #2f6fbd; --cta-sub: #b9d4f5;
+  --drill-1: #2a3550; --drill-2: #171f33; --drill-line: #445a86; --drill-go: #8fb0e2; --drill-sub: #a8b8d6;
+  --pplc-1: #123f31; --pplc-2: #0e2b25; --pplc-line: #1f7a5c; --pplc-go: #2fd39a; --pplc-sub: #9fd4c0;
+  --passc-1: #2b2150; --passc-2: #1c1636; --passc-line: #5b46a8; --passc-go: #a78bfa; --passc-sub: #c3b5f2;
+  --jeuxc-1: #4a2a18; --jeuxc-2: #2c1a10; --jeuxc-line: #955a2c; --jeuxc-go: #ff8a3d; --jeuxc-sub: #e6c2a2;
+  --mod-ppl: #2fd39a; --mod-ppl-2: #17a97a; --mod-ppl-dim: #0e3a2e; --mod-ppl-hero: #10402f;
+  --mod-pass: #a78bfa; --mod-pass-2: #7c5cf0; --mod-pass-dim: #241a4a;
+  --mod-jeux-hero-1: #1a2c55; --game-bg-1: #10233f; --game-bg-2: #081123;
 }
 
-body {
-  background: transparent;
-  font-family: var(--serif);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Les chiffres doivent s'aligner : tableaux, chronos, scores. */
-body { font-variant-numeric: tabular-nums lining-nums; }
-
-/* ═════════ feuilles et réglure ═════════ */
-
-/* une feuille posée sur le cahier */
-.sheet {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ═════════ bouton de mode jour / nuit ═════════ */
-
+/* ═════════ bouton d'ambiance ═════════ */
 .theme-btn {
-  background: var(--surface); border: 1px solid var(--line);
-  width: 38px; height: 38px; border-radius: var(--radius);
+  background: var(--sheen-2); border: 1px solid var(--line);
+  width: 38px; height: 38px; border-radius: 11px;
   display: grid; place-items: center; flex: 0 0 38px;
-  font-size: 16px; cursor: pointer; color: inherit;
-  font-family: var(--serif);
+  font-size: 16px; cursor: pointer; color: inherit; font-family: inherit;
+  transition: transform .1s;
 }
 .theme-btn:active { transform: scale(.95); }
