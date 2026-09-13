@@ -34,15 +34,19 @@ Aucune page ne définit plus de couleur en propre : toutes lisent les jetons de
 `css/theme.css`, et basculent donc ensemble. Le canvas du jeu les lit lui aussi,
 et le drill garde son ambiance « terminal » déclinée dans les deux modes.
 
-## Organisation de l'accueil
+## Organisation
 
-L'accueil est rangé en **cinq onglets** en bas d'écran :
+L'application s'ouvre sur un **accueil qui liste les entraînements** : culture
+générale aéro, calcul mental, PASS, PPL et Jeux. On choisit son entraînement,
+puis on accède à ses cours, ses QCM et ses statistiques.
+
+La navigation se fait par **cinq onglets** en bas d'écran :
 
 | Onglet | Contenu |
 |---|---|
-| Réviser | Score de préparation, modes de session, entraînement par thème |
+| Accueil | Les cinq entraînements, avec l'avancement de chacun |
+| Réviser | Culture générale aéro : score de préparation, modes de session, par thème |
 | Cours | Les 22 fiches et leur progression de lecture |
-| Modules | Calcul mental, PASS, PPL et Jeux — les quatre entraînements autonomes |
 | Stats | Courbe de progression, maîtrise par thème, historique |
 | Réglages | Ambiance, paramètres de session, export et import |
 

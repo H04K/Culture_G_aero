@@ -97,6 +97,14 @@
         <small>Couverture de la banque : ${cov}% (${seen}/${Bank.count()})</small>
       </div>`;
 
+    const lus = Cours.all().filter(f => Store.coursRead()[f.id]).length;
+    const sub = $('#cta-culture-sub');
+    if (sub) {
+      sub.textContent = lus
+        ? `${Bank.count()} questions · ${lus}/${Cours.count()} fiches lues — reprends où tu t'es arrêté`
+        : `${Bank.count()} questions sur ${Bank.categories().length} thèmes, ${Cours.count()} fiches de cours`;
+    }
+
     const errs = Quiz.available('errors');
     const badge = $('#errors-count');
     badge.textContent = errs;
@@ -466,7 +474,7 @@
       if (!b) return;
       const to = b.dataset.nav;
       if (to === 'home')      { renderHome(); show('home'); }
-      else if (to === 'modules')  { show('modules'); }
+      else if (to === 'modules')  { renderHome(); show('modules'); }
       else if (to === 'stats')    { renderStats(); show('stats'); }
       else if (to === 'settings') { renderSettings(); show('settings'); }
       else if (to === 'cours')    { CoursUI.renderList(); show('cours'); }
@@ -599,7 +607,7 @@
     }
     bind();
     renderHome();
-    show('home');            /* affiche la barre d'onglets dès l'ouverture */
+    show('modules');         /* l'application s'ouvre sur les entraînements */
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

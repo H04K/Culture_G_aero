@@ -21,20 +21,11 @@
 <div id="app">
 
   <!-- ══════════════ HOME ══════════════ -->
-  <section class="screen active" id="screen-home">
-    <header class="hero">
-      <div class="hero-brand">
-        <span class="brand-mark"></span>
-        <div>
-          <h1>Cadets Prep</h1>
-          <p class="brand-sub">Culture générale aéronautique · Sélection 2026</p>
-        </div>
-        <button class="theme-btn" id="theme-toggle" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
-      </div>
-      <div class="hero-stats" id="hero-stats"></div>
-    </header>
-
+  <section class="screen" id="screen-home">
     <div class="wrap">
+      <div class="page-head">
+        <h1>Culture générale aéro</h1>
+      </div>
       <div id="readiness" class="readiness"></div>
 
       <h2 class="section-title">Lancer une session</h2>
@@ -114,7 +105,7 @@
       <div class="review" id="review"></div>
       <div class="home-actions sticky-actions">
         <button class="btn primary" data-nav="replay">↻ Nouvelle session</button>
-        <button class="btn ghost" data-nav="home">Accueil</button>
+        <button class="btn ghost" data-nav="modules">Accueil</button>
       </div>
     </div>
   </section>
@@ -146,12 +137,30 @@
 
 
   <!-- ══════════════ MODULES ══════════════ -->
-  <section class="screen" id="screen-modules">
-    <div class="wrap">
-      <div class="page-head">
-        <h1>Modules</h1>
+  <section class="screen active" id="screen-modules">
+    <header class="hero">
+      <div class="hero-brand">
+        <span class="brand-mark"></span>
+        <div>
+          <h1>Cadets Prep</h1>
+          <p class="brand-sub">Culture générale aéronautique · Sélection 2026</p>
+        </div>
+        <button class="theme-btn" id="theme-toggle" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
       </div>
-      <p class="lede">Quatre entraînements autonomes, chacun avec sa propre progression.</p>
+      <div class="hero-stats" id="hero-stats"></div>
+    </header>
+
+    <div class="wrap">
+      <h2 class="section-title">Les entraînements</h2>
+
+      <button class="cours-cta" data-nav="home">
+        <span class="cta-icon">✈️</span>
+        <span class="cta-body">
+          <b>Culture générale aéro</b>
+          <small id="cta-culture-sub">1 763 questions sur 22 thèmes, 22 fiches de cours — l'épreuve de la sélection</small>
+        </span>
+        <span class="cta-go">→</span>
+      </button>
 
       <a class="cours-cta drill-cta" href="drill-calcul.html">
         <span class="cta-icon">⌨️</span>
@@ -255,9 +264,9 @@
 </div>
 
 <nav class="tabbar" id="tabbar" hidden>
+  <button class="tab" data-nav="modules"><span class="tab-ic">🧭</span>Accueil</button>
   <button class="tab" data-nav="home"><span class="tab-ic">🎯</span>Réviser</button>
   <button class="tab" data-nav="cours"><span class="tab-ic">📚</span>Cours</button>
-  <button class="tab" data-nav="modules"><span class="tab-ic">🧭</span>Modules</button>
   <button class="tab" data-nav="stats"><span class="tab-ic">📊</span>Stats</button>
   <button class="tab" data-nav="settings"><span class="tab-ic">⚙️</span>Réglages</button>
 </nav>
