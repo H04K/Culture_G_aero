@@ -53,6 +53,11 @@ La navigation se fait par **cinq onglets** en bas d'écran :
 La barre disparaît pendant une session de QCM et pendant la lecture d'une fiche,
 pour laisser tout l'écran au contenu.
 
+Les modules étant des pages à part, chacun porte un **retour au menu principal**
+visible en permanence : sur l'écran du pseudo, dans l'en-tête du module et sur la
+grille des niveaux du jeu. Le drill le propose dans sa liste et sur la touche
+retour arrière.
+
 ## Modes d'entraînement
 
 | Mode | Description |
@@ -104,10 +109,12 @@ et au doigt sur téléphone (pavé numérique intégré, pas de clavier logiciel
 Module séparé (`ppl.html`), accessible depuis l'accueil : la préparation complète
 du **théorique PPL(A)**, indépendante de la banque culture générale.
 
-- **12 matières** couvrant tout le programme : réglementation, radiotéléphonie,
-  principes du vol, cellule et systèmes, motorisation, instruments, masse et
-  performances, préparation du vol, navigation, météorologie, facteurs humains,
-  procédures et urgences
+- **12 matières** présentées dans l'**ordre du programme théorique**, de 010 à
+  090, le numéro étant affiché sur chaque ligne : réglementation (010),
+  connaissance de l'aéronef (021-022), masse et performances (030), préparation
+  du vol (033), performances humaines (040), météorologie (050), navigation
+  (060), procédures opérationnelles (070), principes du vol (080) et
+  communications (090)
 - **95 sections de cours** (~290 min de lecture), avec encadrés de points clés et
   tableaux de synthèse
 - **413 questions** avec correction expliquée

@@ -19,6 +19,25 @@ const PPL = (() => {
   const items = [];
   const byid  = {};
 
+  /* Ordre officiel du programme théorique PPL(A) : c'est dans cet ordre
+     que les matières sont présentées, et le numéro est affiché pour qu'on
+     sache où l'on en est dans le programme. */
+  const PROGRAMME = {
+    reglementation:   { code: '010', titre: 'Réglementation' },
+    cellule:          { code: '021', titre: "Connaissance de l'aéronef" },
+    moteur:           { code: '021', titre: "Connaissance de l'aéronef" },
+    instruments:      { code: '022', titre: 'Instruments' },
+    performances:     { code: '030', titre: 'Masse, centrage et performances' },
+    preparation:      { code: '033', titre: 'Préparation du vol' },
+    'facteurs-humains': { code: '040', titre: 'Performances humaines' },
+    meteo:            { code: '050', titre: 'Météorologie' },
+    navigation:       { code: '060', titre: 'Navigation' },
+    procedures:       { code: '070', titre: 'Procédures opérationnelles' },
+    'principes-vol':  { code: '080', titre: 'Principes du vol' },
+    radio:            { code: '090', titre: 'Communications' }
+  };
+  const RANG = Object.keys(PROGRAMME).reduce((o, k, i) => (o[k] = i, o), {});
+
   const BLOCKS = {
     air:   { name: 'Cadre réglementaire',   icon: '⚖️',  desc: "Règles de l'air, espaces, licences, radio" },
     tech:  { name: "L'aéronef",             icon: '⚙️',  desc: 'Principes du vol, cellule, moteur, instruments' },
@@ -46,10 +65,17 @@ const PPL = (() => {
     byid[m.id] = m;
   }
 
-  const all        = () => items;
+  /* Les matières sortent toujours dans l'ordre du programme, quel que soit
+     l'ordre de chargement des fichiers de données. */
+  const rang = m => (RANG[m.id] === undefined ? 999 : RANG[m.id]);
+  const ordered = () => items.slice().sort((a, b) => rang(a) - rang(b));
+
+  const all        = () => ordered();
+  const code       = id => (PROGRAMME[id] ? PROGRAMME[id].code : '');
+  const numero     = id => (RANG[id] === undefined ? 0 : RANG[id] + 1);
   const byId       = id => byid[id];
   const blocks     = () => BLOCKS;
-  const byBlock    = b => items.filter(m => m.block === b);
+  const byBlock    = b => ordered().filter(m => m.block === b);
   const matCount   = () => items.length;
   const allQuiz    = () => items.flatMap(m => m.quiz);
   const quizCount  = () => items.reduce((n, m) => n + m.quiz.length, 0);
@@ -72,5 +98,6 @@ const PPL = (() => {
   }
 
   return { add, all, byId, blocks, byBlock, matCount, allQuiz, quizCount,
-           mnemoCount, sectionCount, totalMin, questionById, audit, hash, BLOCKS };
+           mnemoCount, sectionCount, totalMin, questionById, audit, hash,
+           code, numero, PROGRAMME, BLOCKS };
 })();

@@ -231,3 +231,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .play-stage { max-width: 560px; width: 100%; margin: 0 auto; }
   .play-tools { max-width: 560px; margin: 0 auto; width: 100%; }
 }
+
+/* ───────── Retour au menu principal ───────── */
+.page-head .chip-btn {
+  margin-left: auto; text-decoration: none;
+  background: var(--sheen-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 7px 11px;
+  font-size: 12.5px; color: var(--muted);
+}
+.page-head .chip-btn:hover { border-color: var(--mod-jeux); color: var(--mod-jeux); }

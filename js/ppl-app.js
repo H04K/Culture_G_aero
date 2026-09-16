@@ -205,29 +205,26 @@ function renderHome() {
 
   $$('#mode-grid [data-mode]').forEach(b => b.onclick = () => startQuiz(b.dataset.mode));
 
-  /* matières par bloc */
+  /* Les matières dans l'ordre du programme théorique : une seule suite,
+     du 010 au 090, le bloc n'étant plus qu'une étiquette sur la ligne. */
   const blocks = PPL.blocks();
   const ms = PplStore.matStats();
-  $('#mat-list').innerHTML = Object.entries(blocks).map(([key, b]) => {
-    const mats = PPL.byBlock(key);
-    if (!mats.length) return '';
-    return `<div class="block-head"><h3>${b.icon} ${esc(b.name)}</h3><small>${esc(b.desc)}</small></div>` +
-      mats.map(m => {
-        const read = PplStore.readCount(m.id), tot = m.sections.length;
-        const p = pct(read, tot);
-        const st = ms[m.id];
-        return `<button class="mat-row" data-mat="${m.id}">
-          <span class="mic">${m.icon}</span>
-          <span class="mbody">
-            <span class="mname">${esc(m.name)} ${PplStore.coursDone(m.id) ? '<span class="done">✓</span>' : ''}</span>
-            <span class="mmeta">${tot} sections · ${m.quiz.length} questions · ${m.mnemo.length} mnémos${st ? ` · réussite ${st.pct} %` : ''}</span>
-          </span>
-          <span class="mprog">
-            <span class="pbar"><i style="width:${p}%"></i></span>
-            <small class="ppct">${read}/${tot}</small>
-          </span>
-        </button>`;
-      }).join('');
+  $('#mat-list').innerHTML = PPL.all().map(m => {
+    const read = PplStore.readCount(m.id), tot = m.sections.length;
+    const p = pct(read, tot);
+    const st = ms[m.id];
+    const b = blocks[m.block];
+    return `<button class="mat-row" data-mat="${m.id}">
+      <span class="mnum">${PPL.code(m.id)}</span>
+      <span class="mbody">
+        <span class="mname">${esc(m.name)} ${PplStore.coursDone(m.id) ? '<span class="done">✓</span>' : ''}</span>
+        <span class="mmeta">${b ? esc(b.name) + ' · ' : ''}${tot} sections · ${m.quiz.length} questions · ${m.mnemo.length} mnémos${st ? ` · réussite ${st.pct} %` : ''}</span>
+      </span>
+      <span class="mprog">
+        <span class="pbar"><i style="width:${p}%"></i></span>
+        <small class="ppct">${read}/${tot}</small>
+      </span>
+    </button>`;
   }).join('');
 
   $$('#mat-list [data-mat]').forEach(b => b.onclick = () => openFiche(b.dataset.mat));
