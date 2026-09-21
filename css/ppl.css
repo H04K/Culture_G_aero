@@ -648,22 +648,103 @@ body.has-cta .wrap { padding-bottom: calc(var(--bar) + 112px); }
 .qfoot .btn.go { flex: 1; }
 .qfoot .btn.ghost { flex: 0 0 auto; padding-left: 16px; padding-right: 16px; }
 
-/* ───────────── Résultat ───────────── */
-.score { text-align: center; padding: 26px 0 6px; }
-/* Le grand anneau du résultat : même balisage que le petit, en plus gros. */
-.score .ring { margin: 0 auto; }
-.score .ring .val {
-  display: grid; place-content: center; justify-items: center;
-  font-size: 40px; font-weight: 800; letter-spacing: -.05em; line-height: 1;
-}
-.score .ring .val small {
-  display: block; font-family: var(--mono); font-size: 10.5px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--pale); margin-top: 6px;
-}
-.score .lbl { color: var(--dim); font-size: 14.5px; margin-top: 16px; }
-.score .say { font-size: 15.5px; font-weight: 600; margin-top: 8px; letter-spacing: -.015em; }
+/* ───────────── Résultat ─────────────
+   Le verdict d'abord, les erreurs ensuite : c'est la seule chose
+   qu'on regarde vraiment en sortant d'une série. --tone porte la
+   couleur du verdict, verte ou rouge. */
+#screen-result .wrap { padding-bottom: calc(100px + var(--safe-bottom)); }
 
-.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 18px; }
+.rtop { display: flex; align-items: center; gap: 12px; padding: calc(16px + var(--safe-top)) 0 14px; }
+.rtop .kick {
+  flex: 1; min-width: 0; font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--pale);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rtop .link { color: var(--go); font-size: 15px; font-weight: 600; padding: 4px; }
+
+.verdict-card {
+  text-align: center; padding: 26px 18px 24px; border-radius: var(--r-xl);
+  background: var(--tone-soft); border: 1px solid transparent;
+}
+@supports (background: color-mix(in srgb, red 10%, white)) {
+  .verdict-card { border-color: color-mix(in srgb, var(--tone) 22%, transparent); }
+}
+.verdict-card .ring { margin: 0 auto; }
+.verdict-card .ring .val {
+  display: grid; place-content: center; justify-items: center;
+  font-size: 38px; font-weight: 800; letter-spacing: -.05em; line-height: 1;
+}
+.verdict-card .ring .val small {
+  display: block; font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--tone); opacity: .7; margin-top: 7px;
+}
+.verdict-row {
+  display: flex; align-items: center; justify-content: center; gap: 11px;
+  margin-top: 20px; font-size: 25px; font-weight: 800; letter-spacing: -.03em; color: var(--tone);
+}
+.verdict-row .vb {
+  width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%;
+  background: var(--tone); color: var(--card); display: grid; place-items: center;
+}
+.verdict-card .gap { font-size: 14.5px; color: var(--tone); opacity: .85; margin-top: 9px; }
+.result-say { color: var(--dim); font-size: 14px; text-align: center; margin-top: 14px; line-height: 1.5; }
+
+.tiles2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.tile-b {
+  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
+  border-radius: var(--r-l); padding: 16px 12px; text-align: center;
+}
+.tile-b b { display: block; font-size: 24px; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.tile-b small { display: block; color: var(--dim); font-size: 13px; margin-top: 3px; }
+
+.lab .tally {
+  margin-left: auto; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: none; padding: 5px 11px; border-radius: 999px;
+  background: var(--no-soft); color: var(--no);
+}
+.lab .tally.ok { background: var(--yes-soft); color: var(--yes); }
+
+/* Une erreur : l'énoncé sur deux lignes, le détail au toucher. */
+.miss {
+  display: grid; grid-template-columns: 34px 1fr 18px; gap: 4px 12px;
+  align-items: center; width: 100%; text-align: left;
+  padding: 13px 14px; margin-bottom: 8px;
+  background: var(--card); border: 1px solid var(--edge);
+  border-radius: var(--r-l); box-shadow: var(--lift);
+}
+.miss .mi {
+  grid-column: 1; grid-row: 1 / span 2; align-self: start; margin-top: 2px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--no-soft); color: var(--no); display: grid; place-items: center;
+}
+.miss.ok .mi { background: var(--yes-soft); color: var(--yes); }
+.miss .mq {
+  grid-column: 2; grid-row: 1;
+  font-size: 15px; font-weight: 600; line-height: 1.35; letter-spacing: -.015em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.miss.open .mq { -webkit-line-clamp: unset; overflow: visible; }
+.miss .msub { grid-column: 2 / -1; grid-row: 2; font-size: 13px; color: var(--no); line-height: 1.4; }
+.miss.ok .msub { color: var(--yes); }
+.miss .chev { grid-column: 3; grid-row: 1; color: var(--pale); transition: transform .2s; }
+.miss.open .chev { transform: rotate(90deg); }
+.miss .detail { display: none; grid-column: 2 / -1; grid-row: 3; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--edge); }
+.miss.open .detail { display: block; }
+.miss .detail .dl { display: block; font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-bottom: 4px; }
+.miss .detail .dl b { color: var(--yes); font-weight: 650; }
+.miss .detail .dl.bad { color: var(--no); }
+.miss .detail .dx { display: block; font-size: 13.5px; color: var(--dim); line-height: 1.55; margin-top: 8px; }
+
+.rfoot {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  padding: 14px 16px calc(14px + var(--safe-bottom));
+  background: linear-gradient(to top, var(--pg) 66%, transparent);
+  pointer-events: none;
+}
+.rfoot .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; pointer-events: auto; }
+.rfoot .btn.go { flex: 1; }
+
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 4px; }
 .tile-s {
   background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
   border-radius: var(--r-m); padding: 13px 10px; text-align: center;

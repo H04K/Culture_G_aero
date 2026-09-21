@@ -53,12 +53,12 @@ const DIFF = { 1: 'facile', 2: 'moyen', 3: 'difficile' };
 const plural = (n, mot, suffixe = 's') => `${n} ${mot}${n > 1 ? suffixe : ''}`;
 
 /** Anneau de progression. */
-function ring(value, size = 74, stroke = 8, inner = '') {
+function ring(value, size = 74, stroke = 8, inner = '', track = 'var(--pg-2)') {
   const r = (size - stroke) / 2, c = 2 * Math.PI * r;
   const off = c * (1 - Math.max(0, Math.min(100, value)) / 100);
   return `<div class="ring" style="width:${size}px;height:${size}px;flex-basis:${size}px">
     <svg width="${size}" height="${size}" aria-hidden="true">
-      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--pg-2)" stroke-width="${stroke}"/>
+      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${scoreColor(value)}"
               stroke-width="${stroke}" stroke-linecap="round"
               stroke-dasharray="${c}" stroke-dashoffset="${off}"/>
@@ -76,7 +76,11 @@ const TAB_OF = {
   settings: 'settings'
 };
 const TABS = [['learn', 'Cours', 'book'], ['practice', "S'entraîner", 'tick'], ['settings', 'Réglages', 'sliders']];
-const NO_TABS = new Set(['gate', 'reader', 'quiz']);
+const NO_TABS = new Set(['gate', 'reader', 'quiz', 'result']);
+
+/** Nom lisible de chaque mode de série. */
+const MODE_LBL = { mixed: 'Série standard', exam: 'Examen blanc', errors: 'Mes erreurs',
+                   due: 'Révision espacée', hard: 'Difficile', mat: 'Série de matière', block: 'Bloc' };
 
 let view = 'gate';
 
@@ -489,13 +493,13 @@ function setsFor(m) {
   return [
     { id: 'quick', icon: 'bolt', name: 'Série rapide', count: Math.min(10, m.quiz.length),
       desc: `${Math.min(10, m.quiz.length)} questions · sans chrono · correction immédiate`,
-      opts: { count: 10, instant: true } },
+      opts: { count: 10, instant: true, label: 'Série rapide' } },
     { id: 'std', icon: 'target', name: 'Série standard', count: Math.min(n, m.quiz.length), reco: true,
       desc: `${Math.min(n, m.quiz.length)} questions · correction immédiate`,
-      opts: { count: n, instant: true } },
+      opts: { count: n, instant: true, label: 'Série standard' } },
     { id: 'exam', icon: 'clock', name: 'Examen de matière', count: examN,
       desc: `${examN} questions · ${Math.round(examN * 1.5)} min chrono · corrigé à la fin`,
-      opts: { count: examN, instant: false, limitMs: examN * 90000 } }
+      opts: { count: examN, instant: false, limitMs: examN * 90000, label: 'Examen de matière' } }
   ];
 }
 
@@ -614,6 +618,7 @@ function startQuiz(mode, key, opts) {
     const m = PPL.byId(key);
     PplStore.setResume({ view: 'quiz', mat: key, section: 0, label: `Série de QCM — ${m.short || m.name}` });
   }
+  resultAll = false;
   show('quiz');
   renderQuestion();
   startTimer();
@@ -779,58 +784,120 @@ function finish() {
 
 /* ═══════════════ RÉSULTAT ═══════════════ */
 
+/* Par défaut on ne montre que les erreurs : c'est tout ce qu'on
+   regarde vraiment en sortant d'une série. */
+let resultAll = false;
+
 function renderResult(sc, ms) {
   const s = session;
+  const pass = sc.pct >= PASS;
+  const tone = pass ? 'var(--yes)' : 'var(--no)';
+  const soft = pass ? 'var(--yes-soft)' : 'var(--no-soft)';
+  const gap = Math.abs(sc.pct - PASS);
+
   const say = sc.pct >= 85 ? "Niveau examen. Continue comme ça."
-    : sc.pct >= PASS ? "Au-dessus du seuil de réussite. Solide."
+    : pass ? "Au-dessus du seuil de réussite. Solide."
     : sc.pct >= 60 ? "Ça vient. Rejoue tes erreurs avant de passer à autre chose."
     : "Reprends le cours de la matière : les QCM ne remplacent pas la lecture.";
 
-  const bars = Object.entries(sc.mats)
-    .sort((a, b) => pct(a[1][0], a[1][1]) - pct(b[1][0], b[1][1]))
-    .map(([k, v]) => {
-      const m = PPL.byId(k), p = pct(v[0], v[1]);
-      return `<div class="bar-row" style="${skin(k)}">
-        <div class="bar-top">
-          <span class="nm">${Ic.mat(k, 17)} ${m ? esc(m.short || m.name) : esc(k)}</span>
-          <span class="vl">${v[0]}/${v[1]} · ${p} %</span>
-        </div>
-        <div class="track"><i style="width:${p}%;background:${scoreColor(p)}"></i></div>
-      </div>`;
-    }).join('');
+  const m = s.key ? PPL.byId(s.key) : null;
+  const kick = `${m ? (m.short || m.name) : 'Toutes matières'} · ` +
+               `${(s.opts && s.opts.label) || MODE_LBL[s.mode] || s.mode}`;
 
-  const review = s.questions.map((q, i) => {
-    const ok = s.answers[i] === q.a;
-    const mine = s.answers[i] === null ? 'Pas de réponse' : q.o[s.answers[i]];
-    return `<div class="review-item ${ok ? 'ok' : ''}">
-      <div class="rq">${esc(q.q)}</div>
-      <div class="ra">Réponse : <b>${esc(q.o[q.a])}</b>${ok ? '' : `<br>Ta réponse : <span class="rw">${esc(mine)}</span>`}</div>
-      ${q.e ? `<div class="re">${esc(q.e)}</div>` : ''}
-    </div>`;
-  }).join('');
+  const wrong = sc.total - sc.correct;
+  /* Sans faute, la liste montre directement les bonnes réponses :
+     il n'y a rien d'autre à revoir. */
+  if (!wrong) resultAll = true;
 
-  $('#result-wrap').innerHTML = `
-    <div class="score">
-      ${ring(sc.pct, 148, 12, '<small>score</small>')}
-      <div class="lbl">${sc.correct} bonnes réponses sur ${sc.total}</div>
-      <div class="say" style="color:${scoreColor(sc.pct)}">${say}</div>
-    </div>
-    <div class="tiles">
-      <div class="tile-s"><b>${fmtMs(ms)}</b><small>durée</small></div>
-      <div class="tile-s"><b>${Math.round(ms / 1000 / Math.max(1, sc.total))} s</b><small>par question</small></div>
-      <div class="tile-s"><b>${sc.total - sc.correct}</b><small>à revoir</small></div>
-    </div>
+  /* Le détail par matière n'a de sens que si la série en mélange plusieurs. */
+  const mats = Object.entries(sc.mats);
+  const bars = mats.length < 2 ? '' : `
     <div class="lab">Par matière</div>
-    <div class="bars">${bars}</div>
-    <div class="lab">Correction détaillée</div>
-    ${review}
-    <div class="duo" style="margin-bottom:8px">
-      <button class="btn go" id="btn-replay">${Ic.svg('repeat', 17)} Rejouer</button>
-      <button class="btn ghost" data-nav="practice">Terminer</button>
-    </div>`;
+    <div class="bars">${mats
+      .sort((a, b) => pct(a[1][0], a[1][1]) - pct(b[1][0], b[1][1]))
+      .map(([k, v]) => {
+        const mm = PPL.byId(k), p = pct(v[0], v[1]);
+        return `<div class="bar-row" style="${skin(k)}">
+          <div class="bar-top">
+            <span class="nm">${Ic.mat(k, 17)} ${mm ? esc(mm.short || mm.name) : esc(k)}</span>
+            <span class="vl">${v[0]}/${v[1]} · ${p} %</span>
+          </div>
+          <div class="track"><i style="width:${p}%;background:${scoreColor(p)}"></i></div>
+        </div>`;
+      }).join('')}</div>`;
 
-  $('#btn-replay').onclick = () => startQuiz(s.mode, s.key, s.opts);
+  $('#result-wrap').setAttribute('style', `--tone:${tone};--tone-soft:${soft}`);
+  $('#result-wrap').innerHTML = `
+    <div class="rtop">
+      <span class="kick">${esc(kick)}</span>
+      <button class="link" data-nav="practice">Terminer</button>
+    </div>
+
+    <div class="verdict-card">
+      ${ring(sc.pct, 132, 11, '<small>score</small>',
+             'color-mix(in srgb, ' + tone + ' 18%, transparent)')}
+      <div class="verdict-row">
+        <span class="vb">${Ic.svg(pass ? 'check' : 'close', 18)}</span>
+        ${pass ? 'Réussi' : 'Non validé'}
+      </div>
+      <p class="gap">${gap === 0 ? `pile sur la barre des ${PASS} %`
+        : `${gap} point${gap > 1 ? 's' : ''} ${pass ? 'au-dessus de' : 'sous'} la barre des ${PASS} %`}</p>
+    </div>
+    <p class="result-say">${say}</p>
+
+    <div class="tiles2">
+      <div class="tile-b"><b>${sc.correct}/${sc.total}</b><small>bonnes réponses</small></div>
+      <div class="tile-b"><b>${fmtMs(ms)}</b><small>temps · ${Math.round(ms / 1000 / Math.max(1, sc.total))} s par question</small></div>
+    </div>
+
+    <div class="lab">
+      ${wrong ? 'Revoir tes erreurs' : 'Ta correction'}
+      <span class="tally ${wrong ? '' : 'ok'}">${wrong ? plural(wrong, 'faute') : 'sans faute'}</span>
+    </div>
+    <div id="miss-list"></div>
+    ${wrong && wrong < sc.total ? `<button class="btn ghost wide" id="btn-toggle-all"></button>` : ''}
+    ${bars}`;
+
+  renderMisses();
+  const tgl = $('#btn-toggle-all');
+  if (tgl) tgl.onclick = () => { resultAll = !resultAll; renderMisses(); };
 }
+
+/** La liste des questions ratées — dépliables une à une. */
+function renderMisses() {
+  const s = session;
+  const rows = s.questions
+    .map((q, i) => ({ q, i, ok: s.answers[i] === q.a }))
+    .filter(x => resultAll || !x.ok);
+
+  $('#miss-list').innerHTML = rows.length ? rows.map(({ q, i, ok }) => {
+    const mine = s.answers[i];
+    const good = 'ABCDE'[q.a];
+    const sub = ok ? `Q${i + 1} · bonne réponse ${good}`
+      : mine === null ? `Q${i + 1} · pas de réponse · réponse ${good}`
+      : `Q${i + 1} · tu as coché ${'ABCDE'[mine]} · réponse ${good}`;
+    return `<button class="miss ${ok ? 'ok' : ''}" data-miss="${i}">
+      <span class="mi">${Ic.svg(ok ? 'check' : 'close', 16)}</span>
+      <span class="mq">${esc(q.q)}</span>
+      <span class="chev">${Ic.svg('chevron', 17)}</span>
+      <span class="msub">${sub}</span>
+      <span class="detail">
+        <span class="dl"><b>Réponse : ${esc(q.o[q.a])}</b></span>
+        ${ok || mine === null ? '' : `<span class="dl bad">Ta réponse : ${esc(q.o[mine])}</span>`}
+        ${q.e ? `<span class="dx">${esc(q.e)}</span>` : ''}
+      </span>
+    </button>`;
+  }).join('') : `<p class="empty">Aucune erreur sur cette série.</p>`;
+
+  $$('#miss-list [data-miss]').forEach(b => b.onclick = () => b.classList.toggle('open'));
+
+  const tgl = $('#btn-toggle-all');
+  if (tgl) tgl.textContent = resultAll ? 'Ne montrer que les erreurs' : 'Voir aussi les bonnes réponses';
+}
+
+$('#btn-replay').innerHTML = Ic.svg('repeat', 19);
+$('#btn-replay').onclick = () => { if (session) startQuiz(session.mode, session.key, session.opts); };
+$('#btn-done').onclick = () => go('practice');
 
 /* ═══════════════ MNÉMOS ═══════════════ */
 
@@ -939,15 +1006,13 @@ function renderStats() {
     </div>`;
   }).join('');
 
-  const LBL = { mixed: 'Série standard', exam: 'Examen blanc', errors: 'Mes erreurs',
-                due: 'Révision espacée', hard: 'Difficile', mat: 'Matière', block: 'Bloc' };
   const hist = PplStore.sessions().slice(-30).reverse();
   $('#history').innerHTML = hist.length ? hist.map(s => {
     const p = pct(s.correct, s.total);
     const m = s.mat ? PPL.byId(s.mat) : null;
     return `<div class="history-row">
       <span class="hd">${fmtDate(s.ts)}</span>
-      <span class="hm">${m ? esc(m.short || m.name) : (LBL[s.mode] || s.mode)}</span>
+      <span class="hm">${m ? esc(m.short || m.name) : (MODE_LBL[s.mode] || s.mode)}</span>
       <span class="hp" style="color:${scoreColor(p)}">${p} %</span>
     </div>`;
   }).join('') : `<p class="empty">Aucune série pour l'instant.</p>`;

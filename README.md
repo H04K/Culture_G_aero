@@ -142,6 +142,11 @@ restent de la partie.
 - **Le QCM** affiche le bandeau des numéros de question (répondues, justes,
   fausses), la question, les réponses en grandes cartes et, après validation, le
   verdict, l'explication et un lien vers le cours de la matière.
+- **Le résultat** met le verdict en premier — carte verte ou rouge, score en
+  anneau, écart à la barre des 75 % — puis la liste des seules questions
+  ratées, chacune dépliable sur la bonne réponse et son explication. Un bouton
+  ajoute les bonnes réponses à la liste ; la répartition par matière n'apparaît
+  que si la série en mélangeait plusieurs.
 - **Réglages** — format des séries, correction immédiate, chronomètre et profil.
 
 ### Profils par pseudo
