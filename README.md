@@ -120,6 +120,29 @@ du **théorique PPL(A)**, indépendante de la banque culture générale.
 - **413 questions** avec correction expliquée
 - **71 mnémotechniques** (PANNE, FREDA, IMSAFE, PAVE, GUMPS, PARE, SCAP, ANDS,
   RAMPE, VSTOP, FORDEC, 1-en-60…), consultables par matière et marquables « acquis »
+- **26 schémas** vectoriels, agrandissables au doigt
+
+### Une interface à trois onglets
+
+Le module a sa propre charte : fond neutre, cartes blanches, micro-libellés en
+monospace, un bleu unique pour l'action et **une couleur et une icône par
+matière**, tenues du sommaire jusqu'au QCM. Les deux ambiances jour et nuit
+restent de la partie.
+
+- **Cours** — l'anneau de préparation, la carte de reprise, la grille des 12
+  matières puis les mnémos et les schémas. Une matière ouvre sa fiche : barre de
+  progression en segments (un par section), sommaire des sections avec leur état
+  de lecture, et le bouton qui reprend là où l'on s'est arrêté.
+- **Le cours se lit section par section**, une section par écran, avec « section
+  suivante » qui la marque lue au passage — plutôt qu'une seule page interminable.
+- **S'entraîner** — les cinq formats de série en rail horizontal, la liste des
+  matières avec leur taux de réussite, et les rapports. Une matière ouvre sa
+  fiche d'entraînement : courbe des scores série par série avec la barre des
+  75 %, moyenne, meilleur score, puis le choix du format et le bouton de départ.
+- **Le QCM** affiche le bandeau des numéros de question (répondues, justes,
+  fausses), la question, les réponses en grandes cartes et, après validation, le
+  verdict, l'explication et un lien vers le cours de la matière.
+- **Réglages** — format des séries, correction immédiate, chronomètre et profil.
 
 ### Profils par pseudo
 
@@ -135,7 +158,7 @@ sur le même appareil, chacun avec son propre historique et son export JSON.
 | Mes erreurs | Les questions ratées et non consolidées |
 | Révision espacée | Les questions dont l'échéance est arrivée (boîtes de Leitner : 1, 3, 7, 16, 35, 90 jours) |
 | Difficile | Uniquement les questions de niveau 3 |
-| Par matière | Depuis la fiche de cours, entraînement ciblé |
+| Par matière | Série rapide (10 questions), série standard ou examen de matière (40 questions chronométrées) |
 
 Un **score de préparation** agrège cours lus, couverture de la banque, questions
 acquises et régularité.
@@ -305,10 +328,12 @@ data/cours-*.js         les 22 fiches de cours
 drill-calcul.html       drill de calcul mental (autonome, sans dépendance)
 ppl.html                module PPL (cours, QCM, mnémos, profils par pseudo)
 css/ppl.css             styles du module PPL
+js/ppl-icons.js         jeu d'icônes vectorielles du module PPL
 js/ppl-core.js          registre des matières PPL
 js/ppl-store.js         profils par pseudo et progression
 js/ppl-quiz.js          sélection adaptative et moteur de session PPL
-js/ppl-app.js           navigation et rendu du module PPL
+js/ppl-app.js           navigation à trois onglets et rendu du module PPL
+js/ppl-figures.js       les 26 schémas vectoriels du cours
 data/ppl-*.js           les 12 matières (cours + mnémos + questions)
 pass.html               module PASS (cours, QCM, exercices, mnémos, planning)
 css/pass.css            styles du module PASS (charte PPL déclinée)

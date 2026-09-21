@@ -58,9 +58,11 @@ const PplQuiz = (() => {
   /**
    * @param {'mat'|'mixed'|'exam'|'errors'|'due'|'hard'|'block'} mode
    * @param {string|null} key  id de matière ou de bloc
+   * @param {{count?:number, instant?:boolean, limitMs?:number}} [opts]
+   *        Format de série demandé : il l'emporte sur les réglages du profil.
    */
-  function build(mode, key) {
-    const n = mode === 'exam' ? EXAM_COUNT : PplStore.settings().count;
+  function build(mode, key, opts = {}) {
+    const n = opts.count || (mode === 'exam' ? EXAM_COUNT : PplStore.settings().count);
     let pool, picked;
 
     switch (mode) {
@@ -89,7 +91,7 @@ const PplQuiz = (() => {
         picked = weightedPick(pool, Math.min(n, pool.length));
         break;
       case 'exam':
-        picked = balanced(EXAM_COUNT);
+        picked = balanced(n);
         break;
       default:
         picked = balanced(n);
@@ -102,12 +104,14 @@ const PplQuiz = (() => {
     });
 
     return {
-      mode, key: key || null, questions,
+      mode, key: key || null, opts, questions,
       answers: new Array(questions.length).fill(null),
       i: 0,
       startedAt: Date.now(),
-      instant: mode === 'exam' ? false : PplStore.settings().instant,
-      globalLimit: mode === 'exam' ? EXAM_MS : 0
+      instant: opts.instant !== undefined ? opts.instant
+             : (mode === 'exam' ? false : PplStore.settings().instant),
+      globalLimit: opts.limitMs !== undefined ? opts.limitMs
+                 : (mode === 'exam' ? EXAM_MS : 0)
     };
   }
 

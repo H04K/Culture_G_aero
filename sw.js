@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'cadets-prep-v13';
+const VERSION = 'cadets-prep-v14';
 
 const ASSETS = [
   './',
@@ -45,6 +45,7 @@ const ASSETS = [
   './data/q-litterature.js',
   './ppl.html',
   './css/ppl.css',
+  './js/ppl-icons.js',
   './js/ppl-core.js',
   './js/ppl-figures.js',
   './js/ppl-store.js',

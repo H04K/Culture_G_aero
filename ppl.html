@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#f2f3f6">
 <meta name="description" content="Révision complète du PPL(A) : cours, QCM et mnémotechniques sur les 12 matières du programme">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,10 +19,13 @@
 <body>
 
 <!-- ══════════════ PSEUDO ══════════════ -->
-<section class="screen active gate" id="screen-gate">
-  <div class="gate-card">
-    <a class="gate-back" href="index.html">← Menu principal</a>
-    <div class="gate-mark">🛩️</div>
+<section class="screen active" id="screen-gate">
+  <div class="gate-card card">
+    <div class="gate-top">
+      <a class="iconbtn flat" href="index.html" aria-label="Menu principal" id="gate-home"></a>
+      <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+    </div>
+    <div class="tile lg" id="gate-mark"></div>
     <h1>Révision PPL</h1>
     <p class="sub">Cours, QCM et mnémotechniques — les 12 matières du programme théorique PPL(A).</p>
 
@@ -32,7 +35,7 @@
     <input class="field" id="gate-input" type="text" maxlength="24" autocomplete="off"
            autocapitalize="off" spellcheck="false" placeholder="Ex. Theo">
     <div class="gate-err" id="gate-err"></div>
-    <button class="btn primary wide" id="gate-go" style="width:100%">Commencer</button>
+    <button class="btn go wide" id="gate-go">Commencer</button>
     <p class="disclaimer">
       Ta progression est enregistrée dans ce navigateur, sous ton pseudo.
       Plusieurs pseudos peuvent cohabiter sur le même appareil.
@@ -40,108 +43,137 @@
   </div>
 </section>
 
-<!-- ══════════════ ACCUEIL ══════════════ -->
-<section class="screen" id="screen-home">
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="hero-top">
-        <div class="hero-mark">🛩️</div>
-        <div>
-          <h1 id="hello">PPL</h1>
-          <p class="sub" id="hello-sub"></p>
-        </div>
-        <div class="hero-actions">
-          <a class="theme-btn" href="index.html" title="Menu principal" aria-label="Menu principal">🏠</a>
-          <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
-          <button class="chip-btn" data-nav="switch">Changer</button>
-        </div>
-      </div>
-      <div class="ready" id="ready"></div>
-    </div>
-  </header>
-
+<!-- ══════════════ COURS — accueil ══════════════ -->
+<section class="screen" id="screen-learn">
   <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 id="hello">PPL</h1>
+        <p class="sub" id="hello-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" id="learn-home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="card ready" id="ready"></div>
     <div id="resume-slot"></div>
 
-    <h2 class="section-title">S'entraîner</h2>
-    <div class="mode-grid" id="mode-grid"></div>
+    <div class="lab">Matières <span class="n" id="mat-count"></span></div>
+    <div class="topics" id="topics"></div>
 
-    <h2 class="section-title">Le programme — 12 matières</h2>
-    <div id="mat-list"></div>
+    <div class="lab">Outils</div>
+    <div id="learn-tools"></div>
 
-    <div class="home-actions">
-      <button class="btn ghost" data-nav="mnemo">🧠 Mnémos</button>
-      <button class="btn ghost" data-nav="schemas">📐 Schémas</button>
-      <button class="btn ghost" data-nav="stats">📊 Stats</button>
-      <button class="btn ghost" data-nav="settings">⚙️ Réglages</button>
-    </div>
-    <p class="disclaimer" id="home-foot"></p>
+    <p class="disclaimer" id="learn-foot"></p>
   </div>
 </section>
 
-<!-- ══════════════ FICHE ══════════════ -->
-<section class="screen" id="screen-fiche">
-  <div class="wrap">
-    <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
-      <h1 id="fiche-title">Fiche</h1>
+<!-- ══════════════ MATIÈRE ══════════════ -->
+<section class="screen" id="screen-mat">
+  <header class="thead" id="mat-head"></header>
+  <div class="wrap" id="mat-wrap"></div>
+</section>
+
+<!-- ══════════════ LECTEUR DE SECTION ══════════════ -->
+<section class="screen" id="screen-reader">
+  <div class="rdr-top">
+    <div class="line">
+      <button class="iconbtn flat" id="rdr-back" aria-label="Retour"></button>
+      <div class="who">
+        <b id="rdr-mat"></b>
+        <small id="rdr-pos"></small>
+      </div>
+      <button class="iconbtn flat" id="rdr-list" aria-label="Sommaire"></button>
     </div>
-    <div id="fiche-body"></div>
+    <div class="track"><i id="rdr-track"></i></div>
+  </div>
+  <div class="rdr-body" id="rdr-body"></div>
+  <div class="rdr-foot">
+    <div class="inner">
+      <button class="btn ghost" id="rdr-prev" aria-label="Section précédente"></button>
+      <button class="btn go" id="rdr-next"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ S'ENTRAÎNER — accueil ══════════════ -->
+<section class="screen" id="screen-practice">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>S'entraîner</h1>
+        <p class="sub" id="practice-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" id="pr-home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="lab">Séries</div>
+    <div class="rail" id="mode-rail"></div>
+    <div class="dots" id="mode-dots"></div>
+
+    <div class="lab">Toutes les matières <span class="n" id="pr-count"></span></div>
+    <div id="pr-list"></div>
+
+    <div class="lab">Rapports</div>
+    <div id="pr-reports"></div>
+  </div>
+</section>
+
+<!-- ══════════════ ENTRAÎNEMENT D'UNE MATIÈRE ══════════════ -->
+<section class="screen" id="screen-matpractice">
+  <header class="thead" id="mp-head"></header>
+  <div class="wrap" id="mp-wrap"></div>
+  <div class="cta" id="mp-cta">
+    <div class="inner">
+      <span class="sum" id="mp-sum"></span>
+      <button class="btn go wide" id="mp-start"></button>
+    </div>
   </div>
 </section>
 
 <!-- ══════════════ QUIZ ══════════════ -->
 <section class="screen" id="screen-quiz">
-  <div class="quiz-top">
-    <button class="icon-btn" id="quiz-quit" aria-label="Quitter">✕</button>
-    <div class="progress-wrap">
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-      <span class="progress-label" id="progress-label"></span>
+  <div class="qtop">
+    <div class="line">
+      <span class="count" id="q-count"></span>
+      <span class="who" id="q-who"></span>
+      <span class="timer" id="q-timer" hidden></span>
+      <button class="iconbtn flat" id="q-quit" aria-label="Quitter"></button>
     </div>
-    <div class="quiz-timer" id="quiz-timer"></div>
+    <div class="track"><i id="q-track"></i></div>
+    <div class="strip" id="q-strip"></div>
   </div>
-  <div class="quiz-body">
-    <div class="q-meta">
-      <span class="chip" id="q-mat"></span>
-      <span class="chip" id="q-diff"></span>
-    </div>
+  <div class="qbody">
+    <div class="qtag" id="q-tag"></div>
     <h2 class="q-text" id="q-text"></h2>
     <div class="options" id="options"></div>
-    <div class="explain" id="explain" hidden>
-      <div class="verdict" id="explain-verdict"></div>
-      <p id="explain-text"></p>
-      <div class="src" id="explain-src"></div>
-    </div>
+    <div class="card fb" id="fb" hidden></div>
   </div>
-  <div class="quiz-foot">
-    <div class="inner"><button class="btn primary wide" id="btn-next" disabled>Valider</button></div>
+  <div class="qfoot">
+    <div class="inner">
+      <button class="btn ghost" id="q-prev" aria-label="Question précédente"></button>
+      <button class="btn go" id="q-next" disabled>Valider</button>
+    </div>
   </div>
 </section>
 
 <!-- ══════════════ RÉSULTAT ══════════════ -->
 <section class="screen" id="screen-result">
-  <div class="wrap">
-    <div class="score-hero" id="score-hero"></div>
-    <div class="tiles" id="result-tiles"></div>
-    <h2 class="section-title">Par matière</h2>
-    <div class="bars" id="result-bars"></div>
-    <h2 class="section-title">Correction détaillée</h2>
-    <div id="review"></div>
-    <div class="sticky-actions">
-      <button class="btn primary wide" id="btn-replay">↻ Rejouer</button>
-      <button class="btn ghost wide" data-nav="home">Accueil</button>
-    </div>
-  </div>
+  <div class="wrap plain" id="result-wrap"></div>
 </section>
 
 <!-- ══════════════ MNÉMOS ══════════════ -->
 <section class="screen" id="screen-mnemo">
   <div class="wrap">
-    <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
-      <h1>Mnémotechniques</h1>
+    <div class="top">
+      <button class="iconbtn" data-back="learn" aria-label="Retour" id="mn-back"></button>
+      <div><h1>Mnémos</h1><p class="sub" id="mnemo-sub"></p></div>
     </div>
-    <p class="fiche-intro" id="mnemo-sub"></p>
     <div class="filters" id="mnemo-filters"></div>
     <div id="mnemo-list"></div>
   </div>
@@ -150,26 +182,25 @@
 <!-- ══════════════ SCHÉMAS ══════════════ -->
 <section class="screen" id="screen-schemas">
   <div class="wrap">
-    <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
-      <h1>Schémas</h1>
+    <div class="top">
+      <button class="iconbtn" data-back="learn" aria-label="Retour" id="sc-back"></button>
+      <div><h1>Schémas</h1><p class="sub" id="schemas-sub"></p></div>
     </div>
-    <p class="fiche-intro" id="schemas-sub"></p>
     <div id="schemas-list"></div>
   </div>
 </section>
 
-<!-- ══════════════ STATS ══════════════ -->
+<!-- ══════════════ STATISTIQUES ══════════════ -->
 <section class="screen" id="screen-stats">
   <div class="wrap">
-    <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
-      <h1>Statistiques</h1>
+    <div class="top">
+      <button class="iconbtn" data-back="practice" aria-label="Retour" id="st-back"></button>
+      <div><h1>Statistiques</h1><p class="sub" id="stats-sub"></p></div>
     </div>
     <div class="tiles" id="stat-tiles"></div>
-    <h2 class="section-title">Maîtrise par matière</h2>
+    <div class="lab">Maîtrise par matière</div>
     <div class="bars" id="stats-bars"></div>
-    <h2 class="section-title">Historique</h2>
+    <div class="lab">Historique</div>
     <div id="history"></div>
   </div>
 </section>
@@ -177,10 +208,15 @@
 <!-- ══════════════ RÉGLAGES ══════════════ -->
 <section class="screen" id="screen-settings">
   <div class="wrap">
-    <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
-      <h1>Réglages</h1>
+    <div class="top">
+      <div><h1>Réglages</h1><p class="sub" id="set-sub"></p></div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" id="se-home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
     </div>
+
+    <div class="lab">Séries de QCM</div>
     <div class="setting-list">
       <label class="setting">
         <div><strong>Questions par série</strong><small>Hors examen blanc</small></div>
@@ -198,21 +234,15 @@
       </label>
     </div>
 
-    <h2 class="section-title">Profil</h2>
-    <div class="setting-list">
-      <div class="setting">
-        <div><strong>Pseudo</strong><small id="cur-pseudo"></small></div>
-        <button class="btn ghost" id="btn-rename">Renommer</button>
-      </div>
-      <button class="setting" data-nav="switch"><div><strong>Changer de pseudo</strong><small>Revenir à l'écran d'accueil</small></div><span>↔</span></button>
-      <button class="setting" id="btn-export"><div><strong>Exporter ma progression</strong><small>Fichier JSON de sauvegarde</small></div><span>⬇</span></button>
-      <button class="setting" id="btn-import"><div><strong>Importer une sauvegarde</strong><small>Restaure un fichier exporté</small></div><span>⬆</span></button>
-      <button class="setting" id="btn-reset"><div><strong class="" style="color:var(--ko)">Réinitialiser ma progression</strong><small>Efface cours lus, mnémos et statistiques</small></div><span>🗑</span></button>
-    </div>
+    <div class="lab">Profil</div>
+    <div class="setting-list" id="profile-list"></div>
     <input type="file" id="file-import" accept="application/json" hidden>
     <p class="disclaimer" id="build-info"></p>
   </div>
 </section>
+
+<!-- ══════════════ BARRE D'ONGLETS ══════════════ -->
+<nav class="tabbar" id="tabbar"></nav>
 
 <div class="fig-zoom" id="fig-zoom">
   <div id="fig-zoom-body"></div>
@@ -222,6 +252,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- Noyau -->
+<script src="js/ppl-icons.js"></script>
 <script src="js/ppl-core.js"></script>
 <script src="js/ppl-figures.js"></script>
 
