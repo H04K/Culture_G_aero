@@ -14,7 +14,7 @@ const Theme = (() => {
   const KEY = 'cadets-theme';
   const JOUR_DEBUT = 7;      // heure locale
   const JOUR_FIN   = 19;
-  const FOND = { jour: '#eef2f8', nuit: '#0a1628' };
+  const FOND = { jour: '#f2f3f6', nuit: '#0e1117' };
 
   function pref() {
     try { const v = localStorage.getItem(KEY); return v === 'jour' || v === 'nuit' ? v : 'auto'; }

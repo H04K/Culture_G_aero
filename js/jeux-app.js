@@ -106,7 +106,7 @@
     $('#box-left').textContent = s.boxes;
     $('#tool-undo').disabled = s.undos <= 0 || !game || !game.canUndo();
     $('#tool-box').disabled = !s.canBox;
-    $('#sound-icon').textContent = s.muted ? '🔇' : '🔊';
+    $('#sound-icon').innerHTML = Ic.svg(s.muted ? 'mute' : 'sound', 18);
   }
 
   function onWin(r) {
@@ -178,7 +178,7 @@
     JeuxStore.setSound(on);
     if (game) game.mute(!on);
     $('#set-sound').checked = on;
-    $('#sound-icon').textContent = on ? '🔊' : '🔇';
+    $('#sound-icon').innerHTML = Ic.svg(on ? 'sound' : 'mute', 18);
   });
 
   $('#win-next').addEventListener('click', () => {
@@ -207,6 +207,10 @@
     if (!game) return;
     if (document.hidden) game.pause(); else game.resume();
   });
+
+  /* Les icônes du balisage fixe. */
+  $$('[data-ic]').forEach(el => el.insertAdjacentHTML('afterbegin', Ic.svg(el.dataset.ic, el.classList.contains('sheet-mark') ? 30 : 18)));
+  $$('[data-ic-after]').forEach(el => el.insertAdjacentHTML('beforeend', Ic.svg(el.dataset.icAfter, 18)));
 
   renderHub();
 

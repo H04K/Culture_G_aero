@@ -1,114 +1,133 @@
 /* ═══════════════════════════════════════════════════════════
    Cadets Prep — Module PASS (Université de Bordeaux)
 
-   Reprend la charte du module PPL et la décline en violet
-   « santé », puis ajoute les composants propres au PASS :
-   planning hebdomadaire, exercices d'application, codes d'UE.
+   La charte commune vient de ui.css. Le module y ajoute sa
+   couleur — violet santé, décliné par semestre — et ses
+   pièces propres : planning hebdomadaire, exercices
+   d'application et codes d'UE.
    ═══════════════════════════════════════════════════════════ */
 
-@import url('ppl.css');
+@import url('ui.css');
 
-:root {
-  --ppl:     var(--mod-pass);      /* accent principal du module */
-  --ppl-2:   var(--mod-pass-2);
-  --ppl-dim: var(--mod-pass-dim);
+/* Une teinte par bloc de programme : le S1, le S2, le fond continu. */
+:root[data-theme="jour"] {
+  --s1:   #6f57b0;
+  --s2:   #2b7f9e;
+  --fond: #b87a12;
+}
+:root[data-theme="nuit"], :root:not([data-theme]) {
+  --s1:   #a795e8;
+  --s2:   #6cc0dd;
+  --fond: #e8a33c;
 }
 
-.gate-mark { box-shadow: var(--shadow); }
-.field:focus { border-color: var(--ppl); box-shadow: 0 0 0 3px var(--ppl-dim); }
+/* Par défaut, tout le module porte le violet. */
+body { --m: var(--m-pass); }
 
 /* ───────── Code d'UE et UE lourdes ───────── */
-
 .ue-code {
-  display: inline-block; margin-right: 6px; padding: 1px 7px;
-  font-size: 11.5px; font-weight: 800; letter-spacing: .04em;
-  color: var(--ppl); background: var(--ppl-dim);
-  border: 1px solid var(--ppl); border-radius: 6px;
+  display: inline-block; margin-right: 7px; padding: 2px 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  color: var(--m); background: var(--card-2);
+  border: 1px solid var(--edge); border-radius: 7px;
   vertical-align: 1px;
 }
 .heavy {
-  display: inline-block; padding: 1px 7px; border-radius: 6px;
-  font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--warn); background: var(--sheen);
-  border: 1px solid var(--warn);
+  display: inline-block; padding: 2px 8px; border-radius: 7px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--warm); background: var(--warm-soft);
+  border: 1px solid var(--warm);
 }
 .tag.heavy { text-transform: none; }
 
 /* ───────── Bandeau d'accès au planning ───────── */
-
 .plan-cta {
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
-  margin-top: 16px; padding: 16px 18px;
-  background: linear-gradient(135deg, var(--ppl-dim), var(--surface));
-  border: 1px solid var(--ppl); border-radius: var(--radius);
-  color: var(--text); text-decoration: none;
+  margin-top: 14px; padding: 16px 16px 16px 18px;
+  background: var(--card); border: 1px solid var(--edge);
+  border-left: 4px solid var(--m); border-radius: var(--r-l);
+  box-shadow: var(--lift); color: var(--ink); text-decoration: none;
+  transition: transform .12s;
 }
-.plan-cta .cta-icon { font-size: 26px; }
-.plan-cta .cta-body { flex: 1; display: block; }
-.plan-cta b { display: block; font-size: 16px; }
-.plan-cta small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
-.plan-cta .cta-go { color: var(--ppl); font-size: 20px; }
+.plan-cta:active { transform: scale(.99); }
+.plan-cta .cta-icon {
+  width: 44px; height: 44px; flex: 0 0 44px; border-radius: 13px;
+  background: var(--m); color: #fff; display: grid; place-items: center;
+}
+:root[data-theme="nuit"] .plan-cta .cta-icon, :root:not([data-theme]) .plan-cta .cta-icon { color: #12161d; }
+.plan-cta .cta-body { flex: 1; min-width: 0; }
+.plan-cta b { display: block; font-size: 16px; letter-spacing: -.015em; }
+.plan-cta small { display: block; color: var(--dim); font-size: 12.5px; margin-top: 2px; line-height: 1.4; }
+.plan-cta .cta-go { color: var(--pale); }
 
-/* ───────── Planning ───────── */
-
+/* ───────── Planning hebdomadaire ───────── */
 .plan-row {
   display: flex; gap: 12px; align-items: flex-start;
-  padding: 14px; margin-bottom: 10px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px; margin-bottom: 9px;
+  background: var(--card); border: 1px solid var(--edge);
+  border-radius: var(--r-l); box-shadow: var(--lift);
 }
-.plan-row.done { border-color: var(--ok); background: linear-gradient(180deg, var(--ok-dim), var(--surface)); }
+.plan-row.done { border-color: var(--yes); }
 .plan-check {
-  flex: 0 0 auto; width: 28px; height: 28px; margin-top: 2px;
-  border-radius: 9px; border: 1.5px solid var(--line); background: var(--bg-2);
-  color: var(--ok); font-weight: 800; line-height: 1;
+  flex: 0 0 auto; width: 26px; height: 26px; margin-top: 2px;
+  border-radius: 50%; border: 2px solid var(--edge-2); background: transparent;
+  color: transparent; display: grid; place-items: center;
 }
-.plan-row.done .plan-check { border-color: var(--ok); background: var(--ok-dim); }
+.plan-row.done .plan-check { border-color: var(--yes); background: var(--yes); color: #fff; }
+:root[data-theme="nuit"] .plan-row.done .plan-check, :root:not([data-theme]) .plan-row.done .plan-check { color: #12161d; }
 .plan-body { flex: 1; min-width: 0; }
 .plan-when {
-  font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ppl); margin-bottom: 3px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--m); margin-bottom: 4px;
 }
-.plan-txt { font-size: 15px; }
-.plan-ues { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.plan-txt { font-size: 15px; line-height: 1.45; }
+.plan-ues { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .plan-ue {
-  padding: 5px 10px; font-size: 12.5px; color: var(--muted);
-  background: var(--bg-2); border: 1px solid var(--line); border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; font-size: 12.5px; color: var(--dim);
+  background: var(--card-2); border: 1px solid var(--edge); border-radius: 999px;
 }
-.plan-ue:hover { color: var(--text); border-color: var(--ppl); }
-.plan-notes { margin: 12px 0 0; padding-left: 20px; color: var(--muted); font-size: 13.5px; }
+.plan-ue:hover { color: var(--ink); border-color: var(--m); }
+.plan-ue .ic { color: var(--m); }
+.plan-notes { margin: 12px 0 0; padding-left: 20px; color: var(--dim); font-size: 13.5px; line-height: 1.6; }
 .plan-notes li { margin-bottom: 8px; }
-.plan-notes b { color: var(--text); }
+.plan-notes b { color: var(--ink); }
 
 /* ───────── Exercices d'application ───────── */
-
 .exo {
-  padding: 16px; margin-bottom: 12px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 17px; margin-bottom: 11px;
+  background: var(--card); border: 1px solid var(--edge);
+  border-radius: var(--r-l); box-shadow: var(--lift);
 }
-.exo.done { border-color: var(--ok); }
+.exo.done { border-color: var(--yes); }
 .exo-q { font-size: 15.5px; line-height: 1.6; }
-.exo-q b { color: var(--ppl); }
+.exo-q b { color: var(--m); font-weight: 650; }
 .exo-hint {
-  margin-top: 10px; padding: 9px 12px; font-size: 13.5px; color: var(--muted);
-  background: var(--bg-2); border-left: 3px solid var(--ppl); border-radius: 0 8px 8px 0;
+  margin-top: 11px; padding: 11px 13px; font-size: 13.5px; color: var(--dim);
+  background: var(--card-2); border-left: 3px solid var(--m); border-radius: 0 var(--r-s) var(--r-s) 0;
+  line-height: 1.55;
 }
-.exo-hint b { color: var(--ppl); }
+.exo-hint b { color: var(--m); }
 .exo-reveal {
-  margin-top: 12px; padding: 8px 14px; font-size: 13.5px; font-weight: 600;
-  color: var(--ppl); background: var(--ppl-dim);
-  border: 1px solid var(--ppl); border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 12px; padding: 10px 15px; font-size: 13.5px; font-weight: 600;
+  color: var(--go); background: var(--go-soft);
+  border: 1px solid transparent; border-radius: var(--r-m);
 }
 .exo-sol {
-  margin-top: 12px; padding: 13px 15px; font-size: 14.5px; line-height: 1.65;
-  background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+  margin-top: 12px; padding: 14px 15px; font-size: 14.5px; line-height: 1.65;
+  background: var(--card-2); border: 1px solid var(--edge); border-radius: var(--r-m);
+  color: var(--ink-2);
 }
 .exo-sol p { margin-bottom: 9px; }
 .exo-sol p:last-child { margin-bottom: 0; }
-.exo-sol b { color: var(--ok); }
+.exo-sol b { color: var(--yes); font-weight: 650; }
 .exo-foot {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line);
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--edge);
 }
-.exo-mark { font-size: 12.5px; color: var(--faint); }
-.exo.done .exo-mark { color: var(--ok); font-weight: 700; }
-.exo-foot .from { font-size: 12px; color: var(--faint); }
+.exo-mark { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--pale); }
+.exo.done .exo-mark { color: var(--yes); }
+.exo-foot .from { font-family: var(--mono); font-size: 11px; color: var(--pale); letter-spacing: .08em; }

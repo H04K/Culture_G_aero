@@ -28,6 +28,7 @@
       $$('#tabbar .tab').forEach(t => t.classList.toggle('on', t.dataset.nav === id));
     }
     document.body.classList.toggle('with-tabs', onglet);
+    document.body.classList.toggle('no-tabs', !onglet);
     window.scrollTo(0, 0);
   }
 
@@ -114,10 +115,11 @@
     $('#cat-grid').innerHTML = Bank.categories().map(c => {
       const st = catStats[c.key];
       const pct = st ? st.pct : 0;
-      return `<button class="cat-card" data-cat="${c.key}">
-        <span class="cat-head"><span>${c.icon}</span><b>${esc(c.name)}</b></span>
-        <span class="mini-bar"><i style="width:${pct}%;background:${st ? barColor(pct) : 'var(--line)'}"></i></span>
-        <span class="cat-foot"><span>${c.questions.length} q.</span><span>${st ? pct + '%' : '—'}</span></span>
+      return `<button class="topic" data-cat="${c.key}" style="--m:var(--cat-${c.key})">
+        <span class="tile">${Ic.cat(c.key, 20)}</span>
+        <span class="tname">${esc(c.name)}</span>
+        <span class="tmeta">${c.questions.length} questions${st ? ` · ${pct} %` : ''}</span>
+        <span class="track"><i style="width:${pct}%;background:${st ? barColor(pct) : 'transparent'}"></i></span>
       </button>`;
     }).join('');
   }
@@ -251,7 +253,8 @@
     });
 
     const v = $('#explain-verdict');
-    v.textContent = ok ? '✓ Bonne réponse' : '✕ Mauvaise réponse';
+    v.innerHTML = `<span class="vi">${Ic.svg(ok ? 'check' : 'close', 14)}</span>` +
+                  (ok ? 'Bonne réponse' : 'Mauvaise réponse');
     v.className = 'explain-verdict ' + (ok ? 'ok' : 'ko');
     $('#explain-text').textContent = q.e;
     $('#explain').hidden = false;
@@ -339,7 +342,7 @@
         const p = Math.round(v[0] / v[1] * 100);
         const c = Bank.category(k);
         return `<div class="bar-row">
-          <div class="bar-head"><b>${c.icon} ${esc(c.name)}</b><span>${v[0]}/${v[1]}</span></div>
+          <div class="bar-head"><b>${Ic.cat(k, 17)} ${esc(c.name)}</b><span>${v[0]}/${v[1]}</span></div>
           <div class="bar-track"><i style="width:${p}%;background:${barColor(p)}"></i></div>
         </div>`;
       }).join('');
@@ -349,7 +352,7 @@
       const ok = picked === q.a;
       return `<div class="rev-item ${ok ? 'ok' : ''}" data-rev="${i}">
         <button class="rev-q">
-          <span class="rev-mark">${ok ? '✅' : '❌'}</span>
+          <span class="rev-mark" style="color:var(--${ok ? 'yes' : 'no'})">${Ic.svg(ok ? 'check' : 'close', 16)}</span>
           <span>${esc(q.q)}</span>
         </button>
         <div class="rev-body">
@@ -381,7 +384,7 @@
 
     $('#stats-bars').innerHTML = rows.length ? rows.map(({ c, st }) => `
       <div class="bar-row">
-        <div class="bar-head"><b>${c.icon} ${esc(c.name)}</b><span>${st.ok}/${st.tot} · ${st.pct}%</span></div>
+        <div class="bar-head"><b>${Ic.cat(c.key, 17)} ${esc(c.name)}</b><span>${st.ok}/${st.tot} · ${st.pct}%</span></div>
         <div class="bar-track"><i style="width:${st.pct}%;background:${barColor(st.pct)}"></i></div>
       </div>`).join('')
       : `<div class="empty-state">Aucune donnée pour l'instant.</div>`;
@@ -464,7 +467,7 @@
     // lancement d'une session
     $$('.mode-card').forEach(b => b.addEventListener('click', () => start(b.dataset.mode)));
     $('#cat-grid').addEventListener('click', e => {
-      const b = e.target.closest('.cat-card');
+      const b = e.target.closest('.topic[data-cat]');
       if (b) start('cat', b.dataset.cat);
     });
 
@@ -597,6 +600,17 @@
   }
 
   /* ───────────────── Démarrage ───────────────── */
+
+  /* Les icônes du balisage fixe : data-ic pour l'interface,
+     data-mod pour la pastille d'un entraînement. */
+  function peindre() {
+    $$('[data-ic]').forEach(el => {
+      const grand = el.classList.contains('mode-icon') || el.classList.contains('tab-ic');
+      el.insertAdjacentHTML('afterbegin', Ic.svg(el.dataset.ic, grand ? 20 : 18));
+    });
+    $$('[data-mod]').forEach(el => el.innerHTML = Ic.mod(el.dataset.mod, 22));
+  }
+
   function init() {
     if (!Bank.count()) {
       document.body.innerHTML =
@@ -605,6 +619,7 @@
         '(voir README) plutôt qu\'en double-cliquant le fichier.</p>';
       return;
     }
+    peindre();
     bind();
     renderHome();
     show('modules');         /* l'application s'ouvre sur les entraînements */

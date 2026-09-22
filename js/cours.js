@@ -53,6 +53,9 @@ const CoursUI = (() => {
   }
 
   /* ───── Liste des fiches ───── */
+  /* Une icône par bloc de programme. */
+  const BLOC_IC = { tech: 'prop', ops: 'compass', monde: 'globe', autre: 'book' };
+
   function renderList() {
     const read = Store.coursRead();
     const done = Cours.all().filter(f => read[f.id]).length;
@@ -75,20 +78,20 @@ const CoursUI = (() => {
       return `
         <div class="cours-block">
           <div class="cours-block-head">
-            <span class="cours-block-icon">${b.icon}</span>
+            <span class="cours-block-icon">${Ic.svg(BLOC_IC[key] || 'book', 18)}</span>
             <div><b>${esc(b.name)}</b><small>${esc(b.desc)}</small></div>
           </div>
           <div class="cours-cards">
             ${fiches.map(f => `
-              <button class="cours-card${read[f.id] ? ' read' : ''}" data-cours="${f.id}">
-                <span class="cc-icon">${f.icon}</span>
+              <button class="cours-card${read[f.id] ? ' read' : ''}" data-cours="${f.id}" style="--m:var(--cat-${f.cat})">
+                <span class="cc-icon">${Ic.cat(f.cat, 20)}</span>
                 <span class="cc-body">
                   <b>${esc(f.title)}</b>
                   <small>${esc(f.intro)}</small>
                 </span>
                 <span class="cc-meta">
                   <span class="cc-min">${f.min} min</span>
-                  ${read[f.id] ? '<span class="cc-check">✓</span>' : ''}
+                  ${read[f.id] ? `<span class="cc-check">${Ic.svg('check', 15)}</span>` : ''}
                 </span>
               </button>`).join('')}
           </div>
@@ -135,9 +138,10 @@ const CoursUI = (() => {
         </div>
       </section>` : '';
 
+    $('#fiche-content').setAttribute('style', `--m:var(--cat-${f.cat})`);
     $('#fiche-content').innerHTML = `
       <div class="fiche-hero">
-        <span class="fiche-icon">${f.icon}</span>
+        <span class="tile lg">${Ic.cat(f.cat, 26)}</span>
         <h1>${esc(f.title)}</h1>
         <p>${esc(f.intro)}</p>
         <span class="fiche-min">${f.min} min de lecture</span>
@@ -147,11 +151,11 @@ const CoursUI = (() => {
       ${flash}
       <div class="fiche-actions">
         <button class="btn primary wide" id="fiche-read" data-id="${f.id}">
-          ${read[f.id] ? '✓ Fiche lue — marquer comme non lue' : 'Marquer comme lue'}
+          ${read[f.id] ? Ic.svg('check', 17) + ' Fiche lue — marquer comme non lue' : 'Marquer comme lue'}
         </button>
         ${f.cat && Bank.category(f.cat) ? `
           <button class="btn wide" id="fiche-quiz" data-cat="${f.cat}">
-            🎯 S'entraîner sur ce thème (${Bank.category(f.cat).questions.length} questions)
+            ${Ic.svg('target', 17)} S'entraîner sur ce thème (${Bank.category(f.cat).questions.length} questions)
           </button>` : ''}
       </div>`;
 

@@ -445,7 +445,7 @@ Figs.add('espaces', 'reglementation',
   <text x="42" y="209" class="end g">SFC</text>
 
   <g class="af" transform="translate(276,120)">
-    <path d="M0,-7 L0,5 M-8,0 L8,0 M-3,6 L3,6" stroke="var(--ppl)" stroke-width="1.6" fill="none"/>
+    <path d="M0,-7 L0,5 M-8,0 L8,0 M-3,6 L3,6" stroke="var(--m, var(--go))" stroke-width="1.6" fill="none"/>
   </g>
   <text x="276" y="142" class="mid af">VFR</text>
 </svg>`);
@@ -970,7 +970,7 @@ Figs.add('fromage-suisse', 'facteurs-humains',
     <path d="M256 30 l30 -14 v112 l-30 14 z"/>
   </g>
 
-  <g fill="var(--bg)">
+  <g fill="var(--pg)">
     <ellipse cx="55"  cy="86" rx="7" ry="10"/>
     <ellipse cx="127" cy="86" rx="7" ry="10"/>
     <ellipse cx="199" cy="86" rx="7" ry="10"/>
@@ -1049,13 +1049,13 @@ Figs.add('prevol', 'cellule',
            C196 184 164 184 146 176 C110 160 60 140 60 96 C60 54 114 26 180 26"
         class="a dash" fill="none" marker-end="url(#ar-a)"/>
 
-  <g class="af" stroke="var(--bg-2)" stroke-width="2.5">
+  <g class="af" stroke="var(--card)" stroke-width="2.5">
     <circle cx="180" cy="26"  r="9"/><circle cx="266" cy="46"  r="9"/>
     <circle cx="300" cy="104" r="9"/><circle cx="214" cy="176" r="9"/>
     <circle cx="146" cy="176" r="9"/><circle cx="60"  cy="104" r="9"/>
     <circle cx="94"  cy="46"  r="9"/>
   </g>
-  <g class="mid" style="fill:var(--bg);font-weight:700;font-size:10px">
+  <g class="mid" style="fill:var(--pg);font-weight:700;font-size:10px">
     <text x="180" y="30">1</text><text x="266" y="50">2</text>
     <text x="300" y="108">3</text><text x="214" y="180">4</text>
     <text x="146" y="180">5</text><text x="60"  y="108">6</text>

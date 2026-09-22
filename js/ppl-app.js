@@ -88,7 +88,7 @@ function show(v) {
   $$('.screen').forEach(s => s.classList.remove('active'));
   $('#screen-' + v).classList.add('active');
   view = v;
-  document.body.classList.toggle('has-tabs', !NO_TABS.has(v));
+  document.body.classList.toggle('no-tabs', NO_TABS.has(v));
   document.body.classList.toggle('has-cta', v === 'matpractice');
   $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB_OF[v]));
   window.scrollTo(0, 0);

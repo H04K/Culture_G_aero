@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#f2f3f6">
 <meta name="description" content="Jeux de pause — Tri de vis : dévisse les plaques et range les vis par couleur, 40 niveaux">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,7 +22,7 @@
 <section class="screen active" id="screen-hub">
   <header class="hero">
     <div class="hero-inner">
-      <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil">←</a>
+      <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil" data-ic="left"></a>
       <div>
         <h1>Jeux</h1>
         <p class="sub">La pause entre deux séries de QCM</p>
@@ -41,7 +41,7 @@
         <small>Démonte des meubles et des maisons en 3D : dévisse les pièces et range les vis par couleur, trois par boîte. 40 niveaux.</small>
         <span class="game-meta" id="game-meta"></span>
       </span>
-      <span class="game-go">→</span>
+      <span class="game-go" data-ic="chevron"></span>
     </button>
 
     <h2 class="section-title">Comment jouer</h2>
@@ -66,7 +66,7 @@
         <input type="checkbox" id="set-sound" class="switch" checked>
       </label>
       <button class="setting as-btn danger" id="btn-reset-jeux">
-        <div><strong>Réinitialiser la progression</strong><small>Efface étoiles et niveaux débloqués</small></div><span>🗑</span>
+        <div><strong>Réinitialiser la progression</strong><small>Efface étoiles et niveaux débloqués</small></div><span class="chev" data-ic="trash"></span>
       </button>
     </div>
   </div>
@@ -76,9 +76,9 @@
 <section class="screen" id="screen-levels">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="hub" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="hub" aria-label="Retour" data-ic="left"></button>
       <h1>Tri de vis</h1>
-      <a class="chip-btn" href="index.html" title="Menu principal">🏠 Menu</a>
+      <a class="chip-btn" href="index.html" title="Menu principal" data-ic="home">Menu</a>
     </div>
     <div class="lvl-stats" id="lvl-stats"></div>
     <div class="lvl-grid" id="lvl-grid"></div>
@@ -92,7 +92,7 @@
 <!-- ══════════════ PARTIE ══════════════ -->
 <section class="screen" id="screen-play">
   <div class="play-bar">
-    <button class="icon-btn" id="play-back" aria-label="Quitter">←</button>
+    <button class="icon-btn" id="play-back" aria-label="Quitter" data-ic="left"></button>
     <div class="play-info">
       <b id="play-title">Niveau 1</b>
       <small id="play-sub"></small>
@@ -103,10 +103,10 @@
   <div class="play-stage"><canvas id="board" aria-label="Plateau de jeu : touche une vis pour la dévisser"></canvas></div>
 
   <div class="play-tools">
-    <button class="tool" id="tool-undo"><span>↺</span><em>Annuler</em><i id="undo-left">3</i></button>
-    <button class="tool" id="tool-box"><span>＋</span><em>Boîte</em><i id="box-left">1</i></button>
-    <button class="tool" id="tool-restart"><span>⟳</span><em>Rejouer</em></button>
-    <button class="tool" id="tool-sound"><span id="sound-icon">🔊</span><em>Son</em></button>
+    <button class="tool" id="tool-undo"><span data-ic="undo"></span><em>Annuler</em><i id="undo-left">3</i></button>
+    <button class="tool" id="tool-box"><span data-ic="plus"></span><em>Boîte</em><i id="box-left">1</i></button>
+    <button class="tool" id="tool-restart"><span data-ic="repeat"></span><em>Rejouer</em></button>
+    <button class="tool" id="tool-sound"><span id="sound-icon"></span><em>Son</em></button>
   </div>
 
   <!-- victoire -->
@@ -116,9 +116,9 @@
       <h2 id="win-title">Niveau terminé</h2>
       <p class="sheet-sub" id="win-sub"></p>
       <div class="sheet-facts" id="win-facts"></div>
-      <button class="btn primary wide" id="win-next">Niveau suivant →</button>
+      <button class="btn primary wide" id="win-next" data-ic-after="right">Niveau suivant</button>
       <div class="sheet-row">
-        <button class="btn ghost" id="win-again">↻ Rejouer</button>
+        <button class="btn ghost" id="win-again" data-ic="repeat">Rejouer</button>
         <button class="btn ghost" id="win-levels">Niveaux</button>
       </div>
     </div>
@@ -127,11 +127,11 @@
   <!-- blocage -->
   <div class="overlay" id="ov-stuck" hidden>
     <div class="sheet">
-      <div class="sheet-mark">⚠️</div>
+      <div class="sheet-mark" data-ic="alert"></div>
       <h2>Plus aucun coup possible</h2>
       <p class="sheet-sub">La réserve est pleine et aucune vis accessible n'entre dans une boîte ouverte.</p>
       <div class="sheet-row" id="stuck-helps"></div>
-      <button class="btn primary wide" id="stuck-restart">↻ Recommencer le niveau</button>
+      <button class="btn primary wide" id="stuck-restart" data-ic="repeat">Recommencer le niveau</button>
       <button class="btn ghost wide" id="stuck-levels">Choisir un autre niveau</button>
     </div>
   </div>
@@ -139,6 +139,7 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="js/icons.js"></script>
 <script src="js/jeux-solids.js"></script>
 <script src="js/jeux-levels.js"></script>
 <script src="js/jeux-store.js"></script>

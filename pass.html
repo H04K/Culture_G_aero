@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#f2f3f6">
 <meta name="description" content="Révision PASS Bordeaux : cours, fiches, mnémotechniques, exercices et QCM sur les 19 UE du programme">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,8 +21,8 @@
 <!-- ══════════════ PSEUDO ══════════════ -->
 <section class="screen active gate" id="screen-gate">
   <div class="gate-card">
-    <a class="gate-back" href="index.html">← Menu principal</a>
-    <div class="gate-mark">🩺</div>
+    <a class="gate-back" href="index.html" data-ic="left">Menu principal</a>
+    <div class="gate-mark" id="gate-mark"></div>
     <h1>Révision PASS</h1>
     <p class="sub">Cours, fiches, mnémotechniques, exercices et QCM — les UE du PASS de l'Université de Bordeaux, dans l'ordre du planning de révision.</p>
 
@@ -45,13 +45,13 @@
   <header class="hero">
     <div class="hero-inner">
       <div class="hero-top">
-        <div class="hero-mark">🩺</div>
+        <div class="hero-mark" id="hero-mark"></div>
         <div>
           <h1 id="hello">PASS</h1>
           <p class="sub" id="hello-sub"></p>
         </div>
         <div class="hero-actions">
-          <a class="theme-btn" href="index.html" title="Menu principal" aria-label="Menu principal">🏠</a>
+          <a class="theme-btn" href="index.html" title="Menu principal" aria-label="Menu principal" id="go-home"></a>
           <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
           <button class="chip-btn" data-nav="switch">Changer</button>
         </div>
@@ -64,12 +64,12 @@
     <div id="resume-slot"></div>
 
     <button class="plan-cta" data-nav="plan">
-      <span class="cta-icon">🗓️</span>
+      <span class="cta-icon" id="plan-icon"></span>
       <span class="cta-body">
         <b>Le planning de révision</b>
         <small>Semaine par semaine, S1 et S2 — coche ce que tu as bouclé</small>
       </span>
-      <span class="cta-go">→</span>
+      <span class="cta-go" id="plan-go"></span>
     </button>
 
     <h2 class="section-title">S'entraîner</h2>
@@ -79,10 +79,10 @@
     <div id="mat-list"></div>
 
     <div class="home-actions">
-      <button class="btn ghost" data-nav="exos">✍️ Exercices</button>
-      <button class="btn ghost" data-nav="mnemo">🧠 Mnémos</button>
-      <button class="btn ghost" data-nav="stats">📊 Stats</button>
-      <button class="btn ghost" data-nav="settings">⚙️ Réglages</button>
+      <button class="btn ghost" data-nav="exos" data-ic="pen">Exercices</button>
+      <button class="btn ghost" data-nav="mnemo" data-ic="bulb">Mnémos</button>
+      <button class="btn ghost" data-nav="stats" data-ic="chart">Stats</button>
+      <button class="btn ghost" data-nav="settings" data-ic="sliders">Réglages</button>
     </div>
     <p class="disclaimer" id="home-foot"></p>
   </div>
@@ -92,7 +92,7 @@
 <section class="screen" id="screen-plan">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="home" aria-label="Retour" data-ic="left"></button>
       <h1>Planning de révision</h1>
     </div>
     <p class="fiche-intro" id="plan-sub"></p>
@@ -106,7 +106,7 @@
 <section class="screen" id="screen-fiche">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="home" aria-label="Retour" data-ic="left"></button>
       <h1 id="fiche-title">Fiche</h1>
     </div>
     <div id="fiche-body"></div>
@@ -117,7 +117,7 @@
 <section class="screen" id="screen-exos">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="home" aria-label="Retour" data-ic="left"></button>
       <h1>Exercices</h1>
     </div>
     <p class="fiche-intro" id="exos-sub"></p>
@@ -129,7 +129,7 @@
 <!-- ══════════════ QUIZ ══════════════ -->
 <section class="screen" id="screen-quiz">
   <div class="quiz-top">
-    <button class="icon-btn" id="quiz-quit" aria-label="Quitter">✕</button>
+    <button class="icon-btn" id="quiz-quit" aria-label="Quitter" data-ic="close"></button>
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
       <span class="progress-label" id="progress-label"></span>
@@ -174,7 +174,7 @@
 <section class="screen" id="screen-mnemo">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="home" aria-label="Retour" data-ic="left"></button>
       <h1>Mnémotechniques</h1>
     </div>
     <p class="fiche-intro" id="mnemo-sub"></p>
@@ -187,7 +187,7 @@
 <section class="screen" id="screen-stats">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="home" aria-label="Retour" data-ic="left"></button>
       <h1>Statistiques</h1>
     </div>
     <div class="tiles" id="stat-tiles"></div>
@@ -202,7 +202,7 @@
 <section class="screen" id="screen-settings">
   <div class="wrap">
     <div class="page-head">
-      <button class="icon-btn" data-nav="home" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="home" aria-label="Retour" data-ic="left"></button>
       <h1>Réglages</h1>
     </div>
     <div class="setting-list">
@@ -241,6 +241,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- Noyau -->
+<script src="js/icons.js"></script>
 <script src="js/pass-core.js"></script>
 
 <!-- UE — Semestre 1 -->

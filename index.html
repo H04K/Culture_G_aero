@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#f2f3f6">
 <meta name="description" content="Entraînement culture générale aéronautique — préparation Cadets Air France 2026">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -31,23 +31,23 @@
       <h2 class="section-title">Lancer une session</h2>
       <div class="mode-grid">
         <button class="mode-card primary" data-mode="mixed">
-          <span class="mode-icon">🎯</span>
+          <span class="mode-icon" data-ic="target"></span>
           <span class="mode-name">Session standard</span>
           <span class="mode-desc">20 questions, tous thèmes, pondérées par tes faiblesses</span>
         </button>
         <button class="mode-card" data-mode="exam">
-          <span class="mode-icon">⏱️</span>
+          <span class="mode-icon" data-ic="clock"></span>
           <span class="mode-name">Mode examen</span>
           <span class="mode-desc">30 questions · 10 s chrono par question · enchaînées, correction à la fin</span>
         </button>
         <button class="mode-card" data-mode="errors">
-          <span class="mode-icon">🔁</span>
+          <span class="mode-icon" data-ic="repeat"></span>
           <span class="mode-name">Mes erreurs</span>
           <span class="mode-desc">Rejoue uniquement ce que tu as raté</span>
           <span class="mode-badge" id="errors-count">0</span>
         </button>
         <button class="mode-card" data-mode="hard">
-          <span class="mode-icon">🔥</span>
+          <span class="mode-icon" data-ic="flame"></span>
           <span class="mode-name">Difficile</span>
           <span class="mode-desc">Uniquement les questions de niveau 3</span>
         </button>
@@ -66,7 +66,7 @@
   <!-- ══════════════ QUIZ ══════════════ -->
   <section class="screen" id="screen-quiz">
     <div class="quiz-top">
-      <button class="icon-btn" id="quiz-quit" aria-label="Quitter">✕</button>
+      <button class="icon-btn" id="quiz-quit" aria-label="Quitter" data-ic="close"></button>
       <div class="progress-wrap">
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
         <span class="progress-label" id="progress-label">1 / 20</span>
@@ -104,7 +104,7 @@
       <h2 class="section-title">Correction détaillée</h2>
       <div class="review" id="review"></div>
       <div class="home-actions sticky-actions">
-        <button class="btn primary" data-nav="replay">↻ Nouvelle session</button>
+        <button class="btn primary" data-nav="replay" data-ic="repeat">Nouvelle session</button>
         <button class="btn ghost" data-nav="modules">Accueil</button>
       </div>
     </div>
@@ -129,7 +129,7 @@
   <!-- ══════════════ FICHE ══════════════ -->
   <section class="screen" id="screen-fiche">
     <div class="fiche-top">
-      <button class="icon-btn" data-nav="cours" aria-label="Retour">←</button>
+      <button class="icon-btn" data-nav="cours" aria-label="Retour" data-ic="left"></button>
       <span>Fiche de cours</span>
     </div>
     <div class="wrap"><div id="fiche-content"></div></div>
@@ -140,7 +140,7 @@
   <section class="screen active" id="screen-modules">
     <header class="hero">
       <div class="hero-brand">
-        <span class="brand-mark"></span>
+        <span class="brand-mark" data-mod="culture"></span>
         <div>
           <h1>Cadets Prep</h1>
           <p class="brand-sub">Culture générale aéronautique · Sélection 2026</p>
@@ -154,48 +154,48 @@
       <h2 class="section-title">Les entraînements</h2>
 
       <button class="cours-cta" data-nav="home">
-        <span class="cta-icon">✈️</span>
+        <span class="cta-icon" data-mod="culture"></span>
         <span class="cta-body">
           <b>Culture générale aéro</b>
           <small id="cta-culture-sub">1 763 questions sur 22 thèmes, 22 fiches de cours — l'épreuve de la sélection</small>
         </span>
-        <span class="cta-go">→</span>
+        <span class="cta-go" data-ic="chevron"></span>
       </button>
 
       <a class="cours-cta drill-cta" href="drill-calcul.html">
-        <span class="cta-icon">⌨️</span>
+        <span class="cta-icon" data-mod="calcul"></span>
         <span class="cta-body">
           <b>Calcul mental</b>
           <small>Tables, carrés, puissances et chaînes d'opérations — prépa psychotechnique, au clavier</small>
         </span>
-        <span class="cta-go">→</span>
+        <span class="cta-go" data-ic="chevron"></span>
       </a>
 
       <a class="cours-cta pass-cta" href="pass.html">
-        <span class="cta-icon">🩺</span>
+        <span class="cta-icon" data-mod="pass"></span>
         <span class="cta-body">
           <b>Révision PASS</b>
           <small>Les 19 UE du PASS de l'Université de Bordeaux : planning, cours, mnémos, exercices corrigés et QCM</small>
         </span>
-        <span class="cta-go">→</span>
+        <span class="cta-go" data-ic="chevron"></span>
       </a>
 
       <a class="cours-cta ppl-cta" href="ppl.html">
-        <span class="cta-icon">🛩️</span>
+        <span class="cta-icon" data-mod="ppl"></span>
         <span class="cta-body">
           <b>Révision PPL</b>
           <small>Les 12 matières du théorique PPL(A) : cours complets, QCM, mnémos et suivi par pseudo</small>
         </span>
-        <span class="cta-go">→</span>
+        <span class="cta-go" data-ic="chevron"></span>
       </a>
 
       <a class="cours-cta jeux-cta" href="jeux.html">
-        <span class="cta-icon">🔩</span>
+        <span class="cta-icon" data-mod="jeux"></span>
         <span class="cta-body">
           <b>Jeux</b>
           <small>Tri de vis : démonte des meubles et des maisons en 3D, range les vis par couleur — 40 niveaux</small>
         </span>
-        <span class="cta-go">→</span>
+        <span class="cta-go" data-ic="chevron"></span>
       </a>
     </div>
   </section>
@@ -252,9 +252,9 @@
       </div>
       <h2 class="section-title">Données</h2>
       <div class="setting-list">
-        <button class="setting as-btn" id="btn-export"><div><strong>Exporter ma progression</strong><small>Fichier JSON de sauvegarde</small></div><span>⬇</span></button>
-        <button class="setting as-btn" id="btn-import"><div><strong>Importer une sauvegarde</strong><small>Restaure un fichier exporté</small></div><span>⬆</span></button>
-        <button class="setting as-btn danger" id="btn-reset"><div><strong>Réinitialiser</strong><small>Efface tout l'historique</small></div><span>🗑</span></button>
+        <button class="setting as-btn" id="btn-export"><div><strong>Exporter ma progression</strong><small>Fichier JSON de sauvegarde</small></div><span class="chev" data-ic="down"></span></button>
+        <button class="setting as-btn" id="btn-import"><div><strong>Importer une sauvegarde</strong><small>Restaure un fichier exporté</small></div><span class="chev" data-ic="up"></span></button>
+        <button class="setting as-btn danger" id="btn-reset"><div><strong>Réinitialiser</strong><small>Efface tout l'historique</small></div><span class="chev" data-ic="trash"></span></button>
       </div>
       <input type="file" id="file-import" accept="application/json" hidden>
       <p class="disclaimer" id="build-info"></p>
@@ -264,16 +264,17 @@
 </div>
 
 <nav class="tabbar" id="tabbar" hidden>
-  <button class="tab" data-nav="modules"><span class="tab-ic">🧭</span>Accueil</button>
-  <button class="tab" data-nav="home"><span class="tab-ic">🎯</span>Réviser</button>
-  <button class="tab" data-nav="cours"><span class="tab-ic">📚</span>Cours</button>
-  <button class="tab" data-nav="stats"><span class="tab-ic">📊</span>Stats</button>
-  <button class="tab" data-nav="settings"><span class="tab-ic">⚙️</span>Réglages</button>
+  <button class="tab" data-nav="modules"><span class="tab-ic" data-ic="home"></span>Accueil</button>
+  <button class="tab" data-nav="home"><span class="tab-ic" data-ic="target"></span>Réviser</button>
+  <button class="tab" data-nav="cours"><span class="tab-ic" data-ic="book"></span>Cours</button>
+  <button class="tab" data-nav="stats"><span class="tab-ic" data-ic="chart"></span>Stats</button>
+  <button class="tab" data-nav="settings"><span class="tab-ic" data-ic="sliders"></span>Réglages</button>
 </nav>
 
 <div id="toast" class="toast"></div>
 
 <!-- Banque de questions -->
+<script src="js/icons.js"></script>
 <script src="data/bank.js"></script>
 <script src="data/q-histoire.js"></script>
 <script src="data/q-aerodynamique.js"></script>

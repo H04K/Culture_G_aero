@@ -163,12 +163,12 @@ function renderHome() {
   if (r && PASS.byId(r.mat)) {
     const m = PASS.byId(r.mat);
     slot.innerHTML = `<button class="resume" id="btn-resume">
-      <span class="ic">${m.icon}</span>
-      <span>
-        <b>Reprendre : ${esc(m.name)}</b>
-        <small>${esc(r.label || 'Reprendre où tu t\'es arrêté')} · ${fmtDate(r.ts)}</small>
+      <span class="txt">
+        <span class="kicker">Reprendre</span>
+        <b>${esc(m.short || m.name)}</b>
+        <small>${esc(r.label || "Reprendre où tu t'es arrêté")} · ${fmtDate(r.ts)}</small>
       </span>
-      <span class="go">→</span>
+      <span class="play">${Ic.svg('play', 20)}</span>
     </button>`;
     $('#btn-resume').onclick = () => openFiche(r.mat, r.section || 0);
   } else slot.innerHTML = '';
@@ -178,40 +178,40 @@ function renderHome() {
   const due = PassQuiz.available('due');
   $('#mode-grid').innerHTML = `
     <button class="mode-card primary" data-mode="mixed">
-      <span class="mi">🎯</span><span class="mn">Série standard</span>
+      <span class="mi">${Ic.svg("target", 20)}</span><span class="mn">Série standard</span>
       <span class="md">${PassStore.settings().count} QCM, toutes UE, pondérés par tes faiblesses</span>
     </button>
     <button class="mode-card" data-mode="exam">
-      <span class="mi">⏱️</span><span class="mn">Concours blanc</span>
+      <span class="mi">${Ic.svg("clock", 20)}</span><span class="mn">Concours blanc</span>
       <span class="md">${PassQuiz.EXAM_COUNT} QCM en 1 h 15, correction à la fin</span>
     </button>
     <button class="mode-card" data-mode="errors" ${err ? '' : 'disabled'}>
-      <span class="mi">🔁</span><span class="mn">Mes erreurs</span>
+      <span class="mi">${Ic.svg("repeat", 20)}</span><span class="mn">Mes erreurs</span>
       <span class="md">Rejouer ce que tu as raté</span>
       <span class="badge">${err}</span>
     </button>
     <button class="mode-card" data-mode="due" ${due ? '' : 'disabled'}>
-      <span class="mi">🧩</span><span class="mn">Révision espacée</span>
+      <span class="mi">${Ic.svg("layers", 20)}</span><span class="mn">Révision espacée</span>
       <span class="md">Les QCM dont l'échéance est arrivée</span>
       <span class="badge">${due}</span>
     </button>
     <button class="mode-card" data-mode="hard">
-      <span class="mi">🔥</span><span class="mn">Difficile</span>
+      <span class="mi">${Ic.svg("flame", 20)}</span><span class="mn">Difficile</span>
       <span class="md">Uniquement les QCM de niveau 3</span>
       <span class="badge">${PassQuiz.available('hard')}</span>
     </button>
     <button class="mode-card" data-nav="exos">
-      <span class="mi">✍️</span><span class="mn">Exercices</span>
+      <span class="mi">${Ic.svg("pen", 20)}</span><span class="mn">Exercices</span>
       <span class="md">${PASS.exoCount()} exercices d'application, corrigés détaillés</span>
       <span class="badge">${PassStore.exoCount()}</span>
     </button>
     <button class="mode-card" data-mode="block" data-key="s1">
-      <span class="mi">①</span><span class="mn">Réviser le S1</span>
+      <span class="mi">${Ic.svg("book", 20)}</span><span class="mn">Réviser le S1</span>
       <span class="md">Uniquement les UE du premier semestre</span>
       <span class="badge">${PassQuiz.available('block', 's1')}</span>
     </button>
     <button class="mode-card" data-mode="block" data-key="s2">
-      <span class="mi">②</span><span class="mn">Réviser le S2</span>
+      <span class="mi">${Ic.svg("layers", 20)}</span><span class="mn">Réviser le S2</span>
       <span class="md">Uniquement les UE du second semestre</span>
       <span class="badge">${PassQuiz.available('block', 's2')}</span>
     </button>`;
@@ -224,13 +224,14 @@ function renderHome() {
   $('#mat-list').innerHTML = Object.entries(blocks).map(([key, b]) => {
     const mats = PASS.byBlock(key);
     if (!mats.length) return '';
-    return `<div class="block-head"><h3>${b.icon} ${esc(b.name)}</h3><small>${esc(b.desc)}</small></div>` +
+    return `<div class="block-head" style="--m:var(--${key === 's1' ? 's1' : key === 's2' ? 's2' : 'fond'})">
+        <h3>${esc(b.name)}</h3><small>${esc(b.desc)}</small></div>` +
       mats.map(m => {
         const read = PassStore.readCount(m.id), tot = m.sections.length;
         const p = pct(read, tot);
         const st = ms[m.id];
-        return `<button class="mat-row" data-mat="${m.id}">
-          <span class="mic">${m.icon}</span>
+        return `<button class="mat-row" data-mat="${m.id}" style="--m:var(--${key === 's1' ? 's1' : key === 's2' ? 's2' : 'fond'})">
+          <span class="tile sm">${Ic.ue(m.id, 18)}</span>
           <span class="mbody">
             <span class="mname"><span class="ue-code">${esc(m.code)}</span> ${esc(m.short || m.name)}
               ${m.heavy ? '<span class="heavy">lourde</span>' : ''}
@@ -273,7 +274,7 @@ function renderPlan() {
           <div class="plan-when">${esc(r.p)}${r.heavy ? ' <span class="heavy">UE lourde</span>' : ''}</div>
           <div class="plan-txt">${esc(r.txt)}</div>
           ${ues.length ? `<div class="plan-ues">${ues.map(m =>
-            `<button class="plan-ue" data-mat="${m.id}">${m.icon} ${esc(m.code)} — ouvrir la fiche →</button>`).join('')}</div>` : ''}
+            `<button class="plan-ue" data-mat="${m.id}">${Ic.ue(m.id, 15)} ${esc(m.code)} · ${esc(m.short || m.name)}</button>`).join('')}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -297,7 +298,7 @@ function exoCard(m, x, showFrom) {
     <div class="exo-sol" data-sol="${x.id}" hidden>${x.sol.split('\n').map(l => `<p>${rich(l)}</p>`).join('')}</div>
     <div class="exo-foot">
       <button class="exo-mark" data-mark="${x.id}">${done ? '✓ fait' : 'marquer comme fait'}</button>
-      ${showFrom ? `<span class="from">${m.icon} ${esc(m.code)}</span>` : ''}
+      ${showFrom ? `<span class="from">${esc(m.code)} · ${esc(m.short || m.name)}</span>` : ''}
     </div>
   </div>`;
 }
@@ -453,7 +454,7 @@ function mnemoCard(m, mn, showFrom) {
     </div>
     <ul>${mn.lines.map(l => `<li>${rich(l)}</li>`).join('')}</ul>
     ${mn.note ? `<p class="note">${rich(mn.note)}</p>` : ''}
-    ${showFrom ? `<div class="from">${m.icon} ${esc(m.short || m.name)}</div>` : ''}
+    ${showFrom ? `<div class="from">${esc(m.code)} · ${esc(m.short || m.name)}</div>` : ''}
   </div>`;
 }
 
@@ -538,7 +539,7 @@ function renderQuestion() {
 
   $('#progress-fill').style.width = pct(s.i, s.questions.length) + '%';
   $('#progress-label').textContent = `Question ${s.i + 1} sur ${s.questions.length}`;
-  $('#q-mat').textContent = (m ? m.icon + ' ' + (m.short || m.name) : '');
+  $('#q-mat').textContent = (m ? m.code + ' · ' + (m.short || m.name) : '');
   const d = $('#q-diff');
   d.textContent = DIFF[q.d];
   d.className = 'chip d' + q.d;
@@ -640,7 +641,7 @@ function renderResult(sc, ms) {
     .map(([k, v]) => {
       const m = PASS.byId(k), p = pct(v[0], v[1]);
       return `<div class="bar-row">
-        <div class="bar-top"><span style="color:var(--text)">${m ? m.icon + ' ' + (m.short || m.name) : k}</span><span>${v[0]}/${v[1]}</span></div>
+        <div class="bar-top"><span class="nm">${m ? Ic.ue(k, 17) + esc(m.short || m.name) : esc(k)}</span><span class="vl">${v[0]}/${v[1]}</span></div>
         <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${scoreColor(p)}"></div></div>
       </div>`;
     }).join('');
@@ -677,7 +678,7 @@ function renderStats() {
     const p = st ? st.pct : 0;
     return `<div class="bar-row">
       <div class="bar-top">
-        <span style="color:var(--text)">${m.icon} ${esc(m.short || m.name)}</span>
+        <span class="nm">${Ic.ue(m.id, 17)} ${esc(m.short || m.name)}</span>
         <span>${st ? `${st.ok}/${st.tot} · ${p} %` : 'jamais testée'} · cours ${read} %</span>
       </div>
       <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${st ? scoreColor(p) : 'var(--line)'}"></div></div>
@@ -760,6 +761,15 @@ $('#btn-reset').addEventListener('click', () => {
 });
 
 /* ═══════════════ DÉMARRAGE ═══════════════ */
+
+/* Les icônes du balisage fixe : un attribut data-ic suffit à les poser. */
+const paint = (sel, name, size = 18) => { const el = $(sel); if (el) el.innerHTML = Ic.svg(name, size); };
+paint('#gate-mark', 'stetho', 28);
+paint('#hero-mark', 'stetho', 22);
+paint('#go-home', 'home', 17);
+paint('#plan-icon', 'calendar', 21);
+paint('#plan-go', 'chevron', 18);
+$$('[data-ic]').forEach(el => el.insertAdjacentHTML('afterbegin', Ic.svg(el.dataset.ic, el.classList.contains('btn') ? 17 : 18)));
 
 if (PassStore.isLogged()) {
   PassStore.touch();

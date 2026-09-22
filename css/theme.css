@@ -1,145 +1,149 @@
 /* ═══════════════════════════════════════════════════════════
-   theme.css — jeu de couleurs commun, en deux ambiances
+   theme.css — la charte de l'application, en deux ambiances
 
-   Le mode nuit reprend exactement la charte d'origine de
-   l'application : mêmes bleus, mêmes dégradés, mêmes valeurs.
-   Le mode jour en est la transposition claire, dans le même
-   langage graphique.
+   Un fond neutre, des cartes posées dessus, des filets très
+   discrets, un bleu unique pour l'action et une couleur par
+   module. Le jour et la nuit ne changent que des valeurs :
+   jamais une mise en page, jamais un rayon.
 
-   Les pages ne définissent plus de couleur en propre : elles
-   lisent ces jetons, et basculent donc ensemble. js/theme.js
-   choisit l'ambiance d'après l'horloge de l'appareil.
+   Aucune page ne définit de couleur en propre : elles lisent
+   ces jetons et basculent donc ensemble. js/theme.js choisit
+   l'ambiance d'après l'horloge de l'appareil.
+
+   Les noms historiques (--bg, --surface, --text, --accent…)
+   restent définis en fin de bloc : ils pointent sur les
+   nouveaux et gardent les anciennes feuilles debout.
    ═══════════════════════════════════════════════════════════ */
 
 :root {
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius:    16px;
-  --radius-sm: 10px;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-xl: 22px;
+  --r-l:  18px;
+  --r-m:  14px;
+  --r-s:  10px;
+  --radius:    var(--r-l);   /* héritage */
+  --radius-sm: var(--r-m);   /* héritage */
+
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bar: calc(74px + var(--safe-bottom));   /* hauteur de la barre d'onglets */
 }
 
-/* ───────────── NUIT — la charte d'origine, à l'identique ───────────── */
-:root[data-theme="nuit"] {
-  color-scheme: dark;
-  --bg:        #0a1628;
-  --bg-2:      #0f1e35;
-  --surface:   #142744;
-  --surface-2: #1b3255;
-  --line:      #24406b;
-  --text:      #eaf1fb;
-  --text-2:    #d5e3f5;
-  --muted:     #8fa6c6;
-  --faint:     #5d7799;
-
-  --accent:      #4a9eff;
-  --accent-2:    #2b7fe0;
-  --accent-deep: #1256a8;
-  --accent-lite: #7ec8ff;
-  --af-red:  #e5122e;
-  --ok:      #22c66b;
-  --ok-dim:  #123d28;
-  --ko:      #ff5d6c;
-  --ko-dim:  #43151d;
-  --warn:    #ffb020;
-  --gold:    #ffc531;
-  --shadow:  0 8px 28px rgba(0,0,0,.35);
-  --sheen:   rgba(255,255,255,.05);
-  --sheen-2: rgba(255,255,255,.07);
-  --veil:    rgba(6,13,26,.78);
-
-  /* bandeaux et cartes en dégradé */
-  --hero-1: #12305c;  --hero-2: #0a1628;
-  --prim-1: #1a4d8f;  --prim-2: #12315e;  --prim-line: #2f6fbd;  --prim-sub: #b9d4f5;
-  --cta-1:  #1d3f6e;  --cta-2:  #14294a;  --cta-line: #2f6fbd;  --cta-sub: #b9d4f5;
-
-  --drill-1: #2a3550; --drill-2: #171f33; --drill-line: #445a86; --drill-go: #8fb0e2; --drill-sub: #a8b8d6;
-  --pplc-1:  #123f31; --pplc-2:  #0e2b25; --pplc-line: #1f7a5c; --pplc-go:  #2fd39a; --pplc-sub: #9fd4c0;
-  --passc-1: #2b2150; --passc-2: #1c1636; --passc-line: #5b46a8; --passc-go: #a78bfa; --passc-sub: #c3b5f2;
-  --jeuxc-1: #4a2a18; --jeuxc-2: #2c1a10; --jeuxc-line: #955a2c; --jeuxc-go: #ff8a3d; --jeuxc-sub: #e6c2a2;
-
-  /* accents propres aux modules */
-  --mod-ppl:      #2fd39a; --mod-ppl-2:  #17a97a; --mod-ppl-dim:  #0e3a2e;
-  --mod-ppl-hero: #10402f;
-  --mod-pass:     #a78bfa; --mod-pass-2: #7c5cf0; --mod-pass-dim: #241a4a;
-  --mod-jeux-hero-1: #1a2c55;
-  --game-bg-1: #10233f;   --game-bg-2: #081123;
-}
-
-/* ───────────── JOUR — la même charte, en clair ───────────── */
+/* ───────────── JOUR ───────────── */
 :root[data-theme="jour"] {
   color-scheme: light;
-  --bg:        #eef2f8;
-  --bg-2:      #e3eaf4;
-  --surface:   #ffffff;
-  --surface-2: #eef3fa;
-  --line:      #c9d6e6;
-  --text:      #132238;
-  --text-2:    #2a3b53;
-  --muted:     #4f6076;
-  --faint:     #6f8098;
 
-  --accent:      #1667c4;
-  --accent-2:    #11519e;
-  --accent-deep: #0d4585;
-  --accent-lite: #4f9bf0;
-  --af-red:  #c00f24;
-  --ok:      #157c46;
-  --ok-dim:  #dcf0e4;
-  --ko:      #b62630;
-  --ko-dim:  #fadfe1;
-  --warn:    #8a6000;
-  --gold:    #a8780a;
-  --shadow:  0 6px 20px rgba(22,45,80,.13);
+  --pg:        #f2f3f6;   /* fond de page      */
+  --pg-2:      #e8eaef;   /* fond creux        */
+  --card:      #ffffff;   /* carte             */
+  --card-2:    #f7f8fa;   /* carte secondaire  */
+  --edge:      #e5e7ec;   /* filet             */
+  --edge-2:    #d4d8e0;
+  --ink:       #14171d;
+  --ink-2:     #3c4350;
+  --dim:       #6a7383;
+  --pale:      #98a1b1;
+
+  --go:        #2f57e8;   /* bleu d'action     */
+  --go-2:      #2444c4;
+  --go-soft:   #e8edfe;
+  --yes:       #148a52;
+  --yes-soft:  #e3f5ea;
+  --no:        #cc3b48;
+  --no-soft:   #fdeaec;
+  --warm:      #b87a12;
+  --warm-soft: #fdf1dd;
+  --af-red:    #c00f24;
+
+  --lift:   0 1px 2px rgba(20,28,45,.06), 0 6px 18px rgba(20,28,45,.05);
+  --lift-2: 0 2px 6px rgba(20,28,45,.08), 0 16px 34px rgba(20,28,45,.10);
   --sheen:   rgba(19,34,56,.04);
   --sheen-2: rgba(19,34,56,.06);
-  --veil:    rgba(226,233,244,.86);
+  --veil:    rgba(242,243,246,.86);
 
-  --hero-1: #dbe7f7;  --hero-2: #eef2f8;
-  --prim-1: #1e73d2;  --prim-2: #115aae;  --prim-line: #11519e;  --prim-sub: #d6e8fb;
-  --cta-1:  #ffffff;  --cta-2:  #f2f7fd;  --cta-line: #9dc0e8;  --cta-sub: #4f6076;
-
-  --drill-1: #ffffff; --drill-2: #f1f4fa; --drill-line: #a9bbd4; --drill-go: #3a5f94; --drill-sub: #4f6076;
-  --pplc-1:  #ffffff; --pplc-2:  #eef8f3; --pplc-line: #8ccfb4; --pplc-go:  #0e7a55; --pplc-sub: #4f6076;
-  --passc-1: #ffffff; --passc-2: #f3efff; --passc-line: #b7a4ee; --passc-go: #5a3cc0; --passc-sub: #4f6076;
-  --jeuxc-1: #ffffff; --jeuxc-2: #fdf2e9; --jeuxc-line: #e0b083; --jeuxc-go: #a4530f; --jeuxc-sub: #4f6076;
-
-  --mod-ppl:      #0e7a55; --mod-ppl-2:  #0b5f42; --mod-ppl-dim:  #dcf0e7;
-  --mod-ppl-hero: #dff0e8;
-  --mod-pass:     #5a3cc0; --mod-pass-2: #452d95; --mod-pass-dim: #e8e1fb;
-  --mod-jeux-hero-1: #dde6f6;
-  --game-bg-1: #e7eef8;   --game-bg-2: #f3f6fb;
+  /* un accent par module */
+  --m-culture: #2f57e8;
+  --m-calcul:  #0f7f8c;
+  --m-pass:    #6f57b0;
+  --m-ppl:     #2f8a5c;
+  --m-jeux:    #c1682a;
 }
 
-/* Sans JavaScript, on suit la préférence du système ; à défaut, la nuit,
-   qui est l'ambiance historique de l'application. */
-:root:not([data-theme]) {
+/* ───────────── NUIT ───────────── */
+:root[data-theme="nuit"], :root:not([data-theme]) {
   color-scheme: dark;
-  --bg: #0a1628; --bg-2: #0f1e35; --surface: #142744; --surface-2: #1b3255;
-  --line: #24406b; --text: #eaf1fb; --text-2: #d5e3f5; --muted: #8fa6c6; --faint: #5d7799;
-  --accent: #4a9eff; --accent-2: #2b7fe0; --accent-deep: #1256a8; --accent-lite: #7ec8ff;
-  --af-red: #e5122e; --ok: #22c66b; --ok-dim: #123d28; --ko: #ff5d6c; --ko-dim: #43151d;
-  --warn: #ffb020; --gold: #ffc531; --shadow: 0 8px 28px rgba(0,0,0,.35);
-  --sheen: rgba(255,255,255,.05); --sheen-2: rgba(255,255,255,.07); --veil: rgba(6,13,26,.78);
-  --hero-1: #12305c; --hero-2: #0a1628;
-  --prim-1: #1a4d8f; --prim-2: #12315e; --prim-line: #2f6fbd; --prim-sub: #b9d4f5;
-  --cta-1: #1d3f6e; --cta-2: #14294a; --cta-line: #2f6fbd; --cta-sub: #b9d4f5;
-  --drill-1: #2a3550; --drill-2: #171f33; --drill-line: #445a86; --drill-go: #8fb0e2; --drill-sub: #a8b8d6;
-  --pplc-1: #123f31; --pplc-2: #0e2b25; --pplc-line: #1f7a5c; --pplc-go: #2fd39a; --pplc-sub: #9fd4c0;
-  --passc-1: #2b2150; --passc-2: #1c1636; --passc-line: #5b46a8; --passc-go: #a78bfa; --passc-sub: #c3b5f2;
-  --jeuxc-1: #4a2a18; --jeuxc-2: #2c1a10; --jeuxc-line: #955a2c; --jeuxc-go: #ff8a3d; --jeuxc-sub: #e6c2a2;
-  --mod-ppl: #2fd39a; --mod-ppl-2: #17a97a; --mod-ppl-dim: #0e3a2e; --mod-ppl-hero: #10402f;
-  --mod-pass: #a78bfa; --mod-pass-2: #7c5cf0; --mod-pass-dim: #241a4a;
-  --mod-jeux-hero-1: #1a2c55; --game-bg-1: #10233f; --game-bg-2: #081123;
+
+  --pg:        #0e1117;
+  --pg-2:      #14181f;
+  --card:      #181c24;
+  --card-2:    #1e222b;
+  --edge:      #262b35;
+  --edge-2:    #333a47;
+  --ink:       #f1f3f7;
+  --ink-2:     #c8cede;
+  --dim:       #97a0b1;
+  --pale:      #6e7686;
+
+  --go:        #6488ff;
+  --go-2:      #4d70ec;
+  --go-soft:   #1b2440;
+  --yes:       #3ec67f;
+  --yes-soft:  #10301f;
+  --no:        #ff6b76;
+  --no-soft:   #341419;
+  --warm:      #e8a33c;
+  --warm-soft: #33260f;
+  --af-red:    #e5122e;
+
+  --lift:   0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
+  --lift-2: 0 4px 10px rgba(0,0,0,.45), 0 20px 44px rgba(0,0,0,.4);
+  --sheen:   rgba(255,255,255,.05);
+  --sheen-2: rgba(255,255,255,.07);
+  --veil:    rgba(14,17,23,.86);
+
+  --m-culture: #6488ff;
+  --m-calcul:  #4ec3d4;
+  --m-pass:    #a795e8;
+  --m-ppl:     #5fd39a;
+  --m-jeux:    #e8a36a;
+}
+
+/* ───────────── Noms historiques ─────────────
+   Les anciennes feuilles lisent encore ces jetons : ils
+   pointent sur la charte actuelle, rien ne dépasse. */
+:root {
+  --bg:        var(--pg);
+  --bg-2:      var(--pg-2);
+  --surface:   var(--card);
+  --surface-2: var(--card-2);
+  --line:      var(--edge);
+  --text:      var(--ink);
+  --text-2:    var(--ink-2);
+  --muted:     var(--dim);
+  --faint:     var(--pale);
+
+  --accent:      var(--go);
+  --accent-2:    var(--go-2);
+  --accent-deep: var(--go-2);
+  --accent-lite: var(--go);
+  --ok:      var(--yes);
+  --ok-dim:  var(--yes-soft);
+  --ko:      var(--no);
+  --ko-dim:  var(--no-soft);
+  --warn:    var(--warm);
+  --gold:    var(--warm);
+  --shadow:  var(--lift);
 }
 
 /* ═════════ bouton d'ambiance ═════════ */
 .theme-btn {
-  background: var(--sheen-2); border: 1px solid var(--line);
-  width: 38px; height: 38px; border-radius: 11px;
-  display: grid; place-items: center; flex: 0 0 38px;
-  font-size: 16px; cursor: pointer; color: inherit; font-family: inherit;
-  transition: transform .1s;
+  width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%;
+  background: var(--card); border: 1px solid var(--edge); color: var(--ink);
+  display: grid; place-items: center;
+  font-size: 15px; cursor: pointer; font-family: inherit;
+  box-shadow: var(--lift); transition: transform .1s;
 }
-.theme-btn:active { transform: scale(.95); }
+.theme-btn:active { transform: scale(.94); }
 a.theme-btn { text-decoration: none; }

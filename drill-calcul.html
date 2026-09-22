@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#f2f3f6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -14,31 +14,34 @@
 <script src="js/theme.js"></script>
 <style>
 :root{
-  /* teintes propres au drill, déclinées pour les deux ambiances */
-  --bg:#0d0f12; --panel:#14171c; --line:#242a33;
-  --fg:#e8eaed; --dim:#8b939f; --dimmer:#5b636e;
-  --ok:#1f7a3f; --ko:#8c2020;
-  --okf:#3ddc84; --kof:#ff6b6b;
-  --cur:#3d4757; --cur-bg:#171b21; --box:#444d5a; --box-on:#2f6f4a; --box-mark:#d9f7e5;
-  --sel:#4d6a8f; --sel-fg:#cfe0f5; --sel-bg:#1a2331;
-  --act:#333c48; --act-bg:#171b21; --pri:#22303f; --pri-line:#3d5570;
-  --field:#181c23; --field-2:#232a34; --vf-v:#16281d; --vf-f:#28191a;
-  --vf-v-a:#1e3a2a; --vf-f-a:#3a2224; --bar:#3a4757; --caret:#6e8bb0;
-  --tag:#e6b9b9; --hm-none:#1b1f25; --hm-none-fg:#4a525d; --hm-fg:#0c0f12;
-  --plot:#9ec1ea; --plot-2:#6e9fd8;
+  /* Le drill lit la charte de l'application (theme.css) et n'y
+     ajoute que les teintes dont lui seul a besoin. Rien à
+     décliner ici : les jetons basculent déjà jour / nuit. */
+  --panel: var(--card);
+  --fg:    var(--ink);
+  --dimmer: var(--pale);
+  --okf: var(--yes);      --kof: var(--no);
+  --cur: var(--edge-2);   --cur-bg: var(--card-2);
+  --box: var(--edge-2);   --box-on: var(--go);  --box-mark: #fff;
+  --sel: var(--go);       --sel-fg: var(--go);  --sel-bg: var(--go-soft);
+  --act: var(--edge);     --act-bg: var(--card-2);
+  --pri: var(--go-soft);  --pri-line: var(--go);
+  --field: var(--card-2); --field-2: var(--pg-2);
+  --vf-v: var(--yes-soft); --vf-f: var(--no-soft);
+  --jauge: var(--edge-2); --caret: var(--go);
+  --tag: var(--no);
+  --hm-none: var(--card-2); --hm-none-fg: var(--pale);
+  --plot: var(--go);      --plot-2: var(--go-2);
 }
 :root[data-theme="jour"]{
-  --bg:#f2f4f8; --panel:#ffffff; --line:#ccd5e1;
-  --fg:#16202c; --dim:#4f6076; --dimmer:#75859a;
-  --ok:#dcf0e4; --ko:#fadfe1;
-  --okf:#157c46; --kof:#b62630;
-  --cur:#8fa8c6; --cur-bg:#eaf0f8; --box:#a8b6c6; --box-on:#157c46; --box-mark:#ffffff;
-  --sel:#1667c4; --sel-fg:#11386b; --sel-bg:#e2edfb;
-  --act:#c2cddb; --act-bg:#f0f4f9; --pri:#dfeaf8; --pri-line:#8fb5e2;
-  --field:#f6f8fc; --field-2:#e9eef6; --vf-v:#e2f3e8; --vf-f:#fbe3e5;
-  --vf-v-a:#cfead9; --vf-f-a:#f6ccd0; --bar:#b9c6d6; --caret:#1667c4;
-  --tag:#a8323a; --hm-none:#eef1f6; --hm-none-fg:#93a1b3; --hm-fg:#101820;
-  --plot:#1667c4; --plot-2:#11519e;
+  --ok: var(--yes-soft);  --ko: var(--no-soft);
+  --vf-v-a: #cfead9;      --vf-f-a: #f6ccd0;
+  --hm-fg: #101820;
+}
+:root[data-theme="nuit"], :root:not([data-theme]){
+  --ok: var(--yes-soft);  --ko: var(--no-soft);
+  --vf-v-a: #1e3a2a;      --vf-f-a: #3a2224;
+  --hm-fg: #0c0f12;
 }
 *{box-sizing:border-box}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;touch-action:manipulation}
@@ -64,7 +67,7 @@ h2{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
 #home .wrap{overflow-y:auto;height:100%}
 .row{
   display:flex;align-items:center;gap:14px;
-  padding:9px 14px;border:1px solid transparent;border-radius:4px;
+  padding:10px 14px;border:1px solid transparent;border-radius:10px;
   color:var(--fg);
 }
 .row.sub{padding-left:38px}
@@ -72,17 +75,17 @@ h2{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
 .row.off{color:var(--dimmer)}
 .row .key{width:18px;color:var(--dimmer);font-size:12px}
 .row .lbl{flex:1}
-.row .box{width:15px;height:15px;border:1px solid var(--box);border-radius:3px;display:inline-block;position:relative}
+.row .box{width:16px;height:16px;border:1.5px solid var(--box);border-radius:5px;display:inline-block;position:relative}
 .row .box.on{background:var(--box-on);border-color:var(--box-on)}
 .row .box.on::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid var(--box-mark);border-width:0 2px 2px 0;transform:rotate(42deg)}
 .row .val{color:var(--dim)}
 .row.action{color:var(--fg)}
 .row.action .lbl{letter-spacing:.08em}
 .opts{display:flex;gap:6px;flex-wrap:wrap}
-.opt{padding:2px 9px;border:1px solid var(--line);border-radius:3px;color:var(--dimmer);font-size:13px}
+.opt{padding:3px 11px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:13px}
 .opt.on{border-color:var(--sel);color:var(--sel-fg);background:var(--sel-bg)}
 .hint{color:var(--dimmer);font-size:12.5px;margin-top:18px;line-height:1.9}
-.hint kbd{border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--dim);font-size:11.5px}
+.hint kbd{border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--dim);font-size:11.5px}
 .err{color:var(--kof);font-size:13px;min-height:20px;margin-top:8px}
 
 /* ---------- tactile ---------- */
@@ -122,7 +125,7 @@ body.touch .delta{font-size:11.5px}
 body.touch .touchhint{display:block}
 body.touch .btns.touchhint{display:flex}
 .btn{
-  border:1px solid var(--line);border-radius:6px;padding:11px 18px;
+  border:1px solid var(--line);border-radius:12px;padding:12px 18px;
   color:var(--fg);background:var(--cur-bg);font-size:14px;letter-spacing:.04em
 }
 .btn.pri{background:var(--pri);border-color:var(--pri-line)}
@@ -167,7 +170,7 @@ body.touch #quit{display:block}
   display:flex;justify-content:space-between;
   padding:14px 20px;font-size:12.5px;color:var(--dimmer);letter-spacing:.08em
 }
-#bar{position:absolute;top:0;left:0;height:2px;background:var(--bar);width:100%}
+#bar{position:absolute;top:0;left:0;height:2px;background:var(--jauge);width:100%}
 #center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;min-height:0}
 body.touch #center{gap:18px;padding:0 12px}
 body.touch #q{font-size:clamp(44px,12vw,90px)}

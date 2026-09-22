@@ -12,12 +12,24 @@ de la sélection Cadets Air France.
   programme BIA, complétées par les thèmes propres à la sélection
 - Correction expliquée pour chaque question
 
+## La charte
+
+Toute l'application partage une seule charte : un fond neutre, des cartes
+posées dessus, des filets très discrets, des micro-libellés en monospace,
+**un bleu unique pour l'action** et **une couleur par sujet** — par module sur
+l'accueil, par thème en culture générale, par matière au PPL, par semestre au
+PASS. Les icônes sont des tracés vectoriels d'un même jeu (`js/icons.js`), sur
+la même grille et la même graisse, jamais des emojis.
+
+Deux fichiers portent tout cela : `css/theme.css` (les jetons de couleur, en
+deux ambiances) et `css/ui.css` (les formes communes — cartes, listes, boutons,
+onglets, quiz, résultats, réglages). Chaque module n'ajoute ensuite que ce qui
+lui est propre.
+
 ## Mode jour et mode nuit
 
-L'application a deux ambiances. Le **mode nuit est la charte historique**, à
-l'identique : mêmes bleus, mêmes dégradés, mêmes valeurs. Le **mode jour** en est
-la transposition claire, dans le même langage graphique — mêmes cartes, mêmes
-arrondis, mêmes accents.
+L'application a deux ambiances : **claire** et **sombre**. Seules les valeurs
+changent — jamais une mise en page, jamais un arrondi.
 
 Par défaut l'ambiance suit l'**horloge de l'appareil** : claire de 7 h à 19 h,
 sombre le reste du temps, avec bascule automatique en cours de session sans
@@ -30,9 +42,9 @@ Le moteur (`js/theme.js`) est chargé dans le `<head>`, avant le rendu : la page
 s'affiche jamais dans la mauvaise ambiance. Sans JavaScript, c'est la charte de
 nuit qui s'applique.
 
-Aucune page ne définit plus de couleur en propre : toutes lisent les jetons de
+Aucune page ne définit de couleur en propre : toutes lisent les jetons de
 `css/theme.css`, et basculent donc ensemble. Le canvas du jeu les lit lui aussi,
-et le drill garde son ambiance « terminal » déclinée dans les deux modes.
+et le drill garde sa densité « clavier » dans les couleurs de la charte.
 
 ## Organisation
 
@@ -320,9 +332,11 @@ node tools/gen-icons.js
 
 ```
 index.html              interface (onglets accueil, cours, modules, stats, réglages)
-css/theme.css           jeu de couleurs commun, en deux ambiances (nuit = charte d'origine)
+css/theme.css           les jetons de la charte, en deux ambiances
+css/ui.css              les formes communes à tous les modules
 js/theme.js             choix de l'ambiance d'après l'horloge de l'appareil
-css/style.css           styles
+js/icons.js             le jeu d'icônes vectorielles (interface, thèmes, UE, matières)
+css/style.css           styles de l'accueil et de la culture générale
 js/storage.js           persistance localStorage
 js/quiz.js              sélection adaptative et moteur de session
 js/cours.js             registre et rendu des fiches
@@ -333,7 +347,6 @@ data/cours-*.js         les 22 fiches de cours
 drill-calcul.html       drill de calcul mental (autonome, sans dépendance)
 ppl.html                module PPL (cours, QCM, mnémos, profils par pseudo)
 css/ppl.css             styles du module PPL
-js/ppl-icons.js         jeu d'icônes vectorielles du module PPL
 js/ppl-core.js          registre des matières PPL
 js/ppl-store.js         profils par pseudo et progression
 js/ppl-quiz.js          sélection adaptative et moteur de session PPL
@@ -341,7 +354,7 @@ js/ppl-app.js           navigation à trois onglets et rendu du module PPL
 js/ppl-figures.js       les 26 schémas vectoriels du cours
 data/ppl-*.js           les 12 matières (cours + mnémos + questions)
 pass.html               module PASS (cours, QCM, exercices, mnémos, planning)
-css/pass.css            styles du module PASS (charte PPL déclinée)
+css/pass.css            styles du module PASS (planning, exercices, codes d'UE)
 js/pass-core.js         registre des UE et planning hebdomadaire S1/S2
 js/pass-store.js        profils par pseudo, exercices faits, semaines validées
 js/pass-quiz.js         sélection adaptative et moteur de session PASS
