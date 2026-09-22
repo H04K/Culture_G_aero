@@ -232,6 +232,27 @@ L'écran garde la trace de ce qui est coché jusqu'à la remise à zéro — une
 un vol. Deux réglages servent la lecture en vol : **gros caractères** et **écran
 maintenu allumé** tant qu'une liste est ouverte.
 
+### Le questionnaire
+
+Un onglet **Quiz** interroge la check-list elle-même : les questions sont
+**générées à partir des listes**, donc toujours à jour si une ligne change.
+
+| Série | Ce qu'elle demande |
+|---|---|
+| Série mélangée | Un peu de tout, dosé pour que les items ne noient pas le reste |
+| Les items | L'action attendue pour un point donné, et la liste où il tombe |
+| Urgences | Le premier geste de mémoire de chaque situation |
+| Chiffres | Vitesses de référence et limitations |
+| Une liste précise | Les treize listes, interrogeables une par une |
+
+S'y ajoutent **37 questions écrites** sur ce qu'une check-list ne dit pas : pourquoi
+on ne fait pas demi-tour après une panne au décollage, pourquoi le réchauffage
+carburateur se met **avant** de réduire, ce que vaut la check-list du club face au
+manuel de vol. Le générateur écarte les leurres trop proches de la bonne réponse —
+« Rentrés » ne peut pas servir de piège face à « Rentrés (levier verrouillé) » —
+et la correction reprend le format du PPL : verdict, puis les seules questions
+ratées, dépliables sur l'explication.
+
 > Cette check-list est de **type club** : elle suit les procédures usuelles du
 > DR400 mais n'a aucune valeur officielle. La check-list de l'aéroclub et le
 > manuel de vol de l'appareil immatriculé sont les seuls documents qui font foi,
@@ -388,6 +409,8 @@ checklist.html          module Check-list DR400 (listes, urgences, repères)
 css/checklist.css       styles de la check-list
 js/checklist-app.js     déroulé des listes, urgences et réglages
 data/checklist-dr400.js les 13 listes, les urgences et les repères chiffrés
+data/checklist-quiz.js  les questions écrites du questionnaire
+js/checklist-quiz.js    génération des questions à partir des listes
 jeux.html               onglet Jeux (accueil, choix du niveau, partie)
 css/jeux.css            styles de l'onglet Jeux
 js/jeux-solids.js       isométrie, solides et catalogue d'objets (meubles, maisons)

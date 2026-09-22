@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'cadets-prep-v16';
+const VERSION = 'cadets-prep-v17';
 
 const ASSETS = [
   './',
@@ -93,6 +93,8 @@ const ASSETS = [
   './css/checklist.css',
   './js/checklist-app.js',
   './data/checklist-dr400.js',
+  './data/checklist-quiz.js',
+  './js/checklist-quiz.js',
   './jeux.html',
   './css/jeux.css',
   './js/jeux-solids.js',

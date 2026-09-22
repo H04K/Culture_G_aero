@@ -17,13 +17,19 @@ const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
 /* ───────── mémoire locale ───────── */
 
 const KEY = 'checklist-dr400-v1';
-const vide = () => ({ done: {}, startedAt: Date.now(), settings: { big: false, wake: false } });
+const vide = () => ({
+  done: {}, startedAt: Date.now(),
+  settings: { big: false, wake: false },
+  quiz: { n: 15, sessions: [] }
+});
 
 let data = (() => {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return vide();
-    return { ...vide(), ...JSON.parse(raw) };
+    const p = JSON.parse(raw);
+    return { ...vide(), ...p, settings: { ...vide().settings, ...(p.settings || {}) },
+             quiz: { ...vide().quiz, ...(p.quiz || {}) } };
   } catch (e) { return vide(); }
 })();
 
@@ -69,9 +75,14 @@ document.addEventListener('visibilitychange', () => {
 
 /* ───────── navigation ───────── */
 
-const TABS = [['lists', 'Listes', 'clipboard'], ['urgences', 'Urgences', 'alert'], ['infos', 'Repères', 'gauge']];
-const TAB_OF = { lists: 'lists', run: 'lists', urgences: 'urgences', urgence: 'urgences', infos: 'infos' };
-const SANS_ONGLETS = new Set(['run']);
+const TABS = [['lists', 'Listes', 'clipboard'], ['quizhome', 'Quiz', 'target'],
+              ['urgences', 'Urgences', 'alert'], ['infos', 'Repères', 'gauge']];
+const TAB_OF = {
+  lists: 'lists', run: 'lists',
+  quizhome: 'quizhome', quiz: 'quizhome', result: 'quizhome',
+  urgences: 'urgences', urgence: 'urgences', infos: 'infos'
+};
+const SANS_ONGLETS = new Set(['run', 'quiz', 'result']);
 
 let view = 'lists';
 
@@ -80,6 +91,7 @@ function show(v) {
   $('#screen-' + v).classList.add('active');
   view = v;
   document.body.classList.toggle('no-tabs', SANS_ONGLETS.has(v));
+  document.body.classList.toggle('has-cta', v === 'quizhome');
   $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB_OF[v]));
   tenirEcran(v === 'run' && data.settings.wake);
   window.scrollTo(0, 0);
@@ -92,6 +104,7 @@ function go(dest, key) {
     case 'infos':    renderInfos(); show('infos'); break;
     case 'run':      ouvrirPhase(key); break;
     case 'urgence':  ouvrirUrgence(key); break;
+    case 'quizhome': renderQuizHome(); show('quizhome'); break;
   }
 }
 
@@ -313,6 +326,273 @@ $('#set-wake').addEventListener('change', e => {
 $('#btn-reset-all').addEventListener('click', () => {
   if (confirm('Décocher les treize listes ?')) { razTout(); toast('Check-list remise à zéro'); go('lists'); }
 });
+
+/* ═══════════════ QUESTIONNAIRE ═══════════════ */
+
+/* On vise haut : sur une check-list, se tromper une fois sur cinq
+   n'est pas un bon score. */
+const SEUIL = 80;
+
+let serie = null;          // la série en cours
+let dernierMode = 'tout';
+
+const couleurScore = p => p >= SEUIL ? 'var(--yes)' : p >= 55 ? 'var(--warm)' : 'var(--no)';
+
+function anneau(valeur, taille, trait, dedans, piste) {
+  const r = (taille - trait) / 2, c = 2 * Math.PI * r;
+  const off = c * (1 - Math.max(0, Math.min(100, valeur)) / 100);
+  return `<div class="ring" style="width:${taille}px;height:${taille}px;flex-basis:${taille}px">
+    <svg width="${taille}" height="${taille}" aria-hidden="true">
+      <circle cx="${taille / 2}" cy="${taille / 2}" r="${r}" fill="none" stroke="${piste || 'var(--pg-2)'}" stroke-width="${trait}"/>
+      <circle cx="${taille / 2}" cy="${taille / 2}" r="${r}" fill="none" stroke="${couleurScore(valeur)}"
+              stroke-width="${trait}" stroke-linecap="round"
+              stroke-dasharray="${c}" stroke-dashoffset="${off}"/>
+    </svg>
+    <div class="val">${valeur}${dedans || ''}</div>
+  </div>`;
+}
+
+function renderQuizHome() {
+  const q = data.quiz;
+  const dernieres = q.sessions.slice(-30);
+  const best = dernieres.length ? Math.max(...dernieres.map(x => x.pct)) : 0;
+  const derniere = dernieres[dernieres.length - 1];
+
+  $('#quiz-sub').textContent = `${CkQuiz.available('tout')} questions tirées de la check-list`;
+
+  $('#quiz-score').innerHTML = dernieres.length ? `
+    <div class="seance">
+      <div class="txt">
+        <b>Dernière série</b>
+        <small>${derniere.correct}/${derniere.total} le ${new Date(derniere.ts).toLocaleDateString('fr-FR',
+          { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          · meilleur score ${best} %</small>
+      </div>
+      <span class="pcts" style="color:${couleurScore(derniere.pct)}">${derniere.pct}<span style="font-size:14px"> %</span></span>
+    </div>` : '';
+
+  $('#quiz-modes').innerHTML = CkQuiz.MODES.map(m => `
+    <button class="setcard ${dernierMode === m.id ? 'on' : ''}" data-mode="${m.id}">
+      <span class="si">${Ic.svg(m.icon, 20)}</span>
+      <span class="sbody">
+        <span class="sname">${esc(m.nom)}</span>
+        <span class="sdesc">${esc(m.desc)}</span>
+      </span>
+      <span class="radio">${Ic.svg('check', 14)}</span>
+    </button>`).join('');
+  $$('#quiz-modes [data-mode]').forEach(b => b.onclick = () => { dernierMode = b.dataset.mode; renderQuizHome(); });
+
+  $('#quiz-len').innerHTML = [10, 15, 25, 40].map(n =>
+    `<button data-n="${n}" class="${q.n === n ? 'on' : ''}">${n}</button>`).join('');
+  $$('#quiz-len [data-n]').forEach(b => b.onclick = () => {
+    data.quiz.n = +b.dataset.n; save(); renderQuizHome();
+  });
+
+  $('#quiz-phases').innerHTML = DR400.PHASES.map((p, k) => `
+    <button class="row" data-phase="${p.id}">
+      <span class="tile sm">${Ic.svg(p.icon, 18)}</span>
+      <span class="rbody">
+        <span class="rname">${k + 1}. ${esc(p.nom)}</span>
+        <span class="rmeta">${CkQuiz.available(p.id)} questions possibles</span>
+      </span>
+      <span class="chev">${Ic.svg('chevron', 18)}</span>
+    </button>`).join('');
+  $$('#quiz-phases [data-phase]').forEach(b => b.onclick = () => lancerSerie(b.dataset.phase));
+
+  const m = CkQuiz.MODES.find(x => x.id === dernierMode) || CkQuiz.MODES[0];
+  $('#quiz-start').innerHTML = `${m.nom} · ${Math.min(q.n, CkQuiz.available(dernierMode))} questions ${Ic.svg('right', 18)}`;
+  $('#quiz-start').onclick = () => lancerSerie(dernierMode);
+
+  $('#quiz-foot').textContent =
+    "Les questions sont tirées de la check-list elle-même : si elle change, le questionnaire suit. " +
+    "Les valeurs chiffrées restent celles d'un DR400 de club, à confirmer sur le manuel de vol de l'appareil.";
+}
+
+function lancerSerie(mode) {
+  toutMontrer = false;
+  const questions = CkQuiz.build(mode, data.quiz.n);
+  if (!questions.length) { toast('Aucune question pour cette série'); return; }
+  const p = DR400.phase(mode);
+  serie = {
+    mode, questions, i: 0,
+    titre: p ? p.nom : (CkQuiz.MODES.find(x => x.id === mode) || {}).nom || 'Série',
+    answers: new Array(questions.length).fill(null),
+    shown: new Array(questions.length).fill(false),
+    debut: Date.now()
+  };
+  show('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const s = serie, q = s.questions[s.i];
+  $('#q-count').textContent = `Question ${s.i + 1} / ${s.questions.length}`;
+  $('#q-who').textContent = s.titre;
+  $('#q-track').style.width = pct(s.i + (s.shown[s.i] ? 1 : 0), s.questions.length) + '%';
+
+  $('#q-strip').innerHTML = s.questions.map((qq, i) => {
+    let cls = s.shown[i] ? (s.answers[i] === qq.a ? 'ok' : 'ko') : '';
+    if (i === s.i) cls += ' cur';
+    return `<button data-i="${i}" class="${cls.trim()}">${i + 1}</button>`;
+  }).join('');
+  $$('#q-strip button').forEach(b => b.onclick = () => { s.i = +b.dataset.i; renderQuestion(); });
+  const cur = $('#q-strip .cur');
+  if (cur) cur.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+
+  const SUJET = { item: 'Check-list', moment: 'Check-list', ordre: 'Déroulé',
+                  urgence: 'Urgence', chiffre: 'Chiffres', procedure: 'Procédure', principe: 'Principe' };
+  $('#q-tag').innerHTML = `
+    <span class="code">${esc(SUJET[q.s] || 'DR400')}</span>
+    <span class="diff d${q.d}">${['', 'facile', 'moyen', 'difficile'][q.d] || ''}</span>`;
+  $('#q-text').textContent = q.q;
+
+  const vu = s.shown[s.i];
+  $('#options').innerHTML = q.o.map((o, i) => {
+    let cls = '';
+    if (vu) { if (i === q.a) cls = 'good'; else if (i === s.answers[s.i]) cls = 'bad'; }
+    else if (i === s.answers[s.i]) cls = 'sel';
+    const marque = vu && (i === q.a || i === s.answers[s.i])
+      ? `<span class="mark">${Ic.svg(i === q.a ? 'check' : 'close', 17)}</span>` : '';
+    return `<button class="opt ${cls}" data-i="${i}" ${vu ? 'disabled' : ''}>
+      <span class="letter">${'ABCDE'[i]}</span><span class="txt">${esc(o)}</span>${marque}</button>`;
+  }).join('');
+  $$('#options .opt').forEach(b => b.onclick = () => repondre(+b.dataset.i));
+
+  if (vu) peindreRetour(); else $('#fb').hidden = true;
+
+  $('#q-prev').disabled = s.i === 0;
+  const dernier = s.i === s.questions.length - 1;
+  const btn = $('#q-next');
+  if (!vu) { btn.textContent = 'Valider'; btn.disabled = s.answers[s.i] === null; }
+  else { btn.innerHTML = (dernier ? 'Voir le résultat' : 'Question suivante') + ' ' + Ic.svg('right', 18); btn.disabled = false; }
+}
+
+function repondre(i) {
+  const s = serie;
+  if (s.shown[s.i]) return;
+  s.answers[s.i] = i;
+  $$('#options .opt').forEach(b => b.classList.toggle('sel', +b.dataset.i === i));
+  $('#q-next').disabled = false;
+  devoiler();
+}
+
+function devoiler() {
+  serie.shown[serie.i] = true;
+  renderQuestion();
+}
+
+function peindreRetour() {
+  const s = serie, q = s.questions[s.i], ok = s.answers[s.i] === q.a;
+  const fb = $('#fb');
+  fb.className = 'card fb ' + (ok ? 'ok' : 'ko');
+  fb.innerHTML = `
+    <div class="verdict"><span class="vi">${Ic.svg(ok ? 'check' : 'close', 14)}</span>${ok ? 'Correct' : 'Incorrect'}</div>
+    ${q.e ? `<p>${esc(q.e)}</p>` : ''}`;
+  fb.hidden = false;
+}
+
+$('#q-prev').onclick = () => { if (serie.i > 0) { serie.i--; renderQuestion(); } };
+$('#q-next').onclick = () => {
+  const s = serie;
+  if (!s.shown[s.i]) { devoiler(); return; }
+  if (s.i === s.questions.length - 1) { terminer(); return; }
+  s.i++;
+  renderQuestion();
+};
+$('#q-quit').onclick = () => {
+  if (confirm('Quitter la série ? Elle ne sera pas enregistrée.')) go('quizhome');
+};
+
+function terminer() {
+  const s = serie;
+  const correct = s.questions.filter((q, i) => s.answers[i] === q.a).length;
+  const p = pct(correct, s.questions.length);
+  data.quiz.sessions.push({ ts: Date.now(), mode: s.mode, total: s.questions.length, correct, pct: p });
+  if (data.quiz.sessions.length > 60) data.quiz.sessions = data.quiz.sessions.slice(-60);
+  save();
+  renderResultat(correct, p, Date.now() - s.debut);
+  show('result');
+}
+
+let toutMontrer = false;
+
+function renderResultat(correct, p, ms) {
+  const s = serie;
+  const reussi = p >= SEUIL;
+  const tone = reussi ? 'var(--yes)' : 'var(--no)';
+  const soft = reussi ? 'var(--yes-soft)' : 'var(--no-soft)';
+  const ecart = Math.abs(p - SEUIL);
+  const faux = s.questions.length - correct;
+  if (!faux) toutMontrer = true;
+
+  const dit = p >= 95 ? 'La check-list est dans la tête. C’est là qu’elle doit être.'
+    : reussi ? 'Bon niveau. Les points ratés se relisent en deux minutes.'
+    : p >= 55 ? 'Ça vient. Reprends la liste concernée avant de rejouer.'
+    : 'Relis les listes posément : le questionnaire vient après, pas avant.';
+
+  const sec = Math.round(ms / 1000);
+  $('#result-wrap').setAttribute('style', `--tone:${tone};--tone-soft:${soft}`);
+  $('#result-wrap').innerHTML = `
+    <div class="rtop">
+      <span class="kick">${esc(s.titre)}</span>
+      <button class="link" data-nav="quizhome">Terminer</button>
+    </div>
+    <div class="verdict-card">
+      ${anneau(p, 132, 11, '<small>score</small>', 'color-mix(in srgb, ' + tone + ' 18%, transparent)')}
+      <div class="verdict-row">
+        <span class="vb">${Ic.svg(reussi ? 'check' : 'close', 18)}</span>
+        ${reussi ? 'Acquis' : 'À revoir'}
+      </div>
+      <p class="gap">${ecart === 0 ? `pile sur la barre des ${SEUIL} %`
+        : `${ecart} point${ecart > 1 ? 's' : ''} ${reussi ? 'au-dessus de' : 'sous'} la barre des ${SEUIL} %`}</p>
+    </div>
+    <p class="result-say">${dit}</p>
+
+    <div class="tiles2">
+      <div class="tile-b"><b>${correct}/${s.questions.length}</b><small>bonnes réponses</small></div>
+      <div class="tile-b"><b>${sec < 60 ? sec + ' s' : Math.floor(sec / 60) + ' min ' + String(sec % 60).padStart(2, '0')}</b><small>temps</small></div>
+    </div>
+
+    <div class="lab">
+      ${faux ? 'Revoir tes erreurs' : 'Ta correction'}
+      <span class="tally ${faux ? '' : 'ok'}">${faux ? faux + ' faute' + (faux > 1 ? 's' : '') : 'sans faute'}</span>
+    </div>
+    <div id="miss-list"></div>
+    ${faux && faux < s.questions.length ? `<button class="btn ghost wide" id="btn-tout"></button>` : ''}`;
+
+  peindreErreurs();
+  const t = $('#btn-tout');
+  if (t) t.onclick = () => { toutMontrer = !toutMontrer; peindreErreurs(); };
+}
+
+function peindreErreurs() {
+  const s = serie;
+  const lignes = s.questions
+    .map((q, i) => ({ q, i, ok: s.answers[i] === q.a }))
+    .filter(x => toutMontrer || !x.ok);
+
+  $('#miss-list').innerHTML = lignes.map(({ q, i, ok }) => {
+    const mien = s.answers[i];
+    return `<button class="miss ${ok ? 'ok' : ''}" data-miss="${i}">
+      <span class="mi">${Ic.svg(ok ? 'check' : 'close', 16)}</span>
+      <span class="mq">${esc(q.q)}</span>
+      <span class="chev">${Ic.svg('chevron', 17)}</span>
+      <span class="msub">Q${i + 1} · ${ok ? 'bonne réponse' : (mien === null ? 'pas de réponse' : 'tu as coché ' + 'ABCDE'[mien])}</span>
+      <span class="detail">
+        <span class="dl"><b>Réponse : ${esc(q.o[q.a])}</b></span>
+        ${ok || mien === null ? '' : `<span class="dl bad">Ta réponse : ${esc(q.o[mien])}</span>`}
+        ${q.e ? `<span class="dx">${esc(q.e)}</span>` : ''}
+      </span>
+    </button>`;
+  }).join('') || `<p class="empty">Rien à revoir.</p>`;
+
+  $$('#miss-list [data-miss]').forEach(b => b.onclick = () => b.classList.toggle('open'));
+  const t = $('#btn-tout');
+  if (t) t.textContent = toutMontrer ? 'Ne montrer que les erreurs' : 'Voir aussi les bonnes réponses';
+}
+
+$('#btn-replay').onclick = () => { if (serie) { toutMontrer = false; lancerSerie(serie.mode); } };
+$('#btn-done').onclick = () => go('quizhome');
 
 /* ═══════════════ DÉMARRAGE ═══════════════ */
 

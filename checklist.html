@@ -65,6 +65,76 @@
   </div>
 </section>
 
+<!-- ══════════════ QUIZ — CHOIX DE LA SÉRIE ══════════════ -->
+<section class="screen" id="screen-quizhome">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Questionnaire</h1>
+        <p class="sub" id="quiz-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div id="quiz-score"></div>
+
+    <div class="lab">Choisis ta série</div>
+    <div id="quiz-modes"></div>
+
+    <div class="lab">Longueur</div>
+    <div class="seg wide-seg" id="quiz-len"></div>
+
+    <div class="lab">Ou une liste précise</div>
+    <div id="quiz-phases"></div>
+
+    <p class="disclaimer" id="quiz-foot"></p>
+  </div>
+  <div class="rfoot">
+    <div class="inner">
+      <button class="btn go wide" id="quiz-start"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section class="screen" id="screen-quiz">
+  <div class="qtop">
+    <div class="line">
+      <span class="count" id="q-count"></span>
+      <span class="who" id="q-who"></span>
+      <button class="iconbtn flat" id="q-quit" aria-label="Quitter" data-ic="close"></button>
+    </div>
+    <div class="track"><i id="q-track"></i></div>
+    <div class="strip" id="q-strip"></div>
+  </div>
+  <div class="qbody">
+    <div class="qtag" id="q-tag"></div>
+    <h2 class="q-text" id="q-text"></h2>
+    <div class="options" id="options"></div>
+    <div class="card fb" id="fb" hidden></div>
+  </div>
+  <div class="qfoot">
+    <div class="inner">
+      <button class="btn ghost" id="q-prev" aria-label="Question précédente" data-ic="left"></button>
+      <button class="btn go" id="q-next" disabled>Valider</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ RÉSULTAT ══════════════ -->
+<section class="screen" id="screen-result">
+  <div class="wrap" id="result-wrap"></div>
+  <div class="rfoot">
+    <div class="inner">
+      <button class="btn ghost" id="btn-replay" aria-label="Refaire une série" data-ic="repeat"></button>
+      <button class="btn go" id="btn-done">Terminer</button>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════ URGENCES ══════════════ -->
 <section class="screen" id="screen-urgences">
   <div class="wrap">
@@ -137,6 +207,8 @@
 
 <script src="js/icons.js"></script>
 <script src="data/checklist-dr400.js"></script>
+<script src="data/checklist-quiz.js"></script>
+<script src="js/checklist-quiz.js"></script>
 <script src="js/checklist-app.js"></script>
 </body>
 </html>

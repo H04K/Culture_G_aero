@@ -137,37 +137,6 @@
 .chart .end   { text-anchor: end; }
 .chart-empty { color: var(--pale); font-size: 13.5px; text-align: center; padding: 26px 10px 18px; }
 
-/* Choix du format de série */
-.setcard {
-  display: flex; align-items: center; gap: 13px; width: 100%; text-align: left;
-  padding: 15px 15px; margin-bottom: 9px;
-  background: var(--card); border: 1.5px solid var(--edge);
-  border-radius: var(--r-l); transition: border-color .15s, background .15s;
-}
-.setcard.on { border-color: var(--go); background: var(--go-soft); }
-.setcard .si {
-  width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px;
-  display: grid; place-items: center; background: var(--card-2); color: var(--dim);
-}
-.setcard.on .si { background: var(--go); color: #fff; }
-.setcard .sbody { flex: 1; min-width: 0; }
-.setcard .sname { display: block; font-weight: 650; font-size: 15.5px; letter-spacing: -.015em; }
-.setcard .sdesc { display: block; color: var(--dim); font-size: 12.5px; margin-top: 2px; line-height: 1.4; }
-.setcard .radio {
-  width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%;
-  border: 2px solid var(--edge-2); display: grid; place-items: center; color: transparent;
-}
-.setcard.on .radio { background: var(--go); border-color: var(--go); color: #fff; }
-:root[data-theme="nuit"] .setcard.on .si, :root[data-theme="nuit"] .setcard.on .radio,
-:root:not([data-theme]) .setcard.on .si, :root:not([data-theme]) .setcard.on .radio { color: #0c1018; }
-.reco {
-  display: inline-block; margin-bottom: -6px; position: relative; z-index: 1; margin-left: 12px;
-  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; padding: 4px 9px; border-radius: 6px;
-  background: var(--go); color: #fff;
-}
-:root[data-theme="nuit"] .reco, :root:not([data-theme]) .reco { color: #0c1018; }
-
 #screen-result .wrap { padding-bottom: calc(100px + var(--safe-bottom)); }
 
 /* ───────────── Schémas (SVG inline) ─────────────
