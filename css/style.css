@@ -38,6 +38,7 @@ body { --m: var(--m-culture); }
 .pass-cta  { --m: var(--m-pass); }
 .ppl-cta   { --m: var(--m-ppl); }
 .jeux-cta  { --m: var(--m-jeux); }
+.check-cta { --m: var(--m-check); }
 
 /* ───────────── Une couleur par thème ─────────────
    Les 22 thèmes de la banque, du parchemin de l'histoire au

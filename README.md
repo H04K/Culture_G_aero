@@ -49,7 +49,7 @@ et le drill garde sa densité « clavier » dans les couleurs de la charte.
 ## Organisation
 
 L'application s'ouvre sur un **accueil qui liste les entraînements** : culture
-générale aéro, calcul mental, PASS, PPL et Jeux. On choisit son entraînement,
+générale aéro, calcul mental, PASS, check-list DR400, PPL et Jeux. On choisit son entraînement,
 puis on accède à ses cours, ses QCM et ses statistiques.
 
 La navigation se fait par **cinq onglets** en bas d'écran :
@@ -136,10 +136,8 @@ du **théorique PPL(A)**, indépendante de la banque culture générale.
 
 ### Une interface à trois onglets
 
-Le module a sa propre charte : fond neutre, cartes blanches, micro-libellés en
-monospace, un bleu unique pour l'action et **une couleur et une icône par
-matière**, tenues du sommaire jusqu'au QCM. Les deux ambiances jour et nuit
-restent de la partie.
+Le module applique la charte de l'application, avec **une couleur et une icône
+par matière**, tenues du sommaire jusqu'au QCM.
 
 - **Cours** — l'anneau de préparation, la carte de reprise, la grille des 12
   matières puis les mnémos et les schémas. Une matière ouvre sa fiche : barre de
@@ -212,6 +210,32 @@ accorde aucune semaine dédiée mais 20 à 30 minutes par semaine sur toute l'an
 
 Le module partage l'architecture du module PPL : profils par pseudo, carte de
 reprise, score de préparation, export JSON.
+
+## Check-list DR400
+
+Module séparé (`checklist.html`), accessible depuis l'accueil : la check-list du
+**Robin DR400** à moteur Lycoming, du premier coup d'œil en cabine au carnet de
+route rempli.
+
+- **13 listes** dans l'ordre du vol — prévol cabine, tour de l'avion, avant mise
+  en route, mise en route, roulage, essais moteur, avant décollage, décollage et
+  montée, croisière, descente et approche, atterrissage, après atterrissage,
+  arrêt moteur — soit **152 points de contrôle**
+- Chaque point est écrit comme sur une check-list papier : l'**item** annoncé, l'**action**
+  attendue, et la note qui explique quand elle n'a rien d'évident
+- **8 situations d'urgence** séparées en deux temps : les gestes **de mémoire**,
+  puis ce qu'on déroule si le temps le permet — panne au décollage, panne en vol,
+  feu moteur, feu électrique, givrage carburateur, panne électrique, codes
+- **15 vitesses de référence** en km/h et en nœuds, et les limitations usuelles
+
+L'écran garde la trace de ce qui est coché jusqu'à la remise à zéro — une séance,
+un vol. Deux réglages servent la lecture en vol : **gros caractères** et **écran
+maintenu allumé** tant qu'une liste est ouverte.
+
+> Cette check-list est de **type club** : elle suit les procédures usuelles du
+> DR400 mais n'a aucune valeur officielle. La check-list de l'aéroclub et le
+> manuel de vol de l'appareil immatriculé sont les seuls documents qui font foi,
+> et les valeurs chiffrées changent d'une version de DR400 à l'autre.
 
 ## Jeux
 
@@ -360,6 +384,10 @@ js/pass-store.js        profils par pseudo, exercices faits, semaines validées
 js/pass-quiz.js         sélection adaptative et moteur de session PASS
 js/pass-app.js          navigation, écrans planning et exercices
 data/pass-ue*.js        les 19 UE (cours + mnémos + exercices + QCM)
+checklist.html          module Check-list DR400 (listes, urgences, repères)
+css/checklist.css       styles de la check-list
+js/checklist-app.js     déroulé des listes, urgences et réglages
+data/checklist-dr400.js les 13 listes, les urgences et les repères chiffrés
 jeux.html               onglet Jeux (accueil, choix du niveau, partie)
 css/jeux.css            styles de l'onglet Jeux
 js/jeux-solids.js       isométrie, solides et catalogue d'objets (meubles, maisons)
@@ -377,6 +405,10 @@ Les questions ne sont **pas** des annales officielles : Air France ne publie pas
 ses sujets. Elles sont bâties sur le programme réel de l'épreuve et sur des faits
 vérifiables. Le thème « Actualité » reflète l'état du secteur à la date de
 rédaction et demande une mise à jour avant les épreuves.
+
+La **check-list DR400** est un aide-mémoire de révision, pas un document
+opérationnel : elle ne remplace ni la check-list de l'aéroclub ni le manuel de
+vol de l'appareil, qui restent seuls valables en vol.
 
 Le module PASS est un **support de révision personnel**. Le découpage du planning
 est une estimation fondée sur le poids habituel de chaque UE : le livret des

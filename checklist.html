@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f3f6">
+<meta name="description" content="Check-list Robin DR400 : phases de vol, procédures d'urgence et repères chiffrés">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Check-list DR400">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/checklist.css">
+<title>Check-list DR400</title>
+<script src="js/theme.js"></script>
+</head>
+<body>
+
+<!-- ══════════════ LES LISTES ══════════════ -->
+<section class="screen active" id="screen-lists">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Check-list DR400</h1>
+        <p class="sub" id="lists-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <p class="warn" id="warn"></p>
+
+    <div id="seance"></div>
+
+    <div class="lab">Phases de vol <span class="n" id="phase-count"></span></div>
+    <div id="phase-list"></div>
+
+    <p class="disclaimer" id="lists-foot"></p>
+  </div>
+</section>
+
+<!-- ══════════════ UNE LISTE ══════════════ -->
+<section class="screen" id="screen-run">
+  <header class="run-top">
+    <div class="line">
+      <button class="iconbtn flat" id="run-back" aria-label="Retour" data-ic="left"></button>
+      <div class="who">
+        <b id="run-name"></b>
+        <small id="run-sub"></small>
+      </div>
+      <button class="iconbtn flat" id="run-reset" aria-label="Tout décocher" data-ic="repeat"></button>
+    </div>
+    <div class="segs" id="run-segs"></div>
+  </header>
+  <div class="run-body" id="run-body"></div>
+  <div class="run-foot">
+    <div class="inner">
+      <button class="btn ghost" id="run-prev" aria-label="Liste précédente" data-ic="left"></button>
+      <button class="btn go" id="run-next"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ URGENCES ══════════════ -->
+<section class="screen" id="screen-urgences">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Urgences</h1>
+        <p class="sub">Les gestes de mémoire, puis la suite</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <p class="warn danger">Rien ne remplace l'entraînement et la check-list du club. Les gestes de mémoire se révisent au sol, pas en vol.</p>
+    <div id="urg-list"></div>
+  </div>
+</section>
+
+<!-- ══════════════ UNE URGENCE ══════════════ -->
+<section class="screen" id="screen-urgence">
+  <header class="urg-head" id="urg-head"></header>
+  <div class="wrap" id="urg-body"></div>
+</section>
+
+<!-- ══════════════ REPÈRES ══════════════ -->
+<section class="screen" id="screen-infos">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Repères</h1>
+        <p class="sub">Vitesses, limitations et réglages</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Menu principal" aria-label="Menu principal" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="lab">Vitesses <span class="n" id="v-note">km/h · kt</span></div>
+    <div id="vitesses"></div>
+
+    <div class="lab">Limitations</div>
+    <div id="limites"></div>
+
+    <div class="lab">Réglages</div>
+    <div class="setting-list">
+      <label class="setting">
+        <div><strong>Gros caractères</strong><small>Plus lisible en vol, sur les genoux</small></div>
+        <input type="checkbox" id="set-big" class="switch">
+      </label>
+      <label class="setting">
+        <div><strong>Garder l'écran allumé</strong><small>Tant qu'une liste est ouverte</small></div>
+        <input type="checkbox" id="set-wake" class="switch">
+      </label>
+      <button class="setting" id="btn-reset-all">
+        <div><strong style="color:var(--no)">Tout décocher</strong><small>Remet les treize listes à zéro</small></div>
+        <span class="chev" style="color:var(--no)" data-ic="trash"></span>
+      </button>
+    </div>
+
+    <p class="warn" id="warn-2"></p>
+    <p class="disclaimer" id="infos-foot"></p>
+  </div>
+</section>
+
+<!-- ══════════════ ONGLETS ══════════════ -->
+<nav class="tabbar" id="tabbar"></nav>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/icons.js"></script>
+<script src="data/checklist-dr400.js"></script>
+<script src="js/checklist-app.js"></script>
+</body>
+</html>

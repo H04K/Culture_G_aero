@@ -145,6 +145,12 @@ const Ic = (() => {
     pen:      '<path d="M4.6 19.4h4l10-10a2 2 0 0 0-2.8-2.8l-10 10z"/><path d="m14.4 5.4 4.2 4.2"/>',
     swap:     '<path d="M4.6 8.6h12.8M14 5.2l3.4 3.4-3.4 3.4"/><path d="M19.4 15.4H6.6M10 12l-3.4 3.4L10 18.8"/>',
     plus:     '<path d="M12 5.4v13.2M5.4 12h13.2"/>',
+    eye:      '<path d="M2.6 12S6.2 5.8 12 5.8 21.4 12 21.4 12 17.8 18.2 12 18.2 2.6 12 2.6 12z"/><circle cx="12" cy="12" r="3"/>',
+    key:      '<circle cx="8" cy="15.6" r="4.4"/><path d="m11.2 12.4 8.4-8.4M15.6 8l2.6 2.6M13.4 10.2l2.6 2.6"/>',
+    takeoff:  '<path d="M3.4 20.6h17.2"/><path d="M5.6 16.6 18.4 5.8"/><path d="M12.4 5.8h6v6"/>',
+    landing:  '<path d="M3.4 20.6h17.2"/><path d="M5.6 5.8 18.4 16.6"/><path d="M12.4 16.6h6v-6"/>',
+    power:    '<path d="M12 3.4v8.4"/><path d="M7.4 6.4a7.6 7.6 0 1 0 9.2 0"/>',
+    flag:     '<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.3 3.9 2.3 3.9H6"/>',
     undo:     '<path d="M4.8 8.6h8.6a5.3 5.3 0 0 1 0 10.6H7.2"/><path d="m8.4 4.4-3.6 4.2 3.6 4.2"/>',
     sound:    '<path d="M5 9.4h3l4.4-3.6v12.4L8 14.6H5z"/><path d="M16 9.6a3.8 3.8 0 0 1 0 4.8M18.6 7.2a7.2 7.2 0 0 1 0 9.6"/>',
     mute:     '<path d="M5 9.4h3l4.4-3.6v12.4L8 14.6H5z"/><path d="m16.4 10 4.2 4M20.6 10l-4.2 4"/>',
@@ -203,7 +209,8 @@ const Ic = (() => {
 
   /* Les modules de l'accueil. */
   const MOD = {
-    culture: 'globe', calcul: 'keypad', pass: 'stetho', ppl: 'plane', jeux: 'screw'
+    culture: 'globe', calcul: 'keypad', pass: 'stetho', ppl: 'plane',
+    jeux: 'screw',   check: 'clipboard'
   };
 
   function svg(name, size = 20) {
