@@ -1,7 +1,7 @@
 {
-  "name": "Cadets Prep — Culture Aéronautique",
-  "short_name": "Cadets Prep",
-  "description": "Entraînement QCM culture générale aéronautique pour la sélection Cadets Air France 2026",
+  "name": "Maximus Knowledge",
+  "short_name": "Maximus",
+  "description": "Cours, QCM et entraînements pour plusieurs formations : théorique PPL, check-list DR400, culture aéronautique, PASS et calcul mental",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f3f6">
+<meta name="description" content="Culture générale aéronautique : 22 thèmes, 1 763 questions et 22 fiches de cours">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Culture aéro">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/style.css">
+<title>Culture générale aéro — Maximus Knowledge</title>
+<script src="js/theme.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════ HOME ══════════════ -->
+  <section class="screen active" id="screen-home">
+    <div class="wrap">
+      <div class="top">
+        <div>
+          <h1>Culture générale aéro</h1>
+          <p class="sub">22 thèmes · 1 763 questions · 22 fiches</p>
+        </div>
+        <div class="acts">
+          <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+          <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+        </div>
+      </div>
+      <div id="readiness" class="readiness"></div>
+
+      <h2 class="section-title">Lancer une session</h2>
+      <div class="mode-grid">
+        <button class="mode-card primary" data-mode="mixed">
+          <span class="mode-icon" data-ic="target"></span>
+          <span class="mode-name">Session standard</span>
+          <span class="mode-desc">20 questions, tous thèmes, pondérées par tes faiblesses</span>
+        </button>
+        <button class="mode-card" data-mode="exam">
+          <span class="mode-icon" data-ic="clock"></span>
+          <span class="mode-name">Mode examen</span>
+          <span class="mode-desc">30 questions · 10 s chrono par question · enchaînées, correction à la fin</span>
+        </button>
+        <button class="mode-card" data-mode="errors">
+          <span class="mode-icon" data-ic="repeat"></span>
+          <span class="mode-name">Mes erreurs</span>
+          <span class="mode-desc">Rejoue uniquement ce que tu as raté</span>
+          <span class="mode-badge" id="errors-count">0</span>
+        </button>
+        <button class="mode-card" data-mode="hard">
+          <span class="mode-icon" data-ic="flame"></span>
+          <span class="mode-name">Difficile</span>
+          <span class="mode-desc">Uniquement les questions de niveau 3</span>
+        </button>
+      </div>
+
+      <h2 class="section-title">Par thème</h2>
+      <div class="cat-grid" id="cat-grid"></div>
+
+      <p class="disclaimer">
+        Banque de questions bâtie sur le programme de l'épreuve de culture aéronautique.
+        Ce ne sont pas des annales officielles — Air France ne les publie pas.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ QUIZ ══════════════ -->
+  <section class="screen" id="screen-quiz">
+    <div class="quiz-top">
+      <button class="icon-btn" id="quiz-quit" aria-label="Quitter" data-ic="close"></button>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <span class="progress-label" id="progress-label">1 / 20</span>
+      </div>
+      <div class="quiz-timer" id="quiz-timer"></div>
+    </div>
+
+    <div class="exam-bar" id="exam-bar" hidden><div class="exam-bar-fill" id="exam-bar-fill"></div></div>
+
+    <div class="quiz-body">
+      <div class="q-meta">
+        <span class="chip" id="q-cat">—</span>
+        <span class="chip diff" id="q-diff">—</span>
+      </div>
+      <h2 class="q-text" id="q-text"></h2>
+      <div class="options" id="options"></div>
+      <div class="explain" id="explain" hidden>
+        <div class="explain-verdict" id="explain-verdict"></div>
+        <p id="explain-text"></p>
+      </div>
+    </div>
+
+    <div class="quiz-foot">
+      <button class="btn primary wide" id="btn-next" disabled>Valider</button>
+    </div>
+  </section>
+
+  <!-- ══════════════ RESULT ══════════════ -->
+  <section class="screen" id="screen-result">
+    <div class="wrap">
+      <div class="score-hero" id="score-hero"></div>
+      <div class="result-meta" id="result-meta"></div>
+      <h2 class="section-title">Par thème</h2>
+      <div class="bars" id="result-bars"></div>
+      <h2 class="section-title">Correction détaillée</h2>
+      <div class="review" id="review"></div>
+      <div class="home-actions sticky-actions">
+        <button class="btn primary" data-nav="replay" data-ic="repeat">Nouvelle session</button>
+        <a class="btn ghost" href="index.html">Mes formations</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ COURS ══════════════ -->
+  <section class="screen" id="screen-cours">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Les cours</h1>
+      </div>
+      <div id="cours-head"></div>
+      <div id="cours-list"></div>
+      <p class="disclaimer">
+        Programme calé sur les 5 blocs du BIA (aérodynamique · aéronefs · météo ·
+        navigation-réglementation · histoire et culture), complété par les thèmes
+        propres à la sélection : Air France, compagnies, aéroports et littérature aéronautique.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ FICHE ══════════════ -->
+  <section class="screen" id="screen-fiche">
+    <div class="fiche-top">
+      <button class="icon-btn" data-nav="cours" aria-label="Retour" data-ic="left"></button>
+      <span>Fiche de cours</span>
+    </div>
+    <div class="wrap"><div id="fiche-content"></div></div>
+  </section>
+
+
+  <!-- ══════════════ STATS ══════════════ -->
+  <section class="screen" id="screen-stats">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Statistiques</h1>
+      </div>
+      <div class="stat-tiles" id="stat-tiles"></div>
+      <h2 class="section-title">Progression</h2>
+      <div class="chart-card"><div id="chart"></div></div>
+      <h2 class="section-title">Maîtrise par thème</h2>
+      <div class="bars" id="stats-bars"></div>
+      <h2 class="section-title">Historique</h2>
+      <div class="history" id="history"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ SETTINGS ══════════════ -->
+  <section class="screen" id="screen-settings">
+    <div class="wrap">
+      <div class="page-head">
+        <h1>Réglages</h1>
+      </div>
+      <div class="setting-list">
+        <div class="setting">
+          <div><strong>Ambiance</strong><small id="theme-sub">Jour et nuit selon l'heure de l'appareil</small></div>
+          <div class="seg" id="theme-seg">
+            <button data-theme-pref="auto">Auto</button>
+            <button data-theme-pref="jour">Jour</button>
+            <button data-theme-pref="nuit">Nuit</button>
+          </div>
+        </div>
+        <label class="setting">
+          <div><strong>Questions par session</strong><small>Défaut : 20</small></div>
+          <select id="set-count">
+            <option>10</option><option selected>20</option><option>30</option><option>50</option>
+          </select>
+        </label>
+        <label class="setting">
+          <div><strong>Correction immédiate</strong><small>Voir la réponse après chaque question</small></div>
+          <input type="checkbox" id="set-instant" checked class="switch">
+        </label>
+        <label class="setting">
+          <div><strong>Chronomètre</strong><small>Affiche le temps écoulé</small></div>
+          <input type="checkbox" id="set-timer" checked class="switch">
+        </label>
+        <label class="setting">
+          <div><strong>Priorité aux faiblesses</strong><small>Repose plus souvent les questions ratées</small></div>
+          <input type="checkbox" id="set-adaptive" checked class="switch">
+        </label>
+      </div>
+      <h2 class="section-title">Données</h2>
+      <div class="setting-list">
+        <button class="setting as-btn" id="btn-export"><div><strong>Exporter ma progression</strong><small>Fichier JSON de sauvegarde</small></div><span class="chev" data-ic="down"></span></button>
+        <button class="setting as-btn" id="btn-import"><div><strong>Importer une sauvegarde</strong><small>Restaure un fichier exporté</small></div><span class="chev" data-ic="up"></span></button>
+        <button class="setting as-btn danger" id="btn-reset"><div><strong>Réinitialiser</strong><small>Efface tout l'historique</small></div><span class="chev" data-ic="trash"></span></button>
+      </div>
+      <input type="file" id="file-import" accept="application/json" hidden>
+      <p class="disclaimer" id="build-info"></p>
+    </div>
+  </section>
+
+</div>
+
+<nav class="tabbar" id="tabbar" hidden>
+  <button class="tab" data-nav="home"><span class="tab-ic" data-ic="target"></span>Réviser</button>
+  <button class="tab" data-nav="cours"><span class="tab-ic" data-ic="book"></span>Cours</button>
+  <button class="tab" data-nav="stats"><span class="tab-ic" data-ic="chart"></span>Stats</button>
+  <button class="tab" data-nav="settings"><span class="tab-ic" data-ic="sliders"></span>Réglages</button>
+</nav>
+
+<div id="toast" class="toast"></div>
+
+<!-- Banque de questions -->
+<script src="js/icons.js"></script>
+<script src="data/bank.js"></script>
+<script src="data/q-histoire.js"></script>
+<script src="data/q-aerodynamique.js"></script>
+<script src="data/q-motorisation.js"></script>
+<script src="data/q-cellule.js"></script>
+<script src="data/q-instruments.js"></script>
+<script src="data/q-navigation.js"></script>
+<script src="data/q-meteo.js"></script>
+<script src="data/q-reglementation.js"></script>
+<script src="data/q-atc.js"></script>
+<script src="data/q-aeroports.js"></script>
+<script src="data/q-constructeurs.js"></script>
+<script src="data/q-compagnies.js"></script>
+<script src="data/q-airfrance.js"></script>
+<script src="data/q-facteurs-humains.js"></script>
+<script src="data/q-performances.js"></script>
+<script src="data/q-securite.js"></script>
+<script src="data/q-actualite.js"></script>
+<script src="data/q-espace.js"></script>
+<script src="data/q-militaire.js"></script>
+<script src="data/q-licences.js"></script>
+<script src="data/q-geographie.js"></script>
+<script src="data/q-litterature.js"></script>
+
+<!-- Cours -->
+<script src="js/cours.js"></script>
+<script src="data/cours-technique.js"></script>
+<script src="data/cours-operations.js"></script>
+<script src="data/cours-monde.js"></script>
+<script src="data/cours-culture.js"></script>
+
+<!-- Application -->
+<script src="js/storage.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

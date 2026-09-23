@@ -1,16 +1,30 @@
-# Cadets Prep — Culture générale aéronautique
+# Maximus Knowledge
 
-PWA d'entraînement au QCM de culture générale aéronautique, pour la préparation
-de la sélection Cadets Air France.
+Application web de révision, installable et utilisable hors-ligne, qui réunit
+**plusieurs formations** : le théorique du PPL, la check-list du DR400, la
+culture générale aéronautique des sélections de pilote, le PASS de Bordeaux et
+le calcul mental.
 
 **➡️ [Lancer l'application](https://h04k.github.io/Culture_G_aero/)**
 
-## Contenu
+## Les formations
 
-- **1 763 questions** réparties en **22 thèmes**
-- **22 fiches de cours** (~254 min de lecture), calées sur les 5 blocs du
-  programme BIA, complétées par les thèmes propres à la sélection
-- Correction expliquée pour chaque question
+L'accueil est un **portail** : il présente les formations groupées par domaine,
+avec leurs chiffres. Chaque formation est une page à part, avec sa propre
+progression, ses propres onglets et sa couleur.
+
+| Domaine | Formation | Contenu |
+|---|---|---|
+| Piloter | **Théorique PPL(A)** | 12 matières, 95 sections, 413 questions, 71 mnémos, 26 schémas |
+| Piloter | **Check-list DR400** | 13 listes, 152 points, 8 urgences, un questionnaire tiré des listes |
+| Sélections | **Culture générale aéro** | 22 thèmes, 1 763 questions, 22 fiches de cours |
+| Sélections | **Calcul mental** | Tables, carrés, puissances, chaînes — tirage adaptatif |
+| Santé | **PASS — Bordeaux** | 19 UE, 97 sections, 608 QCM, 65 exercices corrigés, 98 mnémos |
+| Pause | **Tri de vis** | 40 niveaux d'un jeu de démontage en 3D |
+
+Soit **2 821 questions** et **214 fiches ou sections de cours**, environ 18 h de
+lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
+se fait là, et elle apparaît au bon endroit sur le portail.
 
 ## La charte
 
@@ -48,29 +62,33 @@ et le drill garde sa densité « clavier » dans les couleurs de la charte.
 
 ## Organisation
 
-L'application s'ouvre sur un **accueil qui liste les entraînements** : culture
-générale aéro, calcul mental, PASS, check-list DR400, PPL et Jeux. On choisit son entraînement,
-puis on accède à ses cours, ses QCM et ses statistiques.
+L'application s'ouvre sur le **portail des formations** (`index.html`). Il ne
+contient aucun contenu de révision : il présente les formations et mène à
+chacune. Chaque formation vit sur sa page, garde sa progression de son côté et
+propose un retour au portail dans son en-tête.
 
-La navigation se fait par **cinq onglets** en bas d'écran :
+La culture générale aéronautique (`culture.html`) se navigue par **quatre
+onglets** :
 
 | Onglet | Contenu |
 |---|---|
-| Accueil | Les cinq entraînements, avec l'avancement de chacun |
-| Réviser | Culture générale aéro : score de préparation, modes de session, par thème |
+| Réviser | Score de préparation, modes de session, grille des 22 thèmes |
 | Cours | Les 22 fiches et leur progression de lecture |
 | Stats | Courbe de progression, maîtrise par thème, historique |
-| Réglages | Ambiance, paramètres de session, export et import |
+| Réglages | Paramètres de session, export et import |
 
 La barre disparaît pendant une session de QCM et pendant la lecture d'une fiche,
-pour laisser tout l'écran au contenu.
+pour laisser tout l'écran au contenu. Le PPL, le PASS et la check-list ont leurs
+propres onglets, sur le même principe.
 
-Les modules étant des pages à part, chacun porte un **retour au menu principal**
-visible en permanence : sur l'écran du pseudo, dans l'en-tête du module et sur la
-grille des niveaux du jeu. Le drill le propose dans sa liste et sur la touche
-retour arrière.
+## Culture générale aéro
 
-## Modes d'entraînement
+La préparation de l'épreuve de culture aéronautique des sélections de pilote :
+**1 763 questions** sur **22 thèmes**, et **22 fiches de cours** (~254 min de
+lecture) calées sur les 5 blocs du programme BIA, complétées par les thèmes
+propres aux sélections.
+
+### Modes d'entraînement
 
 | Mode | Description |
 |---|---|
@@ -85,8 +103,8 @@ acquises s'espacent, et les questions jamais vues sont priorisées.
 
 ## Calcul mental
 
-Module séparé (`drill-calcul.html`), accessible depuis l'accueil, pour la partie
-psychotechnique de la sélection.
+Page dédiée (`drill-calcul.html`), accessible depuis le portail, pour la partie
+psychotechnique des sélections.
 
 | Jeu de données | Contenu |
 |---|---|
@@ -116,9 +134,9 @@ et `3 × 17` étant le même fait — puis lance un exercice sur cette seule tab
 Utilisable au clavier seul sur ordinateur (chiffres + Entrée, jamais de souris)
 et au doigt sur téléphone (pavé numérique intégré, pas de clavier logiciel).
 
-## Révision PPL
+## Théorique PPL(A)
 
-Module séparé (`ppl.html`), accessible depuis l'accueil : la préparation complète
+Page dédiée (`ppl.html`), accessible depuis le portail : la préparation complète
 du **théorique PPL(A)**, indépendante de la banque culture générale.
 
 - **12 matières** présentées dans l'**ordre du programme théorique**, de 010 à
@@ -178,9 +196,9 @@ sur le même appareil, chacun avec son propre historique et son export JSON.
 Un **score de préparation** agrège cours lus, couverture de la banque, questions
 acquises et régularité.
 
-## Révision PASS
+## PASS — Université de Bordeaux
 
-Module séparé (`pass.html`), accessible depuis l'accueil : la préparation des
+Page dédiée (`pass.html`), accessible depuis le portail : la préparation des
 **19 UE du PASS de l'Université de Bordeaux**, calée sur le planning de révision
 officieux du parcours (13 semaines au S1, 10 semaines au S2).
 
@@ -213,7 +231,7 @@ reprise, score de préparation, export JSON.
 
 ## Check-list DR400
 
-Module séparé (`checklist.html`), accessible depuis l'accueil : la check-list du
+Page dédiée (`checklist.html`), accessible depuis le portail : la check-list du
 **Robin DR400** à moteur Lycoming, du premier coup d'œil en cabine au carnet de
 route rempli.
 
@@ -260,7 +278,7 @@ ratées, dépliables sur l'explication.
 
 ## Jeux
 
-Module séparé (`jeux.html`), accessible depuis l'accueil : la pause entre deux
+Page dédiée (`jeux.html`), accessible depuis le portail : la pause entre deux
 séries de QCM.
 
 ### Tri de vis
@@ -345,9 +363,13 @@ doigt : une vis, un appui.
 
 ## Suivi
 
-Scores, courbe de progression, maîtrise par thème et historique de sessions sont
-enregistrés localement (`localStorage`). Export et import JSON disponibles dans
-les réglages pour sauvegarder ou transférer la progression.
+Chaque formation enregistre sa progression **de son côté**, dans le navigateur
+(`localStorage`) : rien ne part sur un serveur, et une formation ne voit pas les
+données d'une autre. Export et import JSON dans les réglages de chaque formation,
+pour sauvegarder ou transférer.
+
+Les clés de stockage gardent leurs noms d'origine malgré le changement de nom de
+l'application : les renommer aurait effacé les progressions déjà enregistrées.
 
 ## Installation sur mobile
 
@@ -381,11 +403,15 @@ css/theme.css           les jetons de la charte, en deux ambiances
 css/ui.css              les formes communes à tous les modules
 js/theme.js             choix de l'ambiance d'après l'horloge de l'appareil
 js/icons.js             le jeu d'icônes vectorielles (interface, thèmes, UE, matières)
-css/style.css           styles de l'accueil et de la culture générale
+css/accueil.css         styles du portail des formations
+js/accueil.js           rendu du portail depuis le registre
+data/formations.js      le registre des formations, groupées par domaine
+culture.html            formation Culture générale aéronautique
+css/style.css           styles de la culture générale
 js/storage.js           persistance localStorage
 js/quiz.js              sélection adaptative et moteur de session
 js/cours.js             registre et rendu des fiches
-js/app.js               navigation, rendu, interactions
+js/app.js               navigation et rendu de la culture générale
 data/bank.js            registre de la banque de questions
 data/q-*.js             les 22 thèmes de questions
 data/cours-*.js         les 22 fiches de cours
@@ -424,8 +450,12 @@ tools/gen-icons.js      génération des icônes PNG, sans dépendance
 
 ## Avertissement
 
-Les questions ne sont **pas** des annales officielles : Air France ne publie pas
-ses sujets. Elles sont bâties sur le programme réel de l'épreuve et sur des faits
+Aucun contenu de cette application n'a de valeur officielle : c'est un support de
+révision personnel, qui ne remplace ni les cours d'un organisme de formation, ni
+les documents de référence.
+
+Les questions de culture aéronautique ne sont **pas** des annales officielles :
+les compagnies ne publient pas leurs sujets. Elles sont bâties sur le programme réel de l'épreuve et sur des faits
 vérifiables. Le thème « Actualité » reflète l'état du secteur à la date de
 rédaction et demande une mise à jour avant les épreuves.
 
@@ -433,7 +463,7 @@ La **check-list DR400** est un aide-mémoire de révision, pas un document
 opérationnel : elle ne remplace ni la check-list de l'aéroclub ni le manuel de
 vol de l'appareil, qui restent seuls valables en vol.
 
-Le module PASS est un **support de révision personnel**. Le découpage du planning
+Le PASS est un **support de révision personnel**. Le découpage du planning
 est une estimation fondée sur le poids habituel de chaque UE : le livret des
 enseignements 2026-2027 et les cours de la faculté font foi, et les dates comme
 les ECTS exacts sont à recaler dès sa parution.

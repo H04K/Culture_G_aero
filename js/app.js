@@ -1,5 +1,8 @@
 /* ═══════════════════════════════════════════════════════════
-   app.js — interface, navigation, rendu
+   app.js — culture générale aéronautique : navigation et rendu
+
+   Cette page est une formation parmi d'autres : le portail qui
+   les réunit est index.html, servi par js/accueil.js.
    ═══════════════════════════════════════════════════════════ */
 
 (() => {
@@ -15,9 +18,9 @@
   let lastLaunch = { mode: 'mixed', cat: null };
 
   /* ───────────────── Navigation ───────────────── */
-  /* Les cinq écrans de premier niveau sont atteints par la barre
+  /* Les quatre écrans de premier niveau sont atteints par la barre
      d'onglets ; les autres (quiz, résultat, fiche) s'ouvrent par-dessus. */
-  const ONGLETS = ['home', 'cours', 'modules', 'stats', 'settings'];
+  const ONGLETS = ['home', 'cours', 'stats', 'settings'];
 
   function show(id) {
     $$('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + id));
@@ -77,11 +80,6 @@
   function renderHome() {
     const g = Store.globalStats();
 
-    $('#hero-stats').innerHTML = `
-      <div class="hstat"><b>${Bank.count()}</b><span>questions</span></div>
-      <div class="hstat"><b>${g.sessions}</b><span>sessions</span></div>
-      <div class="hstat"><b>${g.streak}</b><span>jours d'affilée</span></div>`;
-
     const seen = g.uniques;
     const cov = Math.round(seen / Bank.count() * 100);
     const verdict =
@@ -97,14 +95,6 @@
         <small>${verdict[1]}</small>
         <small>Couverture de la banque : ${cov}% (${seen}/${Bank.count()})</small>
       </div>`;
-
-    const lus = Cours.all().filter(f => Store.coursRead()[f.id]).length;
-    const sub = $('#cta-culture-sub');
-    if (sub) {
-      sub.textContent = lus
-        ? `${Bank.count()} questions · ${lus}/${Cours.count()} fiches lues — reprends où tu t'es arrêté`
-        : `${Bank.count()} questions sur ${Bank.categories().length} thèmes, ${Cours.count()} fiches de cours`;
-    }
 
     const errs = Quiz.available('errors');
     const badge = $('#errors-count');
@@ -477,7 +467,6 @@
       if (!b) return;
       const to = b.dataset.nav;
       if (to === 'home')      { renderHome(); show('home'); }
-      else if (to === 'modules')  { renderHome(); show('modules'); }
       else if (to === 'stats')    { renderStats(); show('stats'); }
       else if (to === 'settings') { renderSettings(); show('settings'); }
       else if (to === 'cours')    { CoursUI.renderList(); show('cours'); }
@@ -622,7 +611,7 @@
     peindre();
     bind();
     renderHome();
-    show('modules');         /* l'application s'ouvre sur les entraînements */
+    show('home');            /* la page s'ouvre sur l'entraînement */
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

@@ -1,0 +1,65 @@
+/* ═══════════════════════════════════════════════════════════
+   accueil.css — le portail des formations
+
+   Une page, un rôle : présenter les formations. La charte vient
+   de ui.css ; il ne reste ici que le bandeau de marque et la
+   carte d'une formation.
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('ui.css');
+
+body { --m: var(--go); }
+
+/* ───────────── Bandeau de marque ───────────── */
+.brand { padding: calc(20px + var(--safe-top)) 16px 20px; }
+.brand-inner { display: flex; align-items: center; gap: 14px; max-width: 720px; margin: 0 auto; }
+.brand-mark {
+  width: 50px; height: 50px; flex: 0 0 50px; border-radius: 16px;
+  background: var(--go); color: #fff; display: grid; place-items: center;
+  box-shadow: 0 8px 22px rgba(47,87,232,.26);
+}
+:root[data-theme="nuit"] .brand-mark, :root:not([data-theme]) .brand-mark { color: #0c1018; box-shadow: none; }
+.brand-txt { flex: 1; min-width: 0; }
+.brand h1 { font-size: 25px; letter-spacing: -.03em; }
+.brand .sub { color: var(--dim); font-size: 13.5px; margin-top: 3px; line-height: 1.4; }
+
+.totaux {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px;
+  max-width: 720px; margin: 20px auto 0;
+}
+.tot {
+  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
+  border-radius: var(--r-m); padding: 13px 10px; text-align: center;
+}
+.tot b { display: block; font-size: 20px; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.tot span {
+  display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--pale); margin-top: 3px;
+}
+
+/* ───────────── Carte d'une formation ───────────── */
+.form-card {
+  display: flex; align-items: flex-start; gap: 14px; width: 100%;
+  padding: 15px 16px; margin-bottom: 10px;
+  background: var(--card); border: 1px solid var(--edge);
+  border-radius: var(--r-l); box-shadow: var(--lift);
+  color: var(--ink); text-decoration: none;
+  transition: transform .12s, border-color .15s;
+}
+.form-card:active { transform: scale(.99); }
+.form-card:hover { border-color: var(--edge-2); }
+.form-icon {
+  width: 46px; height: 46px; flex: 0 0 46px; border-radius: 14px;
+  background: var(--m); color: #fff; display: grid; place-items: center;
+}
+:root[data-theme="nuit"] .form-icon, :root:not([data-theme]) .form-icon { color: #12161d; }
+.form-txt { flex: 1; min-width: 0; }
+.form-txt b { display: block; font-size: 16.5px; letter-spacing: -.02em; }
+.form-txt small { display: block; color: var(--dim); font-size: 13px; line-height: 1.45; margin-top: 3px; }
+.form-txt em {
+  display: block; font-style: normal; font-family: var(--mono);
+  font-size: 11px; letter-spacing: .06em; color: var(--m); margin-top: 8px;
+}
+.form-go { color: var(--pale); margin-top: 14px; }
+
+.lab .n { font-family: var(--font); font-size: 12.5px; letter-spacing: 0; text-transform: none; }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Génère les icônes PNG de la PWA sans dépendance externe.
+/* Génère les icônes PNG de Maximus Knowledge, sans dépendance externe.
    Usage : node tools/gen-icons.js                                        */
 
 const fs = require('fs');
@@ -52,10 +52,18 @@ function png(width, height, pixels) {
 /* ───── dessin ───── */
 const lerp = (a, b, t) => a + (b - a) * t;
 
+/* ───── le M de Maximus Knowledge, blanc sur le bleu de la charte ───── */
+
+/** Distance d'un point au segment [a,b] — sert à tracer un trait épais. */
+function distSegment(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+
 function draw(size, { maskable = false } = {}) {
   const px = Buffer.alloc(size * size * 4);
   const cx = size / 2, cy = size / 2;
-  // rayon du disque : plus petit en maskable pour rester dans la zone sûre
   const radius = maskable ? size * 0.40 : size * 0.5;
   const corner = size * 0.22;
 
@@ -74,48 +82,38 @@ function draw(size, { maskable = false } = {}) {
       if (maskable) {
         inside = 1;  // fond plein : la plateforme applique son propre masque
       } else {
-        // carré à coins arrondis
         const dx = Math.max(Math.abs(x - cx) - (size / 2 - corner), 0);
         const dy = Math.max(Math.abs(y - cy) - (size / 2 - corner), 0);
         const d = Math.hypot(dx, dy);
         inside = d <= corner ? 1 : Math.max(0, 1 - (d - corner));
       }
       if (inside <= 0) continue;
-      // dégradé diagonal bleu nuit → bleu ciel
+      // dégradé diagonal du bleu d'action vers un bleu plus clair
       const t = (x / size * 0.55 + (1 - y / size) * 0.45);
-      const r = Math.round(lerp(10, 42, t));
-      const g = Math.round(lerp(26, 110, t));
-      const b = Math.round(lerp(52, 200, t));
+      const r = Math.round(lerp(38, 103, t));
+      const g = Math.round(lerp(78, 136, t));
+      const b = Math.round(lerp(226, 255, t));
       set(x, y, r, g, b, Math.round(255 * inside));
     }
   }
 
-  /* silhouette d'avion vue de dessus, blanche */
-  const white = (x, y, a = 255) => {
-    if (x < 0 || y < 0 || x >= size || y >= size) return;
-    set(Math.round(x), Math.round(y), 255, 255, 255, a);
-  };
-  const S = radius * 0.92;                 // demi-longueur de l'appareil
-  const fill = (test) => {
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const u = (x - cx) / S, v = (y - cy) / S;
-        if (test(u, v)) white(x, y);
-      }
+  /* La lettre, quatre segments : montant, descente, remontée, montant. */
+  const H = radius * 1.02, W = radius * 1.16, w = radius * 0.21;
+  const A = [cx - W / 2, cy + H / 2];
+  const B = [cx - W / 2, cy - H / 2];
+  const C = [cx,         cy + H * 0.26];
+  const D = [cx + W / 2, cy - H / 2];
+  const E = [cx + W / 2, cy + H / 2];
+  const traits = [[A, B], [B, C], [C, D], [D, E]];
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      let d = Infinity;
+      for (const [p1, p2] of traits) d = Math.min(d, distSegment(x, y, p1[0], p1[1], p2[0], p2[1]));
+      const a = Math.max(0, Math.min(1, w / 2 + 0.5 - d));
+      if (a > 0) set(x, y, 255, 255, 255, Math.round(255 * a));
     }
-  };
-  fill((u, v) => {
-    const au = Math.abs(u);
-    // fuselage
-    if (au < 0.085 && v > -0.92 && v < 0.86) return true;
-    // nez arrondi
-    if (Math.hypot(u / 0.085, (v + 0.86) / 0.16) < 1) return true;
-    // aile principale : bord d'attaque en flèche, envergure maxi vers l'arrière
-    if (v > -0.10 && v < 0.32 && au < 0.88 * ((v + 0.10) / 0.42)) return true;
-    // empennage horizontal, même logique en réduit
-    if (v > 0.56 && v < 0.82 && au < 0.36 * ((v - 0.56) / 0.26)) return true;
-    return false;
-  });
+  }
 
   return png(size, size, px);
 }
