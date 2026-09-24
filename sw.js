@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v18';
+const VERSION = 'maximus-v19';
 
 const ASSETS = [
   './',
@@ -93,12 +93,20 @@ const ASSETS = [
   './data/pass-ue20-initiation-medicament.js',
   './data/pass-ue19-biomateriaux.js',
   './data/pass-ue1-anglais.js',
+  './js/kit.js',
+  './js/trace.js',
   './checklist.html',
   './css/checklist.css',
   './js/checklist-app.js',
   './data/checklist-dr400.js',
+  './data/checklist-cours.js',
   './data/checklist-quiz.js',
   './js/checklist-quiz.js',
+  './aerodrome.html',
+  './css/aerodrome.css',
+  './data/aerodrome-lfcs.js',
+  './js/aerodrome-figs.js',
+  './js/aerodrome-app.js',
   './jeux.html',
   './css/jeux.css',
   './js/jeux-solids.js',

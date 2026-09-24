@@ -15,13 +15,17 @@
 <link rel="stylesheet" href="css/pass.css">
 <title>PASS Bordeaux — Maximus Knowledge</title>
 <script src="js/theme.js"></script>
+<script src="js/trace.js" data-formation="pass"></script>
 </head>
 <body>
 
 <!-- ══════════════ PSEUDO ══════════════ -->
 <section class="screen active gate" id="screen-gate">
   <div class="gate-card">
-    <a class="gate-back" href="index.html" data-ic="left">Menu principal</a>
+    <div class="gate-top">
+      <a class="iconbtn flat" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+      <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+    </div>
     <div class="gate-mark" id="gate-mark"></div>
     <h1>Révision PASS</h1>
     <p class="sub">Cours, fiches, mnémotechniques, exercices et QCM — les UE du PASS de l'Université de Bordeaux, dans l'ordre du planning de révision.</p>
@@ -51,7 +55,7 @@
           <p class="sub" id="hello-sub"></p>
         </div>
         <div class="hero-actions">
-          <a class="theme-btn" href="index.html" title="Mes formations" aria-label="Mes formations" id="go-home"></a>
+          <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" id="go-home"></a>
           <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
           <button class="chip-btn" data-nav="switch">Changer</button>
         </div>

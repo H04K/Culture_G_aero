@@ -47,9 +47,12 @@ const CoursUI = (() => {
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  /** Met en valeur les **termes** encadrés par des doubles astérisques. */
+  /** **gras**, *italique* et ***les deux*** — rien d'autre. */
   function rich(s) {
-    return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    return esc(s)
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/(^|[^*\w])\*([^*\s](?:[^*]*?[^*\s])?)\*(?!\*)/g, '$1<i>$2</i>');
   }
 
   /* ───── Liste des fiches ───── */

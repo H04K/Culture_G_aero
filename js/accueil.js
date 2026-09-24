@@ -24,6 +24,31 @@ $('#totaux').innerHTML = `
   <div class="tot"><b>${nb(t.questions)}</b><span>questions</span></div>
   <div class="tot"><b>${t.heures} h</b><span>de cours</span></div>`;
 
+/* Reprendre : la dernière formation ouverte, notée par js/trace.js. */
+function ilya(ts) {
+  const min = Math.round((Date.now() - ts) / 60000);
+  if (min < 2) return 'à l’instant';
+  if (min < 60) return `il y a ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const j = Math.round(h / 24);
+  return j === 1 ? 'hier' : `il y a ${j} jours`;
+}
+const derniere = (() => {
+  try { return JSON.parse(localStorage.getItem('maximus-derniere')); } catch (e) { return null; }
+})();
+const reprise = derniere && Formations.byId(derniere.id);
+$('#reprise').innerHTML = reprise ? `
+  <a class="resume" href="${reprise.page}" style="--m:var(--m-${reprise.mod})">
+    <span class="form-icon sm">${Ic.mod(reprise.mod, 20)}</span>
+    <span class="txt">
+      <span class="kicker">Reprendre</span>
+      <b>${esc(reprise.nom)}</b>
+      <small>Ouverte ${ilya(derniere.ts)}</small>
+    </span>
+    <span class="go">${Ic.svg('chevron', 20)}</span>
+  </a>` : '';
+
 $('#domaines').innerHTML = Formations.DOMAINES.map(d => {
   const liste = Formations.parDomaine(d.id);
   if (!liste.length) return '';

@@ -1,9 +1,9 @@
 # Maximus Knowledge
 
 Application web de révision, installable et utilisable hors-ligne, qui réunit
-**plusieurs formations** : le théorique du PPL, la check-list du DR400, la
-culture générale aéronautique des sélections de pilote, le PASS de Bordeaux et
-le calcul mental.
+**plusieurs formations** : le théorique du PPL, la check-list du DR400,
+l'aérodrome de Léognan, la culture générale aéronautique des sélections de
+pilote, le PASS de Bordeaux et le calcul mental.
 
 **➡️ [Lancer l'application](https://h04k.github.io/Culture_G_aero/)**
 
@@ -16,14 +16,15 @@ progression, ses propres onglets et sa couleur.
 | Domaine | Formation | Contenu |
 |---|---|---|
 | Piloter | **Théorique PPL(A)** | 12 matières, 95 sections, 413 questions, 71 mnémos, 26 schémas |
-| Piloter | **Check-list DR400** | 13 listes, 152 points, 8 urgences, un questionnaire tiré des listes |
+| Piloter | **Check-list DR400** | 13 listes (lecture ou pointage), 152 points, 13 sections de cours, 8 urgences, 301 questions |
+| Piloter | **Aérodrome · Léognan** | LFCS : la VAC décortiquée, le tour de piste pas à pas, 13 sections de cours, 41 questions |
 | Sélections | **Culture générale aéro** | 22 thèmes, 1 763 questions, 22 fiches de cours |
 | Sélections | **Calcul mental** | Tables, carrés, puissances, chaînes — tirage adaptatif |
 | Santé | **PASS — Bordeaux** | 19 UE, 97 sections, 608 QCM, 65 exercices corrigés, 98 mnémos |
 | Pause | **Tri de vis** | 40 niveaux d'un jeu de démontage en 3D |
 
-Soit **2 821 questions** et **214 fiches ou sections de cours**, environ 18 h de
-lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
+Soit **7 formations**, **3 126 questions** et **240 fiches ou sections de cours**,
+environ 20 h de lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
 se fait là, et elle apparaît au bon endroit sur le portail.
 
 ## La charte
@@ -64,8 +65,11 @@ et le drill garde sa densité « clavier » dans les couleurs de la charte.
 
 L'application s'ouvre sur le **portail des formations** (`index.html`). Il ne
 contient aucun contenu de révision : il présente les formations et mène à
-chacune. Chaque formation vit sur sa page, garde sa progression de son côté et
-propose un retour au portail dans son en-tête.
+chacune, avec en tête une carte **« Reprendre »** qui rouvre la dernière
+formation consultée. Chaque formation vit sur sa page, garde sa progression de
+son côté et porte le même en-tête : le retour au portail (la maison) et
+l'ambiance jour/nuit, toujours à droite, toujours dans cet ordre. Installée, l'app
+propose aussi des raccourcis vers les formations sur son icône.
 
 La culture générale aéronautique (`culture.html`) se navigue par **quatre
 onglets** :
@@ -233,7 +237,15 @@ reprise, score de préparation, export JSON.
 
 Page dédiée (`checklist.html`), accessible depuis le portail : la check-list du
 **Robin DR400** à moteur Lycoming, du premier coup d'œil en cabine au carnet de
-route rempli.
+route rempli, et tout ce qu'il faut pour la comprendre.
+
+| Onglet | Contenu |
+|---|---|
+| Listes | Les 13 listes, en **lecture** (format papier) ou en **pointage** (à cocher) |
+| Cours | 13 sections pour comprendre la check-list avant de la réciter |
+| Quiz | Les questions tirées des listes et du cours |
+| Urgences | Les gestes de mémoire, puis la suite |
+| Repères | Vitesses, limitations et réglages |
 
 - **13 listes** dans l'ordre du vol — prévol cabine, tour de l'avion, avant mise
   en route, mise en route, roulage, essais moteur, avant décollage, décollage et
@@ -246,35 +258,84 @@ route rempli.
   feu moteur, feu électrique, givrage carburateur, panne électrique, codes
 - **15 vitesses de référence** en km/h et en nœuds, et les limitations usuelles
 
-L'écran garde la trace de ce qui est coché jusqu'à la remise à zéro — une séance,
-un vol. Deux réglages servent la lecture en vol : **gros caractères** et **écran
-maintenu allumé** tant qu'une liste est ouverte.
+### Lecture ou pointage
+
+L'onglet Listes s'ouvre en **lecture** : toute la check-list d'un bloc, comme la
+carte qu'on garde sur les genoux — l'item à gauche, l'action à droite, reliés par
+des points de conduite, un index des listes qui reste sous le pouce, puis les
+gestes de mémoire des urgences et les vitesses. Le bouton **Imprimer** en fait une
+vraie carte papier : noir sur blanc, sans boutons, aucune liste coupée en deux.
+
+Le mode **pointage** ouvre une liste à la fois et coche point par point, le point
+courant surligné et la liste à reprendre signalée. Ce qui est coché le reste
+jusqu'à la remise à zéro — une séance, un vol. Deux réglages servent la lecture en
+vol : **gros caractères** et **écran maintenu allumé** tant qu'une liste est ouverte.
+
+### Le cours
+
+**13 sections** (~54 min) qui expliquent la check-list au lieu de la répéter :
+pourquoi elle existe (le Boeing 299 de 1935), comment la lire (lire-faire,
+faire-vérifier, défi-réponse), le DR400 et ses motorisations, le poste de
+pilotage et les *flows*, puis chaque phase du vol avec la raison de chaque geste —
+réchauffage avant de réduire, arrêt au mélange, essais magnétos —, la logique des
+urgences et les vitesses de l'anémomètre. Chaque phase renvoie vers sa liste.
 
 ### Le questionnaire
 
-Un onglet **Quiz** interroge la check-list elle-même : les questions sont
+Un onglet **Quiz** interroge la check-list elle-même : les questions d'items sont
 **générées à partir des listes**, donc toujours à jour si une ligne change.
 
 | Série | Ce qu'elle demande |
 |---|---|
 | Série mélangée | Un peu de tout, dosé pour que les items ne noient pas le reste |
 | Les items | L'action attendue pour un point donné, et la liste où il tombe |
+| Le pourquoi | Les questions tirées du cours : raisons, principes, pièges |
 | Urgences | Le premier geste de mémoire de chaque situation |
 | Chiffres | Vitesses de référence et limitations |
 | Une liste précise | Les treize listes, interrogeables une par une |
 
-S'y ajoutent **37 questions écrites** sur ce qu'une check-list ne dit pas : pourquoi
+S'y ajoutent **54 questions écrites** sur ce qu'une check-list ne dit pas : pourquoi
 on ne fait pas demi-tour après une panne au décollage, pourquoi le réchauffage
 carburateur se met **avant** de réduire, ce que vaut la check-list du club face au
-manuel de vol. Le générateur écarte les leurres trop proches de la bonne réponse —
-« Rentrés » ne peut pas servir de piège face à « Rentrés (levier verrouillé) » —
-et la correction reprend le format du PPL : verdict, puis les seules questions
-ratées, dépliables sur l'explication.
+manuel de vol. Le générateur écarte les leurres trop proches de la bonne réponse,
+et la correction renvoie à la liste concernée — puis ramène au quiz.
 
 > Cette check-list est de **type club** : elle suit les procédures usuelles du
 > DR400 mais n'a aucune valeur officielle. La check-list de l'aéroclub et le
 > manuel de vol de l'appareil immatriculé sont les seuls documents qui font foi,
 > et les valeurs chiffrées changent d'une version de DR400 à l'autre.
+
+## Aérodrome · Léognan
+
+Page dédiée (`aerodrome.html`) : **Bordeaux-Léognan-Saucats (LFCS)** de fond en
+comble, pour arriver prêt au premier tour de piste. Tout vient de la **VAC**
+(AD 2 LFCS, carte et textes du 03 DEC 2020) ; ce qui vient d'ailleurs est signalé.
+
+| Onglet | Contenu |
+|---|---|
+| Terrain | La carte d'identité, la carte des environs, les pistes, le plan, les 13 consignes, les activités, l'espace aérien, les services |
+| Circuit | La piste du jour, le tour de piste dessiné, ses 10 étapes et leur radio, la répétition à blanc |
+| Cours | 13 sections (~61 min), de la lecture d'une VAC aux pannes dans le circuit |
+| Quiz | 41 questions, en quatre séries |
+
+- **Trois schémas redessinés d'après la VAC**, en SVG, jour et nuit : les environs
+  à l'échelle (CTR de Mérignac, TMA, zones à éviter, circuit avion à l'Est,
+  hélicoptères à l'Ouest), le **plan des installations** (pistes revêtue et en
+  herbe, seuil décalé, points d'attente A21, B03, C03, D03, E21, pompe, manche à
+  air) et le **tour de piste** de chaque piste, piste en service vers le haut
+- **Le circuit** : à l'Est, 1 200 ft QNH (1 000 ft sol), main gauche en 21, main
+  droite en 03, virage à gauche interdit au décollage en 03 — chaque étape avec
+  son altitude, sa vitesse, sa configuration, ses gestes, son message radio et
+  son piège
+- **La piste du jour** : on entre le vent et le QNH, la page calcule les
+  composantes de face et de travers pour la 03 et la 21, choisit la piste (la 21,
+  préférentielle, par vent faible) et donne le QFE (QNH − 7 hPa)
+- **Ton indicatif** se saisit une fois : tous les messages radio le reprennent
+- **Répéter à blanc** : le tour étape par étape, la question d'abord — « qu'est-ce
+  que tu fais, et que dis-tu ? » —, la réponse ensuite, le schéma montrant où l'on est
+
+> Aide à la préparation, pas un document opérationnel : avant chaque vol, la VAC
+> en vigueur sur le site du SIA, les NOTAM et les consignes du club font foi.
 
 ## Jeux
 
@@ -398,7 +459,7 @@ node tools/gen-icons.js
 ## Structure
 
 ```
-index.html              interface (onglets accueil, cours, modules, stats, réglages)
+index.html              portail des formations (reprise, domaines, chiffres)
 css/theme.css           les jetons de la charte, en deux ambiances
 css/ui.css              les formes communes à tous les modules
 js/theme.js             choix de l'ambiance d'après l'horloge de l'appareil
@@ -406,6 +467,9 @@ js/icons.js             le jeu d'icônes vectorielles (interface, thèmes, UE, m
 css/accueil.css         styles du portail des formations
 js/accueil.js           rendu du portail depuis le registre
 data/formations.js      le registre des formations, groupées par domaine
+js/trace.js             note la dernière formation ouverte, pour « Reprendre »
+js/kit.js               cours section par section et questionnaire, partagés
+                        par la check-list et l'aérodrome
 culture.html            formation Culture générale aéronautique
 css/style.css           styles de la culture générale
 js/storage.js           persistance localStorage
@@ -431,12 +495,18 @@ js/pass-store.js        profils par pseudo, exercices faits, semaines validées
 js/pass-quiz.js         sélection adaptative et moteur de session PASS
 js/pass-app.js          navigation, écrans planning et exercices
 data/pass-ue*.js        les 19 UE (cours + mnémos + exercices + QCM)
-checklist.html          module Check-list DR400 (listes, urgences, repères)
-css/checklist.css       styles de la check-list
-js/checklist-app.js     déroulé des listes, urgences et réglages
+checklist.html          module Check-list DR400 (listes, cours, quiz, urgences, repères)
+css/checklist.css       styles de la check-list, lecture papier et impression
+js/checklist-app.js     lecture, pointage, cours, urgences et réglages
 data/checklist-dr400.js les 13 listes, les urgences et les repères chiffrés
+data/checklist-cours.js les 13 sections du cours
 data/checklist-quiz.js  les questions écrites du questionnaire
 js/checklist-quiz.js    génération des questions à partir des listes
+aerodrome.html          module Aérodrome de Léognan (terrain, circuit, cours, quiz)
+css/aerodrome.css       styles de l'aérodrome et de ses schémas
+data/aerodrome-lfcs.js  la VAC de LFCS, le tour de piste, le cours et les questions
+js/aerodrome-figs.js    les schémas redessinés de la VAC (environs, plan, circuit)
+js/aerodrome-app.js     navigation, piste du jour, répétition à blanc
 jeux.html               onglet Jeux (accueil, choix du niveau, partie)
 css/jeux.css            styles de l'onglet Jeux
 js/jeux-solids.js       isométrie, solides et catalogue d'objets (meubles, maisons)
@@ -462,6 +532,10 @@ rédaction et demande une mise à jour avant les épreuves.
 La **check-list DR400** est un aide-mémoire de révision, pas un document
 opérationnel : elle ne remplace ni la check-list de l'aéroclub ni le manuel de
 vol de l'appareil, qui restent seuls valables en vol.
+
+Le module **Aérodrome** reprend la VAC de Léognan du 03 DEC 2020. Une VAC change :
+avant chaque vol, la version en vigueur sur le site du SIA, les NOTAM et les
+consignes du club font foi.
 
 Le PASS est un **support de révision personnel**. Le découpage du planning
 est une estimation fondée sur le poids habituel de chaque UE : le livret des
