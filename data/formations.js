@@ -9,14 +9,15 @@
 
    Les chiffres sont ceux du contenu réellement embarqué. Ils se
    recomptent à tout moment dans la console de la page concernée
-   (Bank.count(), PPL.quizCount(), PASS.quizCount(), DR400.total()).
+   (Bank.count(), PPL.quizCount(), PASS.quizCount(), CkQuiz.available('tout'),
+   LFCS.QUESTIONS.length).
    ═══════════════════════════════════════════════════════════ */
 
 const Formations = (() => {
 
   /* Les domaines, dans l'ordre d'affichage. */
   const DOMAINES = [
-    { id: 'piloter',  nom: 'Piloter',   desc: 'Le théorique, puis la machine' },
+    { id: 'piloter',  nom: 'Piloter',   desc: 'Le théorique, la machine, le terrain' },
     { id: 'selection', nom: 'Sélections', desc: 'Culture générale et psychotechnique' },
     { id: 'sante',    nom: 'Santé',     desc: 'Première année de médecine' },
     { id: 'pause',    nom: 'Pause',     desc: 'Entre deux séries' }
@@ -33,9 +34,16 @@ const Formations = (() => {
     {
       id: 'check', domaine: 'piloter', page: 'checklist.html', mod: 'check',
       nom: 'Check-list DR400',
-      desc: 'Les treize listes du vol, les urgences de mémoire et les vitesses — plus un questionnaire tiré des listes.',
-      chiffres: { questions: 37, cours: 0, minutes: 0 },
-      detail: '13 listes · 152 points · 8 urgences'
+      desc: 'Les treize listes du vol, à lire comme sur papier ou à cocher, le cours qui les explique, les urgences de mémoire et un questionnaire.',
+      chiffres: { questions: 301, cours: 13, minutes: 54 },
+      detail: '13 listes · 152 points · 13 sections · 8 urgences'
+    },
+    {
+      id: 'aero', domaine: 'piloter', page: 'aerodrome.html', mod: 'aero',
+      nom: 'Aérodrome · Léognan',
+      desc: 'LFCS de fond en comble : la VAC décortiquée, les pistes, le tour de piste pas à pas avec sa radio — pour arriver prêt au premier tour de piste.',
+      chiffres: { questions: 41, cours: 13, minutes: 61 },
+      detail: 'LFCS · 13 sections · 10 étapes du circuit · 41 questions'
     },
     {
       id: 'culture', domaine: 'selection', page: 'culture.html', mod: 'culture',

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f3f6">
+<meta name="description" content="Aérodrome de Bordeaux-Léognan-Saucats (LFCS) : la VAC décortiquée, les pistes, le tour de piste pas à pas, la radio et un questionnaire">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Léognan">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/aerodrome.css">
+<title>Aérodrome de Léognan — Maximus Knowledge</title>
+<script src="js/theme.js"></script>
+<script src="js/trace.js" data-formation="aero"></script>
+</head>
+<body>
+
+<!-- ══════════════ LE TERRAIN ══════════════ -->
+<section class="screen active" id="screen-terrain">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Léognan</h1>
+        <p class="sub">Bordeaux-Léognan-Saucats · LFCS</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="ad-id" id="ad-id"></div>
+    <p class="warn" id="ad-warn"></p>
+
+    <div class="lab">En un coup d'œil</div>
+    <div class="ad-tiles" id="ad-tiles"></div>
+
+    <div class="lab">La carte <span class="n">nord en haut · 1 km</span></div>
+    <figure class="kfig" id="fig-vac"></figure>
+    <div class="legend" id="legend-vac"></div>
+
+    <div class="lab">Les pistes</div>
+    <div id="ad-pistes"></div>
+
+    <div class="lab">Le plan <span class="n">QFU 033° vers la droite</span></div>
+    <figure class="kfig" id="fig-plan"></figure>
+
+    <div class="lab">Les consignes de la VAC <span class="n" id="n-consignes"></span></div>
+    <div id="ad-consignes"></div>
+
+    <div class="lab">Qui vole ici</div>
+    <div id="ad-activites"></div>
+
+    <div class="lab">L'espace aérien autour</div>
+    <div id="ad-espaces"></div>
+
+    <div class="lab">Les repères au sol</div>
+    <div id="ad-reperes"></div>
+
+    <div class="lab">Situer le terrain <span class="n">depuis LFCS</span></div>
+    <div class="ad-rows" id="ad-navaids"></div>
+
+    <div class="lab">Services</div>
+    <div class="ad-rows" id="ad-services"></div>
+
+    <a class="klink" href="https://www.sia.aviation-civile.gouv.fr/" target="_blank" rel="noopener">
+      <span class="tile" data-ic="map"></span><b>La VAC en vigueur, sur le site du SIA</b><span class="chev" data-ic="chevron"></span>
+    </a>
+    <p class="disclaimer" id="terrain-foot"></p>
+  </div>
+</section>
+
+<!-- ══════════════ LE TOUR DE PISTE ══════════════ -->
+<section class="screen" id="screen-tdp">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Tour de piste</h1>
+        <p class="sub" id="tdp-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="rw-pick">
+      <div class="seg" id="rw-seg" role="tablist" aria-label="Piste en service">
+        <button data-rw="21" role="tab">Piste 21</button>
+        <button data-rw="03" role="tab">Piste 03</button>
+      </div>
+      <span class="rw-note" id="rw-note"></span>
+    </div>
+
+    <details class="card wind" id="wind">
+      <summary><span data-ic="wind"></span><b>Quelle piste aujourd'hui ?</b><small>Vent et QFE</small><span class="chev" data-ic="chevron"></span></summary>
+      <div class="wind-body">
+        <div class="wind-in">
+          <label>Vent du<input class="field" id="w-dir" type="number" inputmode="numeric" min="0" max="360" step="10" placeholder="270"><span>°</span></label>
+          <label>Force<input class="field" id="w-kt" type="number" inputmode="numeric" min="0" max="60" placeholder="12"><span>kt</span></label>
+          <label>QNH<input class="field" id="w-qnh" type="number" inputmode="numeric" min="950" max="1060" placeholder="1018"><span>hPa</span></label>
+        </div>
+        <div id="wind-out"></div>
+      </div>
+    </details>
+
+    <figure class="kfig" id="fig-circuit"></figure>
+    <div class="ad-tiles four" id="tdp-chiffres"></div>
+
+    <div class="duo">
+      <button class="btn go" data-nav="repet" data-ic="play">Répéter à blanc</button>
+      <a class="btn ghost" href="checklist.html#lecture" data-ic="clipboard">Check-list</a>
+    </div>
+
+    <label class="setting ind-set">
+      <div><strong>Ton indicatif</strong><small>Repris dans tous les messages radio</small></div>
+      <input type="text" id="set-ind" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="F-GXXX">
+    </label>
+
+    <div class="lab">Avant de rouler</div>
+    <div id="tdp-roulage"></div>
+
+    <div class="lab">Le tour, étape par étape <span class="n" id="tdp-n"></span></div>
+    <div id="tdp-etapes"></div>
+
+    <p class="disclaimer">
+      Vitesses d'un DR400 de club, celles de la check-list de cette application : le manuel de vol de ton avion et
+      les consignes de ton instructeur font foi. Le circuit est celui de la VAC du 03 DEC 2020.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ RÉPÉTITION À BLANC ══════════════ -->
+<section class="screen" id="screen-repet">
+  <div class="rdr-top">
+    <div class="line">
+      <button class="iconbtn flat" id="rp-back" aria-label="Retour" data-ic="left"></button>
+      <div class="who"><b id="rp-titre"></b><small id="rp-pos"></small></div>
+      <button class="iconbtn flat" id="rp-restart" aria-label="Recommencer" title="Recommencer" data-ic="repeat"></button>
+    </div>
+    <div class="track"><i id="rp-track"></i></div>
+  </div>
+  <div class="rdr-body" id="rp-body"></div>
+  <div class="rdr-foot">
+    <div class="inner">
+      <button class="btn ghost" id="rp-prev" aria-label="Étape précédente" data-ic="left"></button>
+      <button class="btn go" id="rp-next"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ LE COURS ══════════════ -->
+<section class="screen" id="screen-cours">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Le cours</h1>
+        <p class="sub">Léognan de fond en comble</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <div id="cours-body"></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-reader"></section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section class="screen" id="screen-quizhome">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Questionnaire</h1>
+        <p class="sub" id="quiz-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <div id="quiz-score"></div>
+    <div class="lab">Choisis ta série</div>
+    <div id="quiz-modes"></div>
+    <div class="lab">Longueur</div>
+    <div class="seg wide-seg" id="quiz-len"></div>
+    <p class="disclaimer">Questions bâties sur la VAC du 03 DEC 2020. Avant de voler, c'est la VAC en vigueur qui compte.</p>
+  </div>
+  <div class="rfoot">
+    <div class="inner"><button class="btn go wide" id="quiz-start"></button></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-quiz"></section>
+<section class="screen" id="screen-result"></section>
+
+<nav class="tabbar" id="tabbar"></nav>
+<div id="toast" class="toast"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/kit.js"></script>
+<script src="data/aerodrome-lfcs.js"></script>
+<script src="js/aerodrome-figs.js"></script>
+<script src="js/aerodrome-app.js"></script>
+</body>
+</html>
