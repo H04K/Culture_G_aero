@@ -62,25 +62,29 @@ const CkQuiz = (() => {
 
   /* ───────── les générateurs ───────── */
 
+  /** Une question d'item garde la liste d'où elle vient : la
+      correction peut y renvoyer. */
+  const avecListe = (it, x) => (x ? { ...x, ph: it.phase.id } : x);
+
   /** « Avant décollage — Trim ? » → l'action attendue. */
   function qAction(it, actions) {
-    return qcm(
+    return avecListe(it, qcm(
       `${it.phase.nom} — « ${it.t} » ?`,
       it.a, actions,
       `${it.t} : ${it.a}.` + (it.n ? ' ' + it.n : ''),
       it.n ? 2 : 1, 'item'
-    );
+    ));
   }
 
   /** « À quel moment coche-t-on ce point ? » → la liste. */
   function qMoment(it) {
-    return qcm(
+    return avecListe(it, qcm(
       `À quel moment coche-t-on « ${it.t} : ${it.a} » ?`,
       it.phase.nom,
       DR400.PHASES.map(p => p.nom),
       `Ce point appartient à la liste « ${it.phase.nom} » — ${it.phase.sous.toLowerCase()}.`,
       2, 'moment'
-    );
+    ));
   }
 
   /** L'enchaînement des listes. */
@@ -132,7 +136,7 @@ const CkQuiz = (() => {
   /* ───────── fabrication d'une série ───────── */
 
   /**
-   * @param {'tout'|'items'|'urgences'|'chiffres'|string} mode
+   * @param {'tout'|'items'|'pourquoi'|'urgences'|'chiffres'|string} mode
    *        Un identifiant de liste est accepté tel quel.
    * @param {number} n  nombre de questions voulues
    */
@@ -161,6 +165,8 @@ const CkQuiz = (() => {
     } else if (mode === 'urgences') {
       pool = DR400.URGENCES.map(u => qUrgence(u, premiers));
       pool.push(...ecrites.filter(q => q.s === 'urgence'));
+    } else if (mode === 'pourquoi') {
+      pool = ecrites.filter(q => q.s === 'principe' || q.s === 'procedure');
     } else if (mode === 'chiffres') {
       pool = DR400.VITESSES.map(v => qVitesse(v, valeursV));
       pool.push(...DR400.LIMITES.filter(l => !/voir manuel/i.test(l.v)).map(l => qLimite(l, valeursL)));
@@ -200,6 +206,7 @@ const CkQuiz = (() => {
   const MODES = [
     { id: 'tout',     nom: 'Série mélangée', desc: 'Un peu de tout : items, moments, urgences, chiffres', icon: 'target' },
     { id: 'items',    nom: 'Les items',      desc: 'L’action attendue et la liste où elle tombe',        icon: 'clipboard' },
+    { id: 'pourquoi', nom: 'Le pourquoi',    desc: 'Ce qu’explique le cours : raisons, principes, pièges', icon: 'book' },
     { id: 'urgences', nom: 'Urgences',       desc: 'Gestes de mémoire et situations anormales',          icon: 'alert' },
     { id: 'chiffres', nom: 'Chiffres',       desc: 'Vitesses de référence et limitations',               icon: 'gauge' }
   ];

@@ -25,8 +25,6 @@
   --mat-procedures:#ef8496;     --mat-principes-vol:#6ed2bd; --mat-radio:#8c9aee;
 }
 
-#screen-reader.active { display: flex; flex-direction: column; }
-
 /* ───────────── Écran d'une matière ───────────── */
 .thead { position: relative; padding: calc(12px + var(--safe-top)) 16px 20px; }
 .thead::before {
@@ -58,62 +56,6 @@
   font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--pale); margin-top: 16px;
 }
-
-/* Sommaire des sections */
-.secrow {
-  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-  padding: 12px 13px; margin-bottom: 7px;
-  background: var(--card); border: 1px solid var(--edge);
-  border-radius: var(--r-m); transition: border-color .15s, transform .12s;
-}
-.secrow:active { transform: scale(.99); }
-.secrow.cur { border-color: var(--m, var(--go)); box-shadow: var(--lift); }
-.secrow .dot {
-  position: relative;
-  width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%;
-  border: 2px solid var(--edge-2); display: grid; place-items: center; color: transparent;
-}
-.secrow.done .dot { background: var(--m, var(--go)); border-color: var(--m, var(--go)); color: #fff; }
-:root[data-theme="nuit"] .secrow.done .dot, :root:not([data-theme]) .secrow.done .dot { color: #12161d; }
-.secrow.cur .dot { border-color: var(--m, var(--go)); }
-.secrow.cur .dot::after {
-  content: ""; position: absolute; top: 50%; left: 50%; margin: -4.5px 0 0 -4.5px;
-  width: 9px; height: 9px; border-radius: 50%; background: var(--m, var(--go));
-}
-.secrow.cur.done .dot::after { display: none; }
-.secrow .stitle { flex: 1; font-size: 14.5px; font-weight: 550; line-height: 1.35; letter-spacing: -.01em; }
-.secrow .snum { font-family: var(--mono); font-size: 12px; color: var(--pale); margin-right: 2px; }
-.secrow.done .stitle { color: var(--dim); }
-.secrow .chev { color: var(--pale); }
-
-/* ───────────── Lecteur de section ───────────── */
-.rdr-top {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--pg); border-bottom: 1px solid var(--edge);
-  padding: calc(10px + var(--safe-top)) 16px 10px;
-}
-.rdr-top .line { display: flex; align-items: center; gap: 12px; max-width: 720px; margin: 0 auto; }
-.rdr-top .who { flex: 1; min-width: 0; }
-.rdr-top .who b { display: block; font-size: 13.5px; font-weight: 600; letter-spacing: -.01em; }
-.rdr-top .who small {
-  display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--pale); margin-top: 1px;
-}
-.rdr-top .track { max-width: 720px; margin: 10px auto 0; }
-.rdr-top .track i { background: var(--m, var(--go)); }
-.rdr-body { flex: 1; padding: 22px 16px 26px; max-width: 720px; margin: 0 auto; width: 100%; }
-.rdr-body h1 { font-size: 24px; line-height: 1.22; margin-bottom: 16px; }
-.rdr-body p { margin-bottom: 14px; font-size: 16px; line-height: 1.68; color: var(--ink-2); }
-.rdr-body p b, .rdr-body li b { color: var(--ink); font-weight: 650; }
-.rdr-body ul { margin: 0 0 14px; padding-left: 20px; color: var(--ink-2); font-size: 15.5px; line-height: 1.6; }
-.rdr-body li { margin-bottom: 5px; }
-.rdr-foot {
-  position: sticky; bottom: 0; background: var(--pg);
-  border-top: 1px solid var(--edge);
-  padding: 12px 16px calc(12px + var(--safe-bottom));
-}
-.rdr-foot .inner { display: flex; gap: 10px; max-width: 720px; margin: 0 auto; }
-.rdr-foot .btn.go { flex: 1; }
 
 /* ───────────── Fiche d'entraînement d'une matière ───────────── */
 .stats3 { display: flex; align-items: stretch; text-align: center; }
