@@ -347,7 +347,9 @@ const cours = Kit.cours({
   nom: 'Check-list DR400 · le cours',
   show,
   retour: () => go('cours'),
-  fin: 'Terminer le cours'
+  fin: 'Terminer le cours',
+  demoCle: 'check:cours',
+  labo: { prefixe: 'check:', titre: 'Le labo · check-list', sous: 'Essai des magnétos, mélange, givrage carbu, anémomètre, message de détresse', libelles: { 'check:cours': 'Dans le cours' } }
 });
 
 function renderCours() {
