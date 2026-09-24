@@ -28,7 +28,7 @@ const Formations = (() => {
     {
       id: 'ppl', domaine: 'piloter', page: 'ppl.html', mod: 'ppl',
       nom: 'Théorique PPL(A)',
-      desc: 'Les 12 matières du programme, de la réglementation aux communications : cours, QCM, mnémos et schémas.',
+      desc: 'Les 12 matières du programme, de la réglementation aux communications : cours, QCM, mnémos, schémas et 42 simulateurs.',
       chiffres: { questions: 413, cours: 95, minutes: 292 },
       detail: '12 matières · 95 sections · 413 questions · 71 mnémos'
     },
@@ -42,14 +42,14 @@ const Formations = (() => {
     {
       id: 'aero', domaine: 'piloter', page: 'aerodrome.html', mod: 'aero',
       nom: 'Aérodrome · Léognan',
-      desc: 'LFCS de fond en comble : la VAC décortiquée, les pistes, le tour de piste pas à pas avec sa radio — pour arriver prêt au premier tour de piste.',
+      desc: 'LFCS de fond en comble : la VAC décortiquée, les pistes, le tour de piste pas à pas — et animé — avec sa radio, pour arriver prêt au premier tour de piste.',
       chiffres: { questions: 41, cours: 13, minutes: 61 },
       detail: 'LFCS · 13 sections · 10 étapes du circuit · 41 questions'
     },
     {
       id: 'culture', domaine: 'selection', page: 'culture.html', mod: 'culture',
       nom: 'Culture générale aéro',
-      desc: "L'épreuve de culture aéronautique des sélections de pilote : 22 thèmes, du vol à l'histoire du transport aérien.",
+      desc: "L'épreuve de culture aéronautique des sélections de pilote : 22 thèmes, du vol à l'histoire du transport aérien, et 36 démos.",
       chiffres: { questions: 1763, cours: 22, minutes: 254 },
       detail: '22 thèmes · 1 763 questions · 22 fiches de cours'
     },
@@ -63,14 +63,14 @@ const Formations = (() => {
     {
       id: 'ia', domaine: 'tech', page: 'ia.html', mod: 'ia',
       nom: 'IA technique',
-      desc: 'Du gradient à la frontière : Transformer, pré- et post-training, RL, LoRA, quantization, inférence, vision, son, robotique, alignement, RSI.',
+      desc: 'Du gradient à la frontière : Transformer, pré- et post-training, RL, LoRA, quantization, inférence, vision, son, robotique, alignement, RSI — et 40 démos, dont un réseau qui s’entraîne sous tes yeux.',
       chiffres: { questions: 89, cours: 61, minutes: 329 },
       detail: '17 modules · 61 sections · 89 questions · aide-mémoire'
     },
     {
       id: 'pass', domaine: 'sante', page: 'pass.html', mod: 'pass',
       nom: 'PASS — Bordeaux',
-      desc: 'Les 19 UE du parcours accès santé, calées sur le planning de révision : cours, exercices corrigés, QCM.',
+      desc: 'Les 19 UE du parcours accès santé, calées sur le planning de révision : cours, exercices corrigés, QCM et 29 simulateurs.',
       chiffres: { questions: 608, cours: 97, minutes: 534 },
       detail: '19 UE · 97 sections · 608 QCM · 65 exercices'
     },

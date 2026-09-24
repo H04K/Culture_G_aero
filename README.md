@@ -3,7 +3,8 @@
 Application web de révision, installable et utilisable hors-ligne, qui réunit
 **plusieurs formations** : le théorique du PPL, la check-list du DR400,
 l'aérodrome de Léognan, l'IA technique, la culture générale aéronautique des
-sélections de pilote, le PASS de Bordeaux et le calcul mental.
+sélections de pilote, le PASS de Bordeaux et le calcul mental — avec **plus de
+110 démos interactives et simulateurs** placés dans les cours.
 
 **➡️ [Lancer l'application](https://h04k.github.io/Culture_G_aero/)**
 
@@ -15,18 +16,54 @@ progression, ses propres onglets et sa couleur.
 
 | Domaine | Formation | Contenu |
 |---|---|---|
-| Piloter | **Théorique PPL(A)** | 12 matières, 95 sections, 413 questions, 71 mnémos, 26 schémas |
-| Piloter | **Check-list DR400** | 13 listes (lecture ou pointage), 152 points, 13 sections de cours, 8 urgences, 301 questions |
-| Piloter | **Aérodrome · Léognan** | LFCS : la VAC décortiquée, le tour de piste pas à pas, 13 sections de cours, 41 questions |
-| Tech | **IA technique** | 17 modules, 61 sections, 89 questions, aide-mémoire, 3 schémas |
-| Sélections | **Culture générale aéro** | 22 thèmes, 1 763 questions, 22 fiches de cours |
+| Piloter | **Théorique PPL(A)** | 12 matières, 95 sections, 413 questions, 71 mnémos, 26 schémas, 42 démos |
+| Piloter | **Check-list DR400** | 13 listes (lecture ou pointage), 152 points, 13 sections de cours, 8 urgences, 301 questions, 5 démos |
+| Piloter | **Aérodrome · Léognan** | LFCS : la VAC décortiquée, le tour de piste pas à pas (et animé), 13 sections de cours, 41 questions, 6 démos |
+| Tech | **IA technique** | 17 modules, 61 sections, 89 questions, aide-mémoire, 10 schémas, 40 démos |
+| Sélections | **Culture générale aéro** | 22 thèmes, 1 763 questions, 22 fiches de cours, 36 démos |
 | Sélections | **Calcul mental** | Tables, carrés, puissances, chaînes — tirage adaptatif |
-| Santé | **PASS — Bordeaux** | 19 UE, 97 sections, 608 QCM, 65 exercices corrigés, 98 mnémos |
+| Santé | **PASS — Bordeaux** | 19 UE, 97 sections, 608 QCM, 65 exercices corrigés, 98 mnémos, 29 démos |
 | Pause | **Tri de vis** | 40 niveaux d'un jeu de démontage en 3D |
 
 Soit **8 formations**, **3 215 questions** et **301 fiches ou sections de cours**,
 environ 25 h de lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
 se fait là, et elle apparaît au bon endroit sur le portail.
+
+## Démos interactives et simulateurs
+
+Plus de **110 démos** : des curseurs, un tracé, des chiffres qui bougent — et
+de vrais simulateurs. Chacune est posée **dans la section de cours** qu'elle
+illustre, et chaque formation les regroupe dans un **Labo**, un écran à part
+ouvert depuis son accueil.
+
+| Formation | Quelques démos |
+|---|---|
+| PPL, culture, check-list | Portance et incidence, polaire, virage, diagramme V-n, pannes Pitot, cycle à 4 temps et diagramme p-V, essai des magnétos à diagnostiquer, mélange et EGT, givrage carburateur avec réchauffage, hélice, décollage (coefficients CAA), centrage, VOR, GNSS, altimètre et calages, triangle des vitesses, espaces et VMC, priorités, compas, bille, hypoxie, illusions d'approche, désorientation, METAR, message de détresse, Mach, taux de dilution, pressurisation, orbites, PAPI, orthodromie… |
+| Aérodrome · Léognan | Le **tour de piste animé** en 21 ou en 03, avec la dérive due au vent, les actions, la radio et les pièges de chaque étape |
+| IA technique | Un **réseau qui s'entraîne en direct** (rétropropagation et Adam), descente de gradient, attention, RoPE, KV cache, BPE, MoE, Chinchilla, échantillonnage, formats flottants, RLHF et KL, GRPO, Q-learning, LoRA par SVD, quantification, roofline, décodage spéculatif, diffusion, spectrogramme, BM25, Goodhart, **superposition**… |
+| PASS | Se/Sp/VPP et prévalence, valeur p, Michaelis-Menten, titrage et tampons, gaz du sang, Nernst et Goldman, **potentiel d'action de Hodgkin-Huxley**, hémoglobine, Doppler, IRM T1/T2, PCR, Hardy-Weinberg, dérive génétique, pharmacocinétique, osmose… |
+
+Les modèles sont honnêtes mais simples : ils montrent les tendances et les
+ordres de grandeur. Les chiffres qui engagent un vol sont dans le manuel de
+l'avion et sur la VAC en vigueur ; ceux qui engagent un patient, dans les
+référentiels cliniques.
+
+**Le moteur** (`js/demos.js`) fournit tout le reste : une toile nette sur
+écran dense, des curseurs linéaires ou logarithmiques, des choix, des tuiles de
+résultats, des repères et des courbes, des cadrans, des animations qui se
+mettent en veille hors de l'écran, et le redessin au changement d'ambiance —
+les couleurs viennent des jetons de la charte, lus sur la démo elle-même.
+
+Ajouter une démo :
+
+```js
+Demos.def('ma-demo', {
+  titre: 'Le titre', sous: 'Une ligne d’explication', icon: 'chart',
+  monter(corps) { /* Demos.ui.toile, curseur, tuiles, repere… */ }
+});
+// placée dans toute section dont le titre contient ce mot (« ^mot » : commence par)
+Demos.placer('ppl:principes-vol', [['formule de la portance', 'ma-demo']]);
+```
 
 ## La charte
 
@@ -539,7 +576,8 @@ css/ia.css              styles de l'IA et de ses schémas
 data/ia.js              registre des 17 modules
 data/ia-cours-*.js      les 61 sections, en quatre fichiers
 data/ia-quiz.js         les 89 questions
-js/ia-figs.js           schémas : attention, bloc Transformer, LoRA
+js/ia-figs.js           10 schémas : attention, bloc Transformer, LoRA, MoE,
+                        parallélisme, RLHF, RAG, agent, PagedAttention, ViT
 js/ia-app.js            navigation, aide-mémoire, séries
 aerodrome.html          module Aérodrome de Léognan (terrain, circuit, cours, quiz)
 css/aerodrome.css       styles de l'aérodrome et de ses schémas
@@ -553,6 +591,17 @@ js/jeux-levels.js       composition, vérification et couleurs des 40 scènes
 js/jeux-store.js        étoiles, records et niveaux débloqués
 js/jeux-screw.js        moteur du jeu : rendu 3D, animations, règles
 js/jeux-app.js          navigation de l'onglet Jeux
+js/demos.js             le moteur des démos : placement, montage, Labo, briques
+js/demos-vol.js         physique du vol et instruments (atmosphère ISA, avion type DR400)
+js/demos-moteur.js      moteur, hélice, performances, centrage, plané
+js/demos-nav.js         navigation, altimétrie, espaces, priorités, compas, soleil
+js/demos-humain.js      facteurs humains, météo, radio, validités
+js/demos-culture.js     Mach, dilution, pressurisation, orbites, PAPI, fuseaux…
+js/demos-lfcs.js        le tour de piste de Léognan, animé
+js/demos-ia.js          IA : apprendre, réseaux, Transformer, LLM
+js/demos-ia2.js         IA : entraîner, aligner, compresser, servir, voir, agir
+js/demos-sante.js       PASS : statistiques, biochimie, chimie, physiologie
+js/demos-sante2.js      PASS : biophysique, méthodes, génétique, médicament…
 sw.js                   service worker (cache hors-ligne)
 tools/gen-icons.js      génération des icônes PNG, sans dépendance
 ```

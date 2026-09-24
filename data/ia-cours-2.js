@@ -16,7 +16,7 @@ IA.add('pretrain', [
     "Synthétique vérifié : puissant ; récursif non filtré : collapse"
   ] },
 
-{ h: "Paralléliser sur des milliers de GPU", min: 7,
+{ h: "Paralléliser sur des milliers de GPU", min: 7, fig: 'parallel',
   p: [
     "Un modèle de 400 G paramètres ne tient pas sur un GPU de 80 Go, et son entraînement demanderait des siècles sur un seul. On combine plusieurs axes de parallélisme — le « **parallélisme 3D, 4D, 5D** ».",
     "**Data parallelism** : chaque GPU a une copie du modèle et traite une partie du batch ; les gradients sont moyennés par **all-reduce**. **ZeRO / FSDP** en retire la redondance : on **shardes** l'état de l'optimiseur (stage 1), les gradients (stage 2), puis les paramètres eux-mêmes (stage 3), reconstitués à la volée par **all-gather** couche par couche.",
@@ -90,7 +90,7 @@ IA.add('post', [
     "Imiter ne suffit pas : place aux préférences et au RL"
   ] },
 
-{ h: "RLHF : récompense apprise et PPO", min: 6,
+{ h: "RLHF : récompense apprise et PPO", min: 6, fig: 'rlhf',
   p: [
     "Le **RLHF** (InstructGPT, 2022) se déroule en trois temps. On collecte des **comparaisons** : pour un prompt, des humains classent deux réponses. On entraîne un **modèle de récompense** `r_φ(x, y)` avec la perte de **Bradley-Terry** : `−log σ(r(x, y_gagnante) − r(x, y_perdante))`. Puis on optimise la politique par RL pour maximiser cette récompense.",
     "L'objectif optimisé : `E[r_φ(x, y)] − β · KL(π_θ ‖ π_ref)`. La pénalité **KL** vers le modèle de référence (le SFT) est essentielle : sans elle, la politique trouve vite des sorties absurdes que le modèle de récompense note très haut — c'est le **reward hacking**, la sur-optimisation d'un proxy imparfait.",

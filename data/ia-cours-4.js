@@ -2,7 +2,7 @@
 
 IA.add('vision', [
 
-{ h: "Des CNN au Vision Transformer", min: 5,
+{ h: "Des CNN au Vision Transformer", min: 5, fig: 'vit',
   p: [
     "Le **ViT** (2020) traite une image comme une séquence : on la découpe en **patches** (typiquement 16 × 16 pixels), chaque patch est aplati et projeté en un vecteur, on ajoute des positions, et un Transformer standard fait le reste. Moins de biais inductif qu'un CNN : il lui faut plus de données, mais il **passe mieux à l'échelle** et s'unifie avec les modèles de langage.",
     "Tâches classiques : **classification**, **détection** (boîtes et classes — famille YOLO en temps réel, **DETR** qui formule la détection comme une prédiction d'ensemble par un Transformer), **segmentation** (sémantique, d'instances, panoptique). **SAM** (*Segment Anything*) a apporté la segmentation **promptable** : un point, une boîte ou un texte suffisent à segmenter n'importe quel objet, image ou vidéo.",
@@ -109,7 +109,7 @@ IA.add('robot', [
 
 IA.add('agents', [
 
-{ h: "RAG : donner la bonne information au bon moment", min: 6,
+{ h: "RAG : donner la bonne information au bon moment", min: 6, fig: 'rag',
   p: [
     "Le **RAG** (*retrieval-augmented generation*) injecte dans le contexte des passages récupérés dans une base documentaire. Pipeline : découper les documents en **chunks**, les encoder en **embeddings** (un encodeur bidirectionnel entraîné de façon contrastive), les indexer dans une base vectorielle, et à chaque requête récupérer les plus proches voisins pour les placer dans le prompt.",
     "Les index vectoriels reposent sur la recherche de plus proches voisins **approchée** : **HNSW** (graphe navigable multi-niveaux), **IVF** (partition en clusters), compression par **quantification produit** (PQ). La recherche lexicale **BM25** reste excellente pour les noms propres, codes et termes rares : le standard est l'**hybride** (lexical + vectoriel, fusion des rangs), suivi d'un **reranker** (un *cross-encoder* qui lit requête et passage ensemble, plus précis et plus lent).",
@@ -123,7 +123,7 @@ IA.add('agents', [
     "Long contexte et RAG se combinent"
   ] },
 
-{ h: "Outils et agents", min: 6,
+{ h: "Outils et agents", min: 6, fig: 'agent',
   p: [
     "Le **tool use** : le modèle reçoit la description de fonctions (nom, description, schéma JSON des paramètres) et peut émettre un appel structuré ; l'application exécute la fonction et renvoie le résultat dans le contexte. Le modèle est entraîné (SFT puis RL) à décider **quand** appeler, avec **quels** arguments, et comment exploiter le résultat. Des protocoles comme **MCP** (*Model Context Protocol*) standardisent la façon d'exposer outils et ressources à un modèle.",
     "Un **agent**, c'est une **boucle** : observer, réfléchir, agir (appeler un outil), observer le résultat, recommencer, jusqu'à ce que la tâche soit faite. Motif historique **ReAct** (raisonnement et actions entrelacés). Les agents de code lisent un dépôt, éditent, lancent les tests, corrigent ; les agents « computer use » voient l'écran et pilotent souris et clavier.",
