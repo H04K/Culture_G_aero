@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f2f3f6">
-<meta name="description" content="Jeux de pause — Tri de vis : dévisse les plaques et range les vis par couleur, 40 niveaux">
+<meta name="description" content="Jeux de pause — Tri de vis : démonte des meubles en 3D et range les vis par couleur, 40 niveaux">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tri de vis">
@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="css/jeux.css">
 <title>Tri de vis — Maximus Knowledge</title>
 <script src="js/theme.js"></script>
+<script src="js/trace.js" data-formation="jeux"></script>
 </head>
 <body>
 
@@ -22,12 +23,14 @@
 <section class="screen active" id="screen-hub">
   <header class="hero">
     <div class="hero-inner">
-      <a class="icon-btn" href="index.html" aria-label="Retour à l'accueil" data-ic="left"></a>
       <div>
         <h1>Jeux</h1>
         <p class="sub">La pause entre deux séries de QCM</p>
       </div>
-      <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      <div class="hero-actions">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
     </div>
   </header>
 
@@ -78,7 +81,7 @@
     <div class="page-head">
       <button class="icon-btn" data-nav="hub" aria-label="Retour" data-ic="left"></button>
       <h1>Tri de vis</h1>
-      <a class="chip-btn" href="index.html" title="Mes formations" data-ic="home">Menu</a>
+      <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home" style="margin-left:auto"></a>
     </div>
     <div class="lvl-stats" id="lvl-stats"></div>
     <div class="lvl-grid" id="lvl-grid"></div>

@@ -13,7 +13,11 @@ function esc(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 /** Met en gras les **termes** encadrés d'astérisques. */
-const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+/* **gras**, *italique* et ***les deux*** — rien d'autre. */
+const rich = s => esc(s)
+  .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
+  .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+  .replace(/(^|[^*\w])\*([^*\s](?:[^*]*?[^*\s])?)\*(?!\*)/g, '$1<i>$2</i>');
 
 const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
 

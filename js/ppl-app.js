@@ -18,7 +18,11 @@ function esc(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 /** Met en gras les **termes** encadrés d'astérisques. */
-const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+/* **gras**, *italique* et ***les deux*** — rien d'autre. */
+const rich = s => esc(s)
+  .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
+  .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+  .replace(/(^|[^*\w])\*([^*\s](?:[^*]*?[^*\s])?)\*(?!\*)/g, '$1<i>$2</i>');
 
 const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
 
@@ -121,7 +125,7 @@ $('#tabbar').innerHTML = TABS.map(([id, label, icon]) =>
 
 /* Icônes des boutons fixes du balisage */
 const paint = (sel, name, size = 18) => { const el = $(sel); if (el) el.innerHTML = Ic.svg(name, size); };
-paint('#gate-home', 'left'); paint('#gate-mark', 'plane', 28);
+paint('#gate-home', 'home'); paint('#gate-mark', 'plane', 28);
 paint('#learn-home', 'home'); paint('#pr-home', 'home'); paint('#se-home', 'home');
 paint('#mn-back', 'left'); paint('#sc-back', 'left'); paint('#st-back', 'left');
 paint('#rdr-back', 'left'); paint('#rdr-list', 'layers');
