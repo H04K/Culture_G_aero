@@ -63,7 +63,8 @@ const cours = Kit.cours({
   show,
   retour: i => go('module', IA.sections[i] ? IA.sections[i].g : IA.MODULES[0].id),
   fin: 'Terminer le cours',
-  figs: { attention: IaFigs.attention, transformer: IaFigs.transformer, lora: IaFigs.lora }
+  figs: { attention: IaFigs.attention, transformer: IaFigs.transformer, lora: IaFigs.lora },
+  demoCle: s => 'ia:' + s.g
 });
 
 const lusDe = g => IA.indices(g).filter(cours.estLu).length;
@@ -84,6 +85,17 @@ function renderModules() {
       <span class="go">${Ic.svg('chevron', 20)}</span>
     </button>`;
   $('#mods-resume').onclick = () => cours.ouvrir(cours.fini() ? 0 : next, null);
+  const nLabo = typeof Demos !== 'undefined' ? Demos.compte('ia:') : 0;
+  if (nLabo) {
+    $('#mods-head').insertAdjacentHTML('beforeend', `
+    <button class="labo-cta" id="mods-labo">
+      <span class="tile">${Ic.svg('sliders', 20)}</span>
+      <span class="txt"><b>Le labo · ${nLabo} démos</b><small>Un réseau qui s’entraîne, attention, BPE, lois d’échelle, quantization, diffusion, RL…</small></span>
+      <span class="chev">${Ic.svg('chevron', 18)}</span>
+    </button>`);
+    $('#mods-labo').onclick = () => Demos.labo('ia:', 'Le labo · IA technique',
+      Object.fromEntries(IA.MODULES.map((mo, k) => ['ia:' + mo.id, `${String(k + 1).padStart(2, '0')} · ${mo.nom}`])));
+  }
 
   $('#mods-n').textContent = IA.MODULES.length;
   $('#mods-list').innerHTML = IA.MODULES.map((mo, k) => {

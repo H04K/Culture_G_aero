@@ -58,6 +58,7 @@ const Avion = (() => {
 
 (() => {
 const U = Demos.ui;
+const { fleche, cadran } = U;
 const kmh = ms => ms * 3.6;
 
 /* ═══════════════ PORTANCE ET INCIDENCE ═══════════════ */
@@ -107,16 +108,6 @@ function dessineProfil(T, cx, cy, corde, alpha, C, decroche) {
     }
   }
   return pt([0.25, 0.02]);
-}
-
-function fleche(ctx, x1, y1, x2, y2, coul, ep = 2.4) {
-  const a = Math.atan2(y2 - y1, x2 - x1), t = 7;
-  ctx.strokeStyle = coul; ctx.fillStyle = coul; ctx.lineWidth = ep;
-  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - Math.cos(a) * t * 0.8, y2 - Math.sin(a) * t * 0.8); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - t * Math.cos(a) + t * 0.55 * Math.sin(a), y2 - t * Math.sin(a) - t * 0.55 * Math.cos(a));
-  ctx.lineTo(x2 - t * Math.cos(a) - t * 0.55 * Math.sin(a), y2 - t * Math.sin(a) + t * 0.55 * Math.cos(a));
-  ctx.closePath(); ctx.fill();
 }
 
 Demos.def('portance', {
@@ -402,50 +393,6 @@ Demos.def('domaine', {
 /* ═══════════════ L'ANÉMOMÈTRE ET SES ARCS ═══════════════ */
 
 const ARCS = { vs0: 90, vfe: 150, vs1: 100, vno: 270, vne: 310, max: 340 };
-/** Un cadran à aiguille.
-    opts : max, pas (graduation), majeur (une sur n porte un chiffre),
-    debut et balayage (degrés, 0 = 3 h, sens horaire), lab(x),
-    arcs [[v1, v2, couleur, retrait, épaisseur]], traits [[v, couleur]],
-    petite (0 → 1 : aiguille courte), titre, valeur, dessous (textes sous le cadran). */
-function cadran(T, cx, cy, r, v, C, opts = {}) {
-  const { ctx } = T;
-  const deb = opts.debut ?? -225, bal = opts.balayage ?? 300, plein = bal >= 360;
-  const maj = opts.majeur || 2;
-  const a = x => U.rad(deb + x / opts.max * bal);
-  const arc = (v1, v2, coul, rr, ep) => { ctx.strokeStyle = coul; ctx.lineWidth = ep; ctx.beginPath(); ctx.arc(cx, cy, rr, a(v1), a(v2)); ctx.stroke(); };
-  ctx.fillStyle = C.card; ctx.strokeStyle = C.edge2; ctx.lineWidth = 1.4;
-  ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, 7); ctx.fill(); ctx.stroke();
-  (opts.arcs || []).forEach(([v1, v2, coul, dr, ep]) => arc(v1, v2, coul, r - (dr || 0), ep || 6));
-  const petit = r < 70, fs = petit ? 8 : 8.5;
-  for (let i = 0, x = 0; x <= opts.max + 1e-9; i++, x = i * opts.pas) {
-    if (plein && x >= opts.max - 1e-9) break;
-    const t = a(x), M = i % maj === 0;
-    ctx.strokeStyle = C.ink2; ctx.lineWidth = M ? 1.5 : 0.8;
-    ctx.beginPath(); ctx.moveTo(cx + Math.cos(t) * (r - 4), cy + Math.sin(t) * (r - 4));
-    ctx.lineTo(cx + Math.cos(t) * (r - (M ? 12 : 8)), cy + Math.sin(t) * (r - (M ? 12 : 8))); ctx.stroke();
-    const lab = M ? String(opts.lab ? opts.lab(x) : x) : '';
-    if (lab) T.texte(lab, cx + Math.cos(t) * (r - (petit ? 20 : 25)), cy + Math.sin(t) * (r - (petit ? 20 : 25)) + 3, { taille: fs, coul: C.ink2, align: 'center' });
-  }
-  (opts.traits || []).forEach(([x, coul]) => { const t = a(x); ctx.strokeStyle = coul; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx + Math.cos(t) * (r - 12), cy + Math.sin(t) * (r - 12)); ctx.lineTo(cx + Math.cos(t) * (r + 4), cy + Math.sin(t) * (r + 4)); ctx.stroke(); });
-  if (opts.petite !== undefined) {
-    const tp = U.rad(deb + opts.petite * bal);
-    ctx.strokeStyle = C.ink2; ctx.lineWidth = 4; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(tp) * r * 0.5, cy + Math.sin(tp) * r * 0.5); ctx.stroke();
-    ctx.lineCap = 'butt';
-  }
-  const t = a(plein ? ((v % opts.max) + opts.max) % opts.max : U.clamp(v, 0, opts.max));
-  ctx.strokeStyle = C.ink; ctx.lineWidth = 2.4;
-  ctx.beginPath(); ctx.moveTo(cx - Math.cos(t) * 8, cy - Math.sin(t) * 8); ctx.lineTo(cx + Math.cos(t) * (r - 10), cy + Math.sin(t) * (r - 10)); ctx.stroke();
-  ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 7); ctx.fill();
-  if (petit || opts.dessous) {
-    if (opts.titre) T.texte(opts.titre, cx, cy + r + 19, { taille: 9, coul: C.pale, align: 'center' });
-    if (opts.valeur) T.texte(opts.valeur, cx, cy + r + 33, { taille: 10.5, gras: true, mono: true, coul: C.ink, align: 'center' });
-  } else {
-    if (opts.titre) T.texte(opts.titre, cx, cy + r * 0.42, { taille: 8.5, coul: C.pale, align: 'center' });
-    if (opts.valeur) T.texte(opts.valeur, cx, cy + r * 0.62, { taille: 11, gras: true, mono: true, coul: C.ink, align: 'center' });
-  }
-}
-
 Demos.def('anemometre', {
   titre: 'L’anémomètre et ses arcs de couleur', icon: 'gauge',
   sous: 'Blanc, vert, jaune, rouge : ce que chaque zone permet — valeurs d’un DR400 de club',
@@ -577,8 +524,6 @@ Demos.def('pitot', {
   }
 });
 
-Demos.ui.fleche = fleche;
-Demos.ui.cadran = cadran;
 
 /* ═══════════════ OÙ LES PLACER ═══════════════ */
 
