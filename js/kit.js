@@ -76,7 +76,8 @@ function anneau(valeur, taille, trait, dedans, piste, seuil = 80, couleur = null
    Une section de cours est un objet :
      h      le titre
      p      des paragraphes
-     fig    le nom d'un schéma fourni par la page (figs[nom]())
+     fig    le nom d'un schéma (ou une liste) fourni par la page
+     demo   une démo interactive (ou une liste), montée par opts.monter
      list   une liste à puces
      steps  des étapes numérotées [{ t, a }]
      radio  des messages radio [{ ou, t, n }]
@@ -90,10 +91,12 @@ function anneau(valeur, taille, trait, dedans, piste, seuil = 80, couleur = null
 function bloc(s, figs = {}) {
   let h = '';
   (s.p || []).forEach(p => h += `<p>${rich(p)}</p>`);
-  if (s.fig) {
-    const f = figs[s.fig];
+  [].concat(s.fig || []).forEach(nom => {
+    const f = figs[nom];
     if (f) h += `<figure class="kfig">${f()}</figure>`;
-  }
+  });
+  /* Une démo interactive : un emplacement que la page monte ensuite. */
+  [].concat(s.demo || []).forEach(d => { h += `<div class="kdemo" data-demo="${esc(d)}"></div>`; });
   if (s.list) h += `<ul>${s.list.map(l => `<li>${rich(l)}</li>`).join('')}</ul>`;
   if (s.steps) h += s.steps.map((st, i) => `
     <div class="kstep"><span class="no">${i + 1}</span><b>${rich(st.t)}</b><span class="a">${rich(st.a)}</span></div>`).join('');
@@ -127,6 +130,8 @@ function bloc(s, figs = {}) {
      show(v)    affiche un écran de la page
      retour()   ce que fait le bouton retour du lecteur
      figs       les schémas disponibles
+     demos(s)   les noms des démos à placer dans la section s
+     monter(el) monte les démos une fois la section affichée
      fin        le libellé du bouton de la dernière section */
 
 function cours(o) {
@@ -177,7 +182,9 @@ function cours(o) {
     const rang = grp ? grp.indexOf(i) : i, taille = grp ? grp.length : tot;
     q('pos').textContent = grp ? `${o.groupes[s.g].nom} · ${rang + 1} / ${taille}` : `Section ${i + 1} sur ${tot}`;
     q('track').style.width = pct(rang + 1, taille) + '%';
-    q('body').innerHTML = `<h1>${esc(s.h)}</h1>` + bloc(s, o.figs);
+    const s2 = o.demos ? { ...s, demo: [].concat(s.demo || [], o.demos(s)) } : s;
+    q('body').innerHTML = `<h1>${esc(s.h)}</h1>` + bloc(s2, o.figs);
+    if (o.monter) o.monter(q('body'));
     q('prev').disabled = i === 0;
     q('next').innerHTML = (detour ? 'Lu — revenir au quiz' : i === tot - 1 ? (o.fin || 'Terminer le cours') : 'Section suivante') + ' ' + Ic.svg('right', 18);
     o.show(ecran);

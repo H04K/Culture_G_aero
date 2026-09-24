@@ -71,7 +71,16 @@ const CoursUI = (() => {
           <b>${done} / ${Cours.count()} fiches lues</b>
           <small>${Cours.totalMin()} min de lecture au total · programme complet BIA + Air France</small>
         </div>
-      </div>`;
+      </div>
+      ${(typeof Demos !== 'undefined' && Demos.compte('culture:') ? `
+    <button class="labo-cta" data-labo="1">
+      <span class="tile">${Ic.svg('sliders', 20)}</span>
+      <span class="txt"><b>Le labo · ${Demos.compte('culture:')} simulateurs</b><small>Portance, virage, altimètre, METAR, VOR, orbites, PAPI…</small></span>
+      <span class="chev">${Ic.svg('chevron', 18)}</span>
+    </button>` : '')}`;
+    const lab = $('#cours-head [data-labo]');
+    if (lab) lab.onclick = () => Demos.labo('culture:', 'Le labo · culture aéro',
+      Object.fromEntries(Cours.all().map(f => ['culture:' + f.id, f.title])));
 
     const blocks = Cours.blocks();
     $('#cours-list').innerHTML = Object.keys(blocks).map(key => {
@@ -112,6 +121,7 @@ const CoursUI = (() => {
       <section class="fiche-section">
         <h2>${esc(s.h)}</h2>
         ${(s.p || []).map(p => `<p>${rich(p)}</p>`).join('')}
+        ${typeof Demos !== 'undefined' ? Demos.html('culture:' + f.id, s.h) : ''}
         ${s.list ? `<ul class="fiche-list">${s.list.map(li => `<li>${rich(li)}</li>`).join('')}</ul>` : ''}
         ${s.table ? renderTable(s.table) : ''}
         ${s.key ? `<div class="fiche-key">
@@ -162,6 +172,7 @@ const CoursUI = (() => {
           </button>` : ''}
       </div>`;
 
+    if (typeof Demos !== 'undefined') Demos.monter($('#fiche-content'));
     $('#screen-fiche').scrollTop = 0;
     window.scrollTo(0, 0);
   }
