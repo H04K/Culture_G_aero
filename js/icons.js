@@ -150,6 +150,8 @@ const Ic = (() => {
     takeoff:  '<path d="M3.4 20.6h17.2"/><path d="M5.6 16.6 18.4 5.8"/><path d="M12.4 5.8h6v6"/>',
     landing:  '<path d="M3.4 20.6h17.2"/><path d="M5.6 5.8 18.4 16.6"/><path d="M12.4 16.6h6v-6"/>',
     power:    '<path d="M12 3.4v8.4"/><path d="M7.4 6.4a7.6 7.6 0 1 0 9.2 0"/>',
+    chip:     '<rect x="6.2" y="6.2" width="11.6" height="11.6" rx="2.2"/><rect x="9.4" y="9.4" width="5.2" height="5.2" rx=".8"/>' +
+              '<path d="M9.4 3.4v2.8M14.6 3.4v2.8M9.4 17.8v2.8M14.6 17.8v2.8M3.4 9.4h2.8M3.4 14.6h2.8M17.8 9.4h2.8M17.8 14.6h2.8"/>',
     runway:   '<path d="M9.2 3.4 5 20.6M14.8 3.4 19 20.6"/><path d="M12 5.2v2.2M12 10.2v2.6M12 15.8v3.2"/>',
     flag:     '<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.3 3.9 2.3 3.9H6"/>',
     undo:     '<path d="M4.8 8.6h8.6a5.3 5.3 0 0 1 0 10.6H7.2"/><path d="m8.4 4.4-3.6 4.2 3.6 4.2"/>',
@@ -211,7 +213,7 @@ const Ic = (() => {
   /* Les modules de l'accueil. */
   const MOD = {
     culture: 'globe', calcul: 'keypad', pass: 'stetho', ppl: 'plane',
-    jeux: 'screw',   check: 'clipboard', aero: 'runway'
+    jeux: 'screw',   check: 'clipboard', aero: 'runway', ia: 'chip'
   };
 
   function svg(name, size = 20) {
