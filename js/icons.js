@@ -150,6 +150,7 @@ const Ic = (() => {
     takeoff:  '<path d="M3.4 20.6h17.2"/><path d="M5.6 16.6 18.4 5.8"/><path d="M12.4 5.8h6v6"/>',
     landing:  '<path d="M3.4 20.6h17.2"/><path d="M5.6 5.8 18.4 16.6"/><path d="M12.4 16.6h6v-6"/>',
     power:    '<path d="M12 3.4v8.4"/><path d="M7.4 6.4a7.6 7.6 0 1 0 9.2 0"/>',
+    runway:   '<path d="M9.2 3.4 5 20.6M14.8 3.4 19 20.6"/><path d="M12 5.2v2.2M12 10.2v2.6M12 15.8v3.2"/>',
     flag:     '<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.3 3.9 2.3 3.9H6"/>',
     undo:     '<path d="M4.8 8.6h8.6a5.3 5.3 0 0 1 0 10.6H7.2"/><path d="m8.4 4.4-3.6 4.2 3.6 4.2"/>',
     sound:    '<path d="M5 9.4h3l4.4-3.6v12.4L8 14.6H5z"/><path d="M16 9.6a3.8 3.8 0 0 1 0 4.8M18.6 7.2a7.2 7.2 0 0 1 0 9.6"/>',
@@ -210,7 +211,7 @@ const Ic = (() => {
   /* Les modules de l'accueil. */
   const MOD = {
     culture: 'globe', calcul: 'keypad', pass: 'stetho', ppl: 'plane',
-    jeux: 'screw',   check: 'clipboard'
+    jeux: 'screw',   check: 'clipboard', aero: 'runway'
   };
 
   function svg(name, size = 20) {

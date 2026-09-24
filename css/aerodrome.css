@@ -1,0 +1,273 @@
+/* ═══════════════════════════════════════════════════════════
+   Maximus Knowledge — Aérodrome de Léognan (LFCS)
+
+   La charte commune vient de ui.css. Ne restent ici que les
+   pièces propres au terrain : la carte d'identité, les pistes,
+   les consignes, le calcul du vent, les étapes du tour de
+   piste et les schémas redessinés de la VAC.
+
+   Couleur du module : le magenta des cartes VAC.
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('ui.css');
+
+body { --m: var(--m-aero); }
+
+/* Les teintes de la VAC, dans les deux ambiances. */
+:root[data-theme="jour"] {
+  --vac-blue: #2a72b8; --vac-green: #2e8b57; --ad-grass: #cfe6c2; --ad-grass-2: #8fbf7a; --ad-tw: #cfd4dc;
+}
+:root[data-theme="nuit"], :root:not([data-theme]) {
+  --vac-blue: #6aa9e8; --vac-green: #5fcf8e; --ad-grass: #27412a; --ad-grass-2: #5f9a59; --ad-tw: #3a414e;
+}
+
+/* ───────────── Carte d'identité ───────────── */
+.ad-id {
+  display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 16px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: var(--r-l); box-shadow: var(--lift);
+  border-left: 4px solid var(--m);
+}
+.ad-code {
+  font-family: var(--mono); font-size: 25px; font-weight: 800; letter-spacing: .04em;
+  color: var(--m); padding: 8px 10px; border-radius: 12px; background: var(--card-2);
+}
+.ad-txt { flex: 1; min-width: 0; }
+.ad-txt b { display: block; font-size: 16px; letter-spacing: -.015em; }
+.ad-txt small { display: block; color: var(--dim); font-size: 12.5px; line-height: 1.45; margin-top: 2px; }
+.ad-txt small.mono { font-family: var(--mono); font-size: 11px; color: var(--pale); letter-spacing: .02em; }
+
+.warn {
+  margin-top: 12px; padding: 12px 14px;
+  font-size: 13px; line-height: 1.55; color: var(--ink-2);
+  background: var(--warm-soft); border-left: 3px solid var(--warm); border-radius: var(--r-m);
+}
+.warn b { font-weight: 650; }
+
+.ad-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ad-tiles.four { grid-template-columns: repeat(4, 1fr); margin-top: 10px; }
+.ad-tiles .tile-s { padding: 11px 6px; }
+.ad-tiles .tile-s b { font-size: 16px; font-family: var(--mono); letter-spacing: -.02em; color: var(--ink); }
+.ad-tiles .tile-s small { font-size: 9.5px; letter-spacing: .08em; line-height: 1.35; }
+.ad-tiles.four .tile-s b { font-size: 14.5px; }
+@media (max-width: 440px) { .ad-tiles.four { grid-template-columns: repeat(2, 1fr); } }
+#screen-tdp .duo .btn { padding: 14px 12px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -6px 2px 4px; font-size: 12px; color: var(--dim); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .lg { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid var(--m); }
+.legend .lg.hl { border-top: 2px dashed var(--vac-green); }
+.legend .lg.zv { width: 12px; height: 12px; border: 1.5px dashed var(--vac-blue); border-radius: 50%; }
+.legend .lg.as { border-top: 3px solid var(--vac-blue); opacity: .7; }
+
+/* ───────────── Pistes ───────────── */
+.piste { padding: 14px 14px 10px; margin-bottom: 10px; border-left: 4px solid var(--ink); }
+.piste.herbe { border-left-color: var(--ad-grass-2); }
+.pi-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.pi-num { font-family: var(--mono); font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.pi-surf { color: var(--dim); font-size: 13px; }
+.piste .tbl-wrap { margin-bottom: 8px; }
+.piste table { min-width: 0; font-size: 13px; }
+.piste td.hot { color: var(--m); font-weight: 700; }
+.pi-note { font-size: 12.5px; color: var(--dim); line-height: 1.5; margin-bottom: 4px; }
+
+/* ───────────── Consignes ───────────── */
+.cons {
+  display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; margin-bottom: 7px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: var(--r-m);
+  --c: var(--m);
+}
+.cons.no { --c: var(--no); }
+.cons.go { --c: var(--go); }
+.cons.warm { --c: var(--warm); }
+.cons .ci {
+  flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%; margin-top: 1px;
+  display: grid; place-items: center; color: var(--c);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+}
+.cons .cb { flex: 1; min-width: 0; }
+.cons .cb small {
+  display: block; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--c);
+}
+.cons .cb b { display: block; font-size: 14.5px; letter-spacing: -.01em; margin-top: 1px; }
+.cons .cb span { display: block; font-size: 13px; color: var(--dim); line-height: 1.5; margin-top: 2px; }
+
+.row.static { align-items: flex-start; cursor: default; }
+.row.static:active { transform: none; }
+.row .rmeta.nb { color: var(--warm); margin-top: 6px; }
+
+.esp {
+  padding: 12px 14px; margin-bottom: 7px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: var(--r-m);
+}
+.esp-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.esp-top b { font-size: 14.5px; }
+.esp-top span { font-family: var(--mono); font-size: 12px; color: var(--vac-blue); font-weight: 600; }
+.esp p { font-size: 13px; color: var(--dim); line-height: 1.5; margin-top: 3px; }
+
+.ad-rows {
+  background: var(--card); border: 1px solid var(--edge); border-radius: var(--r-l); box-shadow: var(--lift);
+  padding: 4px 14px; margin-bottom: 14px;
+}
+.ad-row {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--edge); font-size: 13.5px;
+}
+.ad-row:last-child { border-bottom: none; }
+.ad-row span { color: var(--dim); }
+.ad-row b { font-family: var(--mono); font-size: 12.5px; font-weight: 650; text-align: right; }
+.ad-row small { flex: 1 0 100%; font-size: 12px; color: var(--pale); line-height: 1.45; }
+
+/* ───────────── Tour de piste ───────────── */
+.rw-pick { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.rw-pick .seg button { padding: 10px 18px; font-size: 14.5px; font-weight: 650; }
+.rw-note { font-size: 12.5px; color: var(--dim); }
+.rw-note b { color: var(--m); }
+.red { color: var(--no) !important; }
+
+.wind { margin-top: 12px; padding: 0; overflow: hidden; }
+.wind summary {
+  display: flex; align-items: center; gap: 10px; padding: 13px 14px; cursor: pointer; list-style: none;
+}
+.wind summary::-webkit-details-marker { display: none; }
+.wind summary > span:first-child { color: var(--m); display: grid; }
+.wind summary b { font-size: 14.5px; }
+.wind summary small { color: var(--pale); font-size: 12.5px; }
+.wind summary .chev { margin-left: auto; color: var(--pale); transition: transform .2s; display: grid; }
+.wind[open] summary .chev { transform: rotate(90deg); }
+.wind-body { padding: 0 14px 14px; border-top: 1px solid var(--edge); }
+.wind-in { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.wind-in label {
+  position: relative; display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--pale); font-weight: 600;
+}
+.wind-in .field { margin-top: 5px; padding: 11px 32px 11px 11px; font-size: 16px; font-family: var(--mono); }
+.wind-in input::-webkit-inner-spin-button, .wind-in input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.wind-in input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.wind-in label span { position: absolute; right: 10px; bottom: 13px; font-size: 11px; letter-spacing: 0; text-transform: none; }
+.w-row {
+  display: grid; grid-template-columns: 38px 1fr 1fr; gap: 8px; align-items: center;
+  padding: 9px 10px; margin-top: 8px; border-radius: var(--r-m);
+  background: var(--card-2); border: 1px solid var(--edge); font-size: 13px; color: var(--dim);
+}
+.w-row.on { border-color: var(--m); background: color-mix(in srgb, var(--m) 8%, var(--card)); }
+.w-rw { font-family: var(--mono); font-weight: 800; font-size: 16px; color: var(--ink); }
+.w-val b { color: var(--ink); font-family: var(--mono); }
+.w-reco, .w-help, .w-qfe { font-size: 13.5px; color: var(--ink-2); margin-top: 10px; line-height: 1.5; }
+.w-help { color: var(--dim); margin-top: 12px; }
+.w-qfe { padding-top: 10px; border-top: 1px solid var(--edge); }
+.wind .btn { margin-top: 10px; }
+
+#fig-circuit figcaption { text-align: center; }
+.ind-set { margin-top: 14px; }
+.ind-set input {
+  width: 118px; background: var(--card-2); border: 1px solid var(--edge); color: var(--ink);
+  border-radius: 10px; padding: 9px 11px; font-size: 15px; font-family: var(--mono); text-transform: uppercase;
+}
+
+.etape {
+  padding: 14px 14px 12px; margin-bottom: 10px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: var(--r-l); box-shadow: var(--lift);
+  scroll-margin: 90px; transition: border-color .3s, box-shadow .3s;
+}
+.etape.flash { border-color: var(--m); box-shadow: 0 0 0 4px color-mix(in srgb, var(--m) 20%, transparent); }
+.etape header, .rp-head { display: flex; align-items: center; gap: 11px; }
+.etape .no, .rp-head .no {
+  flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 13px; font-weight: 700;
+  background: var(--m); color: #fff;
+}
+:root[data-theme="nuit"] .etape .no, :root:not([data-theme]) .etape .no,
+:root[data-theme="nuit"] .rp-head .no, :root:not([data-theme]) .rp-head .no { color: #12161d; }
+.etape header b { font-size: 16px; letter-spacing: -.015em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
+.chips span {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px;
+  background: var(--card-2); border: 1px solid var(--edge); font-size: 12px; color: var(--ink-2);
+}
+.chips .ic { color: var(--m); }
+.etape ul, .rp-body ul { margin: 0 0 10px; padding-left: 19px; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.etape li, .rp-body li { margin-bottom: 4px; }
+.etape li b, .rp-body li b { color: var(--ink); }
+.piege {
+  display: flex; gap: 8px; align-items: flex-start; margin-top: 4px;
+  font-size: 13px; line-height: 1.5; color: var(--warm);
+}
+.piege .ic { margin-top: 3px; flex: 0 0 auto; }
+.piege span { color: var(--ink-2); }
+
+/* Répétition à blanc */
+#screen-repet.active { display: flex; flex-direction: column; }
+.rp-fig { max-width: 250px; margin: 0 auto 14px; }
+.rp-fig svg { display: block; width: 100%; height: auto; }
+.rp-head h1 { font-size: 23px; margin: 0; }
+.rp-q { color: var(--dim); font-size: 15px; margin: 10px 0 6px; line-height: 1.5; }
+
+/* ───────────── Questionnaire ───────────── */
+.wide-seg { display: flex; width: 100%; }
+.wide-seg button { flex: 1; padding: 11px 6px; font-family: var(--mono); font-size: 14px; }
+#screen-quizhome .setcard { margin-bottom: 8px; }
+#screen-result .wrap { padding-bottom: calc(100px + var(--safe-bottom)); }
+#screen-quizhome .rfoot { padding-bottom: calc(var(--bar) + 6px); }
+.seance {
+  display: flex; align-items: center; gap: 16px; margin-top: 14px; padding: 16px;
+}
+.seance .txt { flex: 1; min-width: 0; }
+.seance b { display: block; font-size: 16px; }
+.seance small { display: block; color: var(--dim); font-size: 12.5px; margin-top: 2px; }
+.seance .pcts { font-family: var(--mono); font-size: 26px; font-weight: 800; letter-spacing: -.04em; }
+
+/* ───────────── Les schémas ─────────────
+   Toutes les couleurs viennent des jetons : jour et nuit. */
+.adf text { font-size: 10px; fill: var(--dim); }
+.adf .t { fill: var(--ink); font-weight: 700; font-size: 10.5px; }
+.adf .mid { text-anchor: middle; }
+.adf .land { fill: var(--card-2); }
+.adf .asf { fill: var(--vac-blue); opacity: .07; }
+.adf .as { stroke: var(--vac-blue); stroke-width: 3; opacity: .55; fill: none; }
+.adf .asl { fill: var(--vac-blue); font-size: 9px; font-weight: 700; letter-spacing: .03em; }
+.adf .asl.dim { opacity: .75; font-weight: 600; }
+.adf .zv { fill: var(--vac-blue); fill-opacity: .06; stroke: var(--vac-blue); stroke-width: 1.2; stroke-dasharray: 3 2.5; }
+.adf .zl { fill: var(--vac-blue); font-size: 10px; font-weight: 600; }
+.adf .zl.sm { font-size: 8.5px; }
+.adf .hl { stroke: var(--vac-green); stroke-width: 1.8; stroke-dasharray: 5 4; fill: none; }
+.adf .hlt { fill: var(--vac-green); font-size: 9.5px; font-weight: 600; }
+.adf .ct { stroke: var(--m); stroke-width: 2.6; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.adf .ctf { fill: var(--m); }
+.adf .ctl { fill: var(--m); font-size: 10px; font-weight: 700; }
+.adf .rw-l { stroke: var(--ink); stroke-width: 3.2; stroke-linecap: butt; }
+.adf .rw-l.big { stroke-width: 7; }
+.adf .gr-l { stroke: var(--ad-grass-2); stroke-width: 5; stroke-linecap: butt; opacity: .8; }
+.adf .rw { fill: var(--ink); }
+.adf .gr { fill: var(--ad-grass); stroke: var(--ad-grass-2); stroke-width: .8; }
+.adf .grt { fill: var(--ink-2); font-size: 9px; font-weight: 600; }
+.adf .dthr { stroke: var(--card); stroke-width: 2.2; }
+.adf .acc { stroke: var(--ink-2); stroke-width: 1.6; }
+.adf .tw { stroke: var(--ad-tw); stroke-width: 4.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.adf .ap { fill: var(--ad-tw); }
+.adf .hg { fill: var(--ink-2); }
+.adf .avt { fill: var(--card); stroke: var(--ink); stroke-width: 1.4; }
+.adf .ws { fill: var(--no); }
+.adf .hp { stroke: var(--ink); stroke-width: 1.6; }
+.adf .hpt { fill: var(--ink); font-size: 8.5px; font-weight: 700; font-family: var(--mono); }
+.adf .lbl { font-size: 8.5px; fill: var(--dim); }
+.adf .rwn { font-family: var(--mono); font-weight: 800; font-size: 11px; fill: var(--ink); }
+.adf .aem { fill: var(--m); fill-opacity: .07; stroke: var(--m); stroke-width: 1.2; }
+.adf .aemt { fill: var(--m); font-size: 8.5px; font-weight: 700; }
+.adf .stop rect { fill: var(--no); }
+.adf .stop text { fill: #fff; font-size: 7.5px; font-weight: 800; letter-spacing: .04em; }
+.adf .nb { fill: var(--card); stroke: var(--edge-2); stroke-width: 1; }
+.adf .nf { fill: var(--ink); }
+.adf .sc { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+.adf .nav { stroke: var(--dim); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.adf .navf { fill: var(--dim); }
+.adf .navt { font-size: 8.5px; fill: var(--dim); }
+.adf .no { stroke: var(--no); stroke-width: 2; fill: none; stroke-dasharray: 4 3; }
+.adf .nob { fill: var(--card); stroke: var(--no); stroke-width: 1.6; }
+.adf .nox { stroke: var(--no); stroke-width: 1.8; stroke-linecap: round; }
+.adf .not { fill: var(--no); font-size: 9px; font-weight: 700; }
+.adf .mk { cursor: pointer; }
+.adf .mk circle { fill: var(--card); stroke: var(--m); stroke-width: 1.6; }
+.adf .mk text { fill: var(--m); font-size: 9.5px; font-weight: 800; font-family: var(--mono); }
+.adf .mk.on circle { fill: var(--m); }
+.adf .mk.on text { fill: var(--card); }
