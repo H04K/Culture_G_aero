@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f2f3f6">
-<meta name="description" content="Check-list Robin DR400 : phases de vol, procédures d'urgence et repères chiffrés">
+<meta name="description" content="Check-list Robin DR400 : les listes en lecture ou à cocher, le cours qui les explique, les urgences et les repères chiffrés">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Check-list DR400">
@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="css/checklist.css">
 <title>Check-list DR400 — Maximus Knowledge</title>
 <script src="js/theme.js"></script>
+<script src="js/trace.js" data-formation="check"></script>
 </head>
 <body>
 
@@ -32,18 +33,34 @@
       </div>
     </div>
 
+    <div class="vue-bar">
+      <div class="seg vue-seg" id="vue-seg" role="tablist" aria-label="Affichage des listes">
+        <button data-vue="lecture" role="tab">Lecture</button>
+        <button data-vue="pointage" role="tab">Pointage</button>
+      </div>
+      <button class="chip-btn" id="btn-print" data-ic="clipboard">Imprimer</button>
+    </div>
+
     <p class="warn" id="warn"></p>
 
-    <div id="seance"></div>
+    <!-- Lecture : toute la check-list, comme sur papier -->
+    <div id="vue-lecture">
+      <nav class="lect-index" id="lect-index" aria-label="Aller à une liste"></nav>
+      <article class="paper" id="paper"></article>
+    </div>
 
-    <div class="lab">Phases de vol <span class="n" id="phase-count"></span></div>
-    <div id="phase-list"></div>
+    <!-- Pointage : une liste à la fois, à cocher -->
+    <div id="vue-pointage" hidden>
+      <div id="seance"></div>
+      <div class="lab">Phases de vol <span class="n" id="phase-count"></span></div>
+      <div id="phase-list"></div>
+    </div>
 
     <p class="disclaimer" id="lists-foot"></p>
   </div>
 </section>
 
-<!-- ══════════════ UNE LISTE ══════════════ -->
+<!-- ══════════════ UNE LISTE À COCHER ══════════════ -->
 <section class="screen" id="screen-run">
   <header class="run-top">
     <div class="line">
@@ -52,7 +69,7 @@
         <b id="run-name"></b>
         <small id="run-sub"></small>
       </div>
-      <button class="iconbtn flat" id="run-reset" aria-label="Tout décocher" data-ic="repeat"></button>
+      <button class="iconbtn flat" id="run-reset" aria-label="Tout décocher" title="Décocher cette liste" data-ic="repeat"></button>
     </div>
     <div class="segs" id="run-segs"></div>
   </header>
@@ -64,6 +81,26 @@
     </div>
   </div>
 </section>
+
+<!-- ══════════════ LE COURS ══════════════ -->
+<section class="screen" id="screen-cours">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Le cours</h1>
+        <p class="sub">Comprendre la check-list avant de la réciter</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <div id="cours-body"></div>
+  </div>
+</section>
+
+<!-- ══════════════ LECTEUR DE SECTION (rempli par Kit.cours) ══════════════ -->
+<section class="screen" id="screen-reader"></section>
 
 <!-- ══════════════ QUIZ — CHOIX DE LA SÉRIE ══════════════ -->
 <section class="screen" id="screen-quizhome">
@@ -99,41 +136,9 @@
   </div>
 </section>
 
-<!-- ══════════════ QUIZ ══════════════ -->
-<section class="screen" id="screen-quiz">
-  <div class="qtop">
-    <div class="line">
-      <span class="count" id="q-count"></span>
-      <span class="who" id="q-who"></span>
-      <button class="iconbtn flat" id="q-quit" aria-label="Quitter" data-ic="close"></button>
-    </div>
-    <div class="track"><i id="q-track"></i></div>
-    <div class="strip" id="q-strip"></div>
-  </div>
-  <div class="qbody">
-    <div class="qtag" id="q-tag"></div>
-    <h2 class="q-text" id="q-text"></h2>
-    <div class="options" id="options"></div>
-    <div class="card fb" id="fb" hidden></div>
-  </div>
-  <div class="qfoot">
-    <div class="inner">
-      <button class="btn ghost" id="q-prev" aria-label="Question précédente" data-ic="left"></button>
-      <button class="btn go" id="q-next" disabled>Valider</button>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════ RÉSULTAT ══════════════ -->
-<section class="screen" id="screen-result">
-  <div class="wrap" id="result-wrap"></div>
-  <div class="rfoot">
-    <div class="inner">
-      <button class="btn ghost" id="btn-replay" aria-label="Refaire une série" data-ic="repeat"></button>
-      <button class="btn go" id="btn-done">Terminer</button>
-    </div>
-  </div>
-</section>
+<!-- ══════════════ QUIZ ET RÉSULTAT (remplis par Kit.serie) ══════════════ -->
+<section class="screen" id="screen-quiz"></section>
+<section class="screen" id="screen-result"></section>
 
 <!-- ══════════════ URGENCES ══════════════ -->
 <section class="screen" id="screen-urgences">
@@ -179,7 +184,7 @@
     <div class="lab">Limitations</div>
     <div id="limites"></div>
 
-    <div class="lab">Réglages</div>
+    <div class="lab">Réglages de la check-list</div>
     <div class="setting-list">
       <label class="setting">
         <div><strong>Gros caractères</strong><small>Plus lisible en vol, sur les genoux</small></div>
@@ -189,7 +194,7 @@
         <div><strong>Garder l'écran allumé</strong><small>Tant qu'une liste est ouverte</small></div>
         <input type="checkbox" id="set-wake" class="switch">
       </label>
-      <button class="setting" id="btn-reset-all">
+      <button class="setting as-btn" id="btn-reset-all">
         <div><strong style="color:var(--no)">Tout décocher</strong><small>Remet les treize listes à zéro</small></div>
         <span class="chev" style="color:var(--no)" data-ic="trash"></span>
       </button>
@@ -201,12 +206,14 @@
 </section>
 
 <!-- ══════════════ ONGLETS ══════════════ -->
-<nav class="tabbar" id="tabbar"></nav>
+<nav class="tabbar five" id="tabbar"></nav>
 
 <div id="toast" class="toast"></div>
 
 <script src="js/icons.js"></script>
+<script src="js/kit.js"></script>
 <script src="data/checklist-dr400.js"></script>
+<script src="data/checklist-cours.js"></script>
 <script src="data/checklist-quiz.js"></script>
 <script src="js/checklist-quiz.js"></script>
 <script src="js/checklist-app.js"></script>

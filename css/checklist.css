@@ -205,6 +205,108 @@ body { --m: var(--m-check); }
 .l-row .v { font-family: var(--mono); font-size: 13.5px; color: var(--m); white-space: nowrap; }
 .l-row .n { flex: 1 0 100%; font-size: 12.5px; color: var(--pale); }
 
+/* ───────────── Lecture ou pointage ───────────── */
+.vue-bar { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.vue-seg { flex: 1; }
+.vue-seg button { flex: 1; padding: 10px 12px; font-size: 14px; font-weight: 600; }
+.vue-bar .chip-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; }
+.vue-bar .chip-btn .ic { color: var(--m); }
+
+.phase.cur { border-color: var(--m); box-shadow: 0 0 0 3px var(--go-soft), var(--lift); }
+.phase .cnt .pill { font-size: 10px; padding: 4px 8px; }
+
+/* Index des listes : un rail qui reste sous la main. */
+.lect-index {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  margin: 14px -16px 0; padding: calc(8px + var(--safe-top)) 16px 10px;
+  background: linear-gradient(to bottom, var(--pg) 78%, transparent);
+}
+.lect-index::-webkit-scrollbar { display: none; }
+.lect-index a {
+  flex: 0 0 auto; padding: 7px 12px; border-radius: 999px;
+  border: 1px solid var(--edge); background: var(--card);
+  font-size: 12.5px; color: var(--dim); text-decoration: none; white-space: nowrap;
+}
+.lect-index a:hover { color: var(--ink); border-color: var(--edge-2); }
+.lect-index a.red { color: var(--no); border-color: color-mix(in srgb, var(--no) 40%, var(--edge)); }
+
+/* La carte papier. */
+.paper {
+  margin-top: 6px; padding: 6px 0 4px;
+  background: var(--card); border: 1px solid var(--edge);
+  border-radius: var(--r-l); box-shadow: var(--lift);
+}
+.paper-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px 14px; border-bottom: 2px solid var(--ink);
+  margin: 0 12px;
+}
+.paper-head div { flex: 1; min-width: 0; }
+.paper-head b { display: block; font-size: 17px; letter-spacing: -.02em; }
+.paper-head small { display: block; font-size: 12px; color: var(--dim); margin-top: 1px; }
+.paper-tag {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; padding: 5px 9px; border-radius: 6px;
+  background: var(--m); color: #fff;
+}
+:root[data-theme="nuit"] .paper-tag, :root:not([data-theme]) .paper-tag { color: #12161d; }
+
+.pl { padding: 14px 12px 6px; scroll-margin-top: 70px; }
+.pl + .pl { border-top: 1px solid var(--edge); }
+.pl h3 {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 4px 8px; font-size: 15.5px; letter-spacing: -.015em;
+}
+.pl h3 .k {
+  flex: 0 0 auto; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 8px;
+  display: grid; place-items: center; font-family: var(--mono); font-size: 12px; font-weight: 700;
+  background: var(--m); color: #fff;
+}
+:root[data-theme="nuit"] .pl h3 .k, :root:not([data-theme]) .pl h3 .k { color: #12161d; }
+.pl h3 .nm { flex: 1; min-width: 0; }
+.pl h3 .nm small { display: block; font-size: 12px; font-weight: 500; color: var(--pale); letter-spacing: 0; margin-top: 1px; }
+.pl-go {
+  display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto;
+  padding: 6px 8px; border-radius: 10px; color: var(--pale);
+}
+.pl-go:hover { color: var(--m); background: var(--card-2); }
+.pl-go em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--yes); }
+
+/* Une ligne : numéro, item, points de conduite, action. */
+.pl ol { list-style: none; margin: 0; padding: 0; }
+.pl li {
+  display: grid; grid-template-columns: 22px auto minmax(14px, 1fr) auto;
+  align-items: baseline; column-gap: 6px;
+  padding: 6px 4px; border-radius: 8px;
+}
+.pl li:nth-child(odd) { background: var(--card-2); }
+.pl li .ln { font-family: var(--mono); font-size: 11px; color: var(--pale); text-align: right; }
+.pl li .it { font-size: 14.5px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.pl li .lead { border-bottom: 1.5px dotted var(--edge-2); transform: translateY(-4px); }
+.pl li .ac {
+  font-size: 14px; font-weight: 650; color: var(--m); text-align: right;
+  max-width: min(58vw, 380px); justify-self: end;
+}
+.pl li .ac i { font-style: normal; font-weight: 500; color: var(--pale); font-size: 12.5px; }
+.pl li .nt { grid-column: 2 / -1; font-size: 12px; color: var(--pale); line-height: 1.45; margin-top: 2px; }
+.pl ol.vit li { grid-template-columns: auto minmax(14px, 1fr) auto; padding-left: 8px; }
+
+.pl-urg h3 .k { background: var(--no); }
+.pl-urg li .ac { color: var(--no); }
+.pl-sub { margin: 4px 0 10px; }
+.pl-subh {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin: 0 4px 4px; font-size: 13.5px; font-weight: 700; color: var(--ink);
+}
+.pl-subh .ic { color: var(--pale); }
+.paper-foot { margin: 8px 16px 12px; font-size: 11.5px; color: var(--pale); line-height: 1.5; }
+
+/* Urgence : la suivante, sans repasser par la liste. */
+.urg-pos { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--no); letter-spacing: .08em; }
+.urg-next { margin-top: 18px; }
+.urg-next .rmeta { margin: 0 0 2px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+
 /* ───────────── Questionnaire ───────────── */
 .wide-seg { display: flex; width: 100%; }
 .wide-seg button { flex: 1; padding: 11px 6px; font-family: var(--mono); font-size: 14px; }
@@ -226,3 +328,35 @@ body.big .ck { grid-template-columns: 30px 1fr; }
 body.big .phase .nm, body.big .urg b { font-size: 17px; }
 body.big .v-row .nm, body.big .l-row .nm { font-size: 16px; }
 body.big .v-row .kmh { font-size: 17px; }
+body.big .pl li .it { font-size: 16.5px; }
+body.big .pl li .ac { font-size: 16px; }
+body.big .pl li .nt { font-size: 13.5px; }
+
+/* ───────────── Impression ─────────────
+   La lecture s'imprime comme une vraie carte : noir sur blanc,
+   sans barre ni boutons, une liste jamais coupée en deux. */
+@media print {
+  @page { margin: 12mm; }
+  :root, :root[data-theme] {
+    --pg: #fff; --pg-2: #fff; --card: #fff; --card-2: #f3f3f3; --edge: #bbb; --edge-2: #888;
+    --ink: #000; --ink-2: #111; --dim: #333; --pale: #555; --m: #000; --no: #000;
+  }
+  :root, :root[data-theme] { color-scheme: light; }
+  html, body { background: #fff !important; color: #000; }
+  body { --m: #000; }
+  .tabbar, .top .acts, .vue-bar, .lect-index, .warn, #lists-foot, .pl-go, .toast { display: none !important; }
+  .screen { display: none !important; }
+  #screen-lists { display: block !important; animation: none; }
+  .wrap { max-width: none; padding: 0; }
+  .top { padding-top: 0; }
+  .paper { border: none; box-shadow: none; margin: 0; }
+  .paper-tag, .pl h3 .k { background: #000 !important; color: #fff !important; }
+  .pl { break-inside: avoid; padding-top: 8px; }
+  .pl li { padding: 2px 4px; }
+  .pl h3 { margin-bottom: 4px; font-size: 12pt; }
+  .pl li:nth-child(odd) { background: #f1f1f1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pl li .it, .pl li .ac { font-size: 10.5pt; }
+  .pl li .nt { font-size: 8.5pt; }
+  .pl li .ac { max-width: 9.5cm; color: #000; }
+  .pl li .ac i, .pl li .nt, .pl h3 .nm small { color: #444; }
+}
