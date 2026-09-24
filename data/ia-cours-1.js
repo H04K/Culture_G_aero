@@ -228,7 +228,7 @@ IA.add('llm', [
     "Chat template : les tokens spéciaux des rôles"
   ] },
 
-{ h: "Mixture of Experts", min: 6,
+{ h: "Mixture of Experts", min: 6, fig: 'moe',
   p: [
     "Dans un **MoE**, le MLP de chaque bloc est remplacé par `E` **experts** (des MLP) et un **routeur** : un petit réseau linéaire qui, pour chaque token, choisit les `k` experts les plus adaptés (**top-k**) et pondère leurs sorties. Le modèle a beaucoup de paramètres **totaux**, mais chaque token n'en active qu'une fraction : on découple la **capacité** (paramètres) du **coût** (FLOPs par token).",
     "Exemples : Mixtral 8×7B active 2 experts sur 8 — ≈ 47 G paramètres totaux, ≈ 13 G actifs par token. DeepSeek-V3 pousse le **fine-grained MoE** : 256 petits experts routés dont 8 actifs, plus un **expert partagé** que tous les tokens traversent, pour ≈ 671 G paramètres totaux et ≈ 37 G actifs. La plupart des modèles frontière ouverts récents sont des MoE.",

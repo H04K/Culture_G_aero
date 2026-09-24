@@ -63,7 +63,7 @@ const cours = Kit.cours({
   show,
   retour: i => go('module', IA.sections[i] ? IA.sections[i].g : IA.MODULES[0].id),
   fin: 'Terminer le cours',
-  figs: { attention: IaFigs.attention, transformer: IaFigs.transformer, lora: IaFigs.lora },
+  figs: IaFigs,
   demoCle: s => 'ia:' + s.g
 });
 

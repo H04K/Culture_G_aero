@@ -85,7 +85,7 @@ IA.add('infer', [
     "TTFT vs TPOT ; le batching rentabilise la lecture des poids"
   ] },
 
-{ h: "KV cache, PagedAttention et batching continu", min: 6,
+{ h: "KV cache, PagedAttention et batching continu", min: 6, fig: 'paged',
   p: [
     "Sans **KV cache**, chaque nouveau token recalculerait les clés et valeurs de tout le contexte : un coût quadratique. Avec, on ne calcule que celles du nouveau token. Mais le cache grossit linéairement avec la longueur, et sa gestion devient le problème central du serving.",
     "**PagedAttention** (vLLM, 2023) applique l'idée de la **mémoire virtuelle** : le KV cache est découpé en **blocs** de taille fixe (16 tokens par exemple), alloués à la demande et référencés par une table de pages. Fini la fragmentation et la réservation au pire cas : on sert deux à quatre fois plus de requêtes simultanées. Bonus : des blocs peuvent être **partagés** entre séquences (même prompt système, échantillonnage parallèle).",
