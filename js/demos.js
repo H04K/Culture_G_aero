@@ -10,6 +10,7 @@
      Demos.placer(cle, liste)  la range dans un cours
                                cle : 'ppl:navigation', 'pass:ue7', 'ia:transfo'…
                                liste : [[mot du titre de section, 'nom[:arg]'], …]
+                               (« ^mot » : le titre commence par ce mot)
      Demos.html(cle, titre)    les emplacements d'une section (HTML)
      Demos.noms(cle, titre)    les mêmes, en liste de noms
      Demos.monter(racine)      monte les démos présentes dans racine
@@ -33,11 +34,14 @@ const Demos = (() => {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   function def(nom, spec) { REG[nom] = spec; }
+  /** Une démo existe, et ses données sont chargées dans cette page. */
+  const dispo = n => { const d = REG[n.split(':')[0]]; return !!d && (!d.dispo || d.dispo()); };
   function placer(cle, liste) { (PLACES[cle] = PLACES[cle] || []).push(...liste); }
   function noms(cle, titre) {
     const t = norm(titre || '');
-    return (PLACES[cle] || []).filter(([mot]) => t.includes(norm(mot))).map(([, n]) => n)
-      .filter(n => REG[n.split(':')[0]]);
+    /* « ^mot » : le titre doit commencer par ce mot. */
+    const va = mot => (mot[0] === '^' ? t.startsWith(norm(mot.slice(1))) : t.includes(norm(mot)));
+    return (PLACES[cle] || []).filter(([mot]) => va(mot)).map(([, n]) => n).filter(dispo);
   }
   const html = (cle, titre) => noms(cle, titre).map(n => `<div class="kdemo" data-demo="${esc(n)}"></div>`).join('');
 
@@ -94,9 +98,9 @@ const Demos = (() => {
 
   /* ───── Nombres ───── */
   /* « −0 » n'existe pas à l'affichage. */
-  const zero = (v, d) => (+v.toFixed(Math.min(20, d)) === 0 ? 0 : v);
-  const nf = (v, d = 1) => (Number.isFinite(v) ? zero(v, d).toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: 0 }) : '—');
-  const nfx = (v, d = 1) => (Number.isFinite(v) ? zero(v, d).toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d }) : '—');
+  const zero = (v, d) => (+v.toFixed(Math.max(0, Math.min(20, d))) === 0 ? 0 : v);
+  const nf = (v, d = 1) => (Number.isFinite(v) ? zero(v, d).toLocaleString('fr-FR', { maximumFractionDigits: Math.max(0, Math.min(20, d)), minimumFractionDigits: 0 }) : '—');
+  const nfx = (v, d = 1) => (Number.isFinite(v) ? zero(v, d).toLocaleString('fr-FR', { maximumFractionDigits: Math.max(0, Math.min(20, d)), minimumFractionDigits: Math.max(0, Math.min(20, d)) }) : '—');
   const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
   /** 3,6·10²⁵ */
   function sci(v, d = 1) {
@@ -386,7 +390,7 @@ const Demos = (() => {
     Object.keys(PLACES).filter(c => c.startsWith(prefixe)).forEach(cle => {
       const n = [];
       PLACES[cle].forEach(([, nom]) => {
-        if (vus.has(nom) || !REG[nom.split(':')[0]]) return;
+        if (vus.has(nom) || !dispo(nom)) return;
         vus.add(nom); n.push(nom);
       });
       if (n.length) out.push({ cle, groupe: libelles[cle] || cle.split(':')[1], noms: n });

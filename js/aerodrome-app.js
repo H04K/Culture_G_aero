@@ -329,7 +329,9 @@ const cours = Kit.cours({
   nom: 'Léognan · le cours',
   show,
   retour: () => go('cours'),
-  figs: { vac: AdFigs.vac, plan: AdFigs.plan, circuit21: () => AdFigs.circuit('21') }
+  figs: { vac: AdFigs.vac, plan: AdFigs.plan, circuit21: () => AdFigs.circuit('21') },
+  demoCle: 'aero:cours',
+  labo: { prefixe: 'aero:', titre: 'Le labo · Léognan', sous: 'Tour de piste animé, vent de travers, plané, soleil, radio', libelles: { 'aero:cours': 'Dans le cours' } }
 });
 
 /* ═══════════════ LE QUESTIONNAIRE ═══════════════ */

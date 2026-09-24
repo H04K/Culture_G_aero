@@ -130,8 +130,8 @@ function bloc(s, figs = {}) {
      show(v)    affiche un écran de la page
      retour()   ce que fait le bouton retour du lecteur
      figs       les schémas disponibles
-     demos(s)   les noms des démos à placer dans la section s
-     monter(el) monte les démos une fois la section affichée
+     demoCle    la clé des démos du cours ('check:cours'), ou s => clé
+     labo       { prefixe, titre, sous, libelles } : le Labo, sous le sommaire
      fin        le libellé du bouton de la dernière section */
 
 function cours(o) {
@@ -182,9 +182,12 @@ function cours(o) {
     const rang = grp ? grp.indexOf(i) : i, taille = grp ? grp.length : tot;
     q('pos').textContent = grp ? `${o.groupes[s.g].nom} · ${rang + 1} / ${taille}` : `Section ${i + 1} sur ${tot}`;
     q('track').style.width = pct(rang + 1, taille) + '%';
-    const s2 = o.demos ? { ...s, demo: [].concat(s.demo || [], o.demos(s)) } : s;
+    const D = typeof Demos !== 'undefined' ? Demos : null;
+    const cle = typeof o.demoCle === 'function' ? o.demoCle(s) : o.demoCle;
+    const plus = D && cle ? D.noms(cle, s.h) : [];
+    const s2 = plus.length ? { ...s, demo: [].concat(s.demo || [], plus) } : s;
     q('body').innerHTML = `<h1>${esc(s.h)}</h1>` + bloc(s2, o.figs);
-    if (o.monter) o.monter(q('body'));
+    if (D) D.monter(q('body'));
     q('prev').disabled = i === 0;
     q('next').innerHTML = (detour ? 'Lu — revenir au quiz' : i === tot - 1 ? (o.fin || 'Terminer le cours') : 'Section suivante') + ' ' + Ic.svg('right', 18);
     o.show(ecran);
@@ -225,6 +228,7 @@ function cours(o) {
         <button class="ch-all" data-k="all">${fini() ? 'Tout remettre à « non lu »' : 'Tout marquer comme lu'}</button>
       </div>
       ${intro ? `<p class="fiche-intro">${rich(intro)}</p>` : ''}
+      ${!indices ? laboCta() : ''}
       <div class="lab">Sommaire <span class="n">${tot} sections</span></div>
       ${ks.map((k, rang) => {
         const s = o.sections[k];
@@ -243,6 +247,20 @@ function cours(o) {
       toast(tout ? 'Cours marqué comme lu' : 'Sections remises à « non lu »');
     };
     cible.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => ouvrir(+b.dataset.sec, null));
+    const lab = cible.querySelector('[data-k="labo"]');
+    if (lab) lab.onclick = () => Demos.labo(o.labo.prefixe, o.labo.titre, o.labo.libelles || {});
+  }
+
+  /** L'entrée du Labo, si la page charge des démos. */
+  function laboCta() {
+    if (!o.labo || typeof Demos === 'undefined') return '';
+    const n = Demos.compte(o.labo.prefixe);
+    if (!n) return '';
+    return `<button class="labo-cta" data-k="labo">
+      <span class="tile">${Ic.svg('sliders', 20)}</span>
+      <span class="txt"><b>Le labo · ${n} simulateur${n > 1 ? 's' : ''}</b><small>${esc(o.labo.sous || '')}</small></span>
+      <span class="chev">${Ic.svg('chevron', 18)}</span>
+    </button>`;
   }
 
   /** Retrouve une section par un morceau de son titre. */
