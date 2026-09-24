@@ -1,7 +1,7 @@
 {
   "name": "Maximus Knowledge",
   "short_name": "Maximus",
-  "description": "Cours, QCM et entraînements pour plusieurs formations : théorique PPL, check-list DR400, aérodrome de Léognan, culture aéronautique, PASS et calcul mental",
+  "description": "Cours, QCM et entraînements pour plusieurs formations : théorique PPL, check-list DR400, aérodrome de Léognan, IA technique, culture aéronautique, PASS et calcul mental",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -19,6 +19,7 @@
     { "name": "Théorique PPL", "short_name": "PPL", "url": "./ppl.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Check-list DR400", "short_name": "Check-list", "url": "./checklist.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Aérodrome de Léognan", "short_name": "Léognan", "url": "./aerodrome.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "IA technique", "short_name": "IA", "url": "./ia.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Culture générale aéro", "short_name": "Culture", "url": "./culture.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

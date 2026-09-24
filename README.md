@@ -2,8 +2,8 @@
 
 Application web de révision, installable et utilisable hors-ligne, qui réunit
 **plusieurs formations** : le théorique du PPL, la check-list du DR400,
-l'aérodrome de Léognan, la culture générale aéronautique des sélections de
-pilote, le PASS de Bordeaux et le calcul mental.
+l'aérodrome de Léognan, l'IA technique, la culture générale aéronautique des
+sélections de pilote, le PASS de Bordeaux et le calcul mental.
 
 **➡️ [Lancer l'application](https://h04k.github.io/Culture_G_aero/)**
 
@@ -18,13 +18,14 @@ progression, ses propres onglets et sa couleur.
 | Piloter | **Théorique PPL(A)** | 12 matières, 95 sections, 413 questions, 71 mnémos, 26 schémas |
 | Piloter | **Check-list DR400** | 13 listes (lecture ou pointage), 152 points, 13 sections de cours, 8 urgences, 301 questions |
 | Piloter | **Aérodrome · Léognan** | LFCS : la VAC décortiquée, le tour de piste pas à pas, 13 sections de cours, 41 questions |
+| Tech | **IA technique** | 17 modules, 61 sections, 89 questions, aide-mémoire, 3 schémas |
 | Sélections | **Culture générale aéro** | 22 thèmes, 1 763 questions, 22 fiches de cours |
 | Sélections | **Calcul mental** | Tables, carrés, puissances, chaînes — tirage adaptatif |
 | Santé | **PASS — Bordeaux** | 19 UE, 97 sections, 608 QCM, 65 exercices corrigés, 98 mnémos |
 | Pause | **Tri de vis** | 40 niveaux d'un jeu de démontage en 3D |
 
-Soit **7 formations**, **3 126 questions** et **240 fiches ou sections de cours**,
-environ 20 h de lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
+Soit **8 formations**, **3 215 questions** et **301 fiches ou sections de cours**,
+environ 25 h de lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
 se fait là, et elle apparaît au bon endroit sur le portail.
 
 ## La charte
@@ -337,6 +338,37 @@ comble, pour arriver prêt au premier tour de piste. Tout vient de la **VAC**
 > Aide à la préparation, pas un document opérationnel : avant chaque vol, la VAC
 > en vigueur sur le site du SIA, les NOTAM et les consignes du club font foi.
 
+## IA technique
+
+Page dédiée (`ia.html`) : un cours d'IA pour ingénieur, sans vulgarisation —
+formules, ordres de grandeur, mécanismes. **17 modules**, **61 sections**
+(~5 h 30 de lecture), lus section par section avec la progression retenue.
+
+| Module | Ce qu'il couvre |
+|---|---|
+| Bases du ML | Risque empirique, entropie croisée, SGD, schedules, double descente, évaluation |
+| Deep learning | Activations, SwiGLU, init et μP, backprop, AdamW, Muon, normalisations, CNN, RNN, SSM |
+| Transformer | Attention en détail, bloc pre-norm, RoPE et extension de contexte, GQA, MLA, KV cache |
+| Anatomie d'un LLM | Tokenisation BPE, Mixture of Experts, lois d'échelle, décodage |
+| Pré-entraînement | Données, parallélisme DP/FSDP/TP/PP/EP/CP, bf16, fp8, MX, run frontière |
+| Post-training | SFT, RLHF, DPO, RLVR, GRPO, modèles de raisonnement |
+| Reinforcement learning | Bellman, DQN, policy gradient, PPO, AlphaZero, MuZero |
+| Fine-tuning | CPT vs FT vs RAG, LoRA, QLoRA, model merging |
+| Compression | Distillation, quantization (GPTQ, AWQ, SmoothQuant), pruning 2:4 |
+| Inférence | Prefill/decode, PagedAttention, batching continu, FlashAttention, spéculatif |
+| Formats | safetensors, GGUF et k-quants, moteurs de serving, compilateurs, matériel |
+| Vision, son, robotique | ViT, CLIP, diffusion et flow matching · ASR, codecs, speech-to-speech · imitation, VLA |
+| Agents | RAG hybride, tool use, boucles agentiques, benchmarks |
+| Alignement | Reward hacking, supervision à l'échelle, interprétabilité, sécurité frontière |
+| Frontière | État de l'art, calcul à l'inférence, auto-amélioration récursive, bitter lesson |
+
+Un onglet **Aide-mémoire** regroupe les formules, les ordres de grandeur et les
+sigles ; le **Quiz** propose tout le cours, les questions les plus dures, deux
+parcours thématiques ou un module, et chaque correction renvoie à sa section.
+
+> Écrit en 2026 : les mécanismes durent, les noms de modèles et les records
+> vieillissent vite.
+
 ## Jeux
 
 Page dédiée (`jeux.html`), accessible depuis le portail : la pause entre deux
@@ -468,8 +500,8 @@ css/accueil.css         styles du portail des formations
 js/accueil.js           rendu du portail depuis le registre
 data/formations.js      le registre des formations, groupées par domaine
 js/trace.js             note la dernière formation ouverte, pour « Reprendre »
-js/kit.js               cours section par section et questionnaire, partagés
-                        par la check-list et l'aérodrome
+js/kit.js               cours section par section (en modules) et questionnaire,
+                        partagés par la check-list, l'aérodrome et l'IA
 culture.html            formation Culture générale aéronautique
 css/style.css           styles de la culture générale
 js/storage.js           persistance localStorage
@@ -502,6 +534,13 @@ data/checklist-dr400.js les 13 listes, les urgences et les repères chiffrés
 data/checklist-cours.js les 13 sections du cours
 data/checklist-quiz.js  les questions écrites du questionnaire
 js/checklist-quiz.js    génération des questions à partir des listes
+ia.html                 module IA technique (cours en modules, aide-mémoire, quiz)
+css/ia.css              styles de l'IA et de ses schémas
+data/ia.js              registre des 17 modules
+data/ia-cours-*.js      les 61 sections, en quatre fichiers
+data/ia-quiz.js         les 89 questions
+js/ia-figs.js           schémas : attention, bloc Transformer, LoRA
+js/ia-app.js            navigation, aide-mémoire, séries
 aerodrome.html          module Aérodrome de Léognan (terrain, circuit, cours, quiz)
 css/aerodrome.css       styles de l'aérodrome et de ses schémas
 data/aerodrome-lfcs.js  la VAC de LFCS, le tour de piste, le cours et les questions

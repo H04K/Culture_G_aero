@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v19';
+const VERSION = 'maximus-v20';
 
 const ASSETS = [
   './',
@@ -102,6 +102,16 @@ const ASSETS = [
   './data/checklist-cours.js',
   './data/checklist-quiz.js',
   './js/checklist-quiz.js',
+  './ia.html',
+  './css/ia.css',
+  './data/ia.js',
+  './data/ia-cours-1.js',
+  './data/ia-cours-2.js',
+  './data/ia-cours-3.js',
+  './data/ia-cours-4.js',
+  './data/ia-quiz.js',
+  './js/ia-figs.js',
+  './js/ia-app.js',
   './aerodrome.html',
   './css/aerodrome.css',
   './data/aerodrome-lfcs.js',

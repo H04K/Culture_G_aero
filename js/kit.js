@@ -21,10 +21,13 @@ const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const rich = s => esc(s)
+const emph = t => t
   .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
   .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
   .replace(/(^|[^*\w])\*([^*\s](?:[^*]*?[^*\s])?)\*(?!\*)/g, '$1<i>$2</i>');
+/* `code` en ligne : protégé de la mise en valeur. */
+const rich = s => esc(s).split(/`([^`]+)`/)
+  .map((part, n) => (n % 2 ? `<code>${part}</code>` : emph(part))).join('');
 
 const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
 const plural = (n, mot, suffixe = 's') => `${n} ${mot}${n > 1 ? suffixe : ''}`;
@@ -162,15 +165,18 @@ function cours(o) {
   /* Un détour : ouvert depuis une correction de quiz, le lecteur
      ramène au quiz plutôt qu'au sommaire. */
   let detour = null;
-  const sortir = () => { const f = detour; detour = null; (f || o.retour)(); };
+  const sortir = () => { const f = detour; detour = null; (f || o.retour)(i); };
 
   function ouvrir(k, retourUnique) {
     if (retourUnique !== undefined) detour = retourUnique;
     i = Math.max(0, Math.min(k || 0, tot - 1));
     const s = o.sections[i];
     q('nom').textContent = o.nom;
-    q('pos').textContent = `Section ${i + 1} sur ${tot}`;
-    q('track').style.width = pct(i + 1, tot) + '%';
+    /* Un cours en modules : la position se lit dans le module. */
+    const grp = o.groupes && s.g ? o.sections.map((x, n) => n).filter(n => o.sections[n].g === s.g) : null;
+    const rang = grp ? grp.indexOf(i) : i, taille = grp ? grp.length : tot;
+    q('pos').textContent = grp ? `${o.groupes[s.g].nom} · ${rang + 1} / ${taille}` : `Section ${i + 1} sur ${tot}`;
+    q('track').style.width = pct(rang + 1, taille) + '%';
     q('body').innerHTML = `<h1>${esc(s.h)}</h1>` + bloc(s, o.figs);
     q('prev').disabled = i === 0;
     q('next').innerHTML = (detour ? 'Lu — revenir au quiz' : i === tot - 1 ? (o.fin || 'Terminer le cours') : 'Section suivante') + ' ' + Ic.svg('right', 18);
@@ -179,7 +185,7 @@ function cours(o) {
   }
 
   q('back').onclick = sortir;
-  q('list').onclick = () => { detour = null; o.retour(); };
+  q('list').onclick = () => { detour = null; o.retour(i); };
   q('prev').onclick = () => ouvrir(i - 1);
   q('next').onclick = () => {
     marquer(i, true);
@@ -189,37 +195,44 @@ function cours(o) {
   };
 
   /** Le sommaire : l'état de lecture, puis une ligne par section. */
-  function sommaire(cible, intro) {
-    const n = nbLus(), cur = prochaine();
-    const libelle = n === 0 ? 'Commencer le cours' : fini() ? 'Relire depuis le début' : 'Reprendre la lecture';
+  function sommaire(cible, intro, indices) {
+    const ks = indices || o.sections.map((_, x) => x);
+    const tot = ks.length;
+    const n = ks.filter(estLu).length;
+    const fini = () => ks.every(estLu);
+    const cur = ks.find(x => !estLu(x)) ?? ks[0];
+    const minutes = () => ks.reduce((m, x) => m + (o.sections[x].min || 4), 0);
+    const quoi = indices ? 'le module' : 'le cours';
+    const libelle = n === 0 ? `Commencer ${quoi}` : fini() ? 'Relire depuis le début' : 'Reprendre la lecture';
     cible.innerHTML = `
       <div class="card cours-head">
         <div class="ch-top">
           ${anneau(pct(n, tot), 58, 6, '<small>%</small>', null, 100, fini() ? 'var(--yes)' : 'var(--m, var(--go))')}
           <div class="ch-txt">
-            <b>${fini() ? 'Cours terminé' : n ? `Section ${cur + 1} : ${esc(o.sections[cur].h)}` : 'Le cours'}</b>
+            <b>${fini() ? (indices ? 'Module terminé' : 'Cours terminé') : n ? `Section ${ks.indexOf(cur) + 1} : ${esc(o.sections[cur].h)}` : (o.titreSommaire || 'Le cours')}</b>
             <small>${n} / ${tot} sections lues · ≈ ${minutes()} min de lecture</small>
           </div>
         </div>
-        <div class="segs">${o.sections.map((_, k) => `<i class="${estLu(k) ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="segs">${ks.map(x => `<i class="${estLu(x) ? 'on' : ''}"></i>`).join('')}</div>
         <button class="btn go wide" data-k="go">${Ic.svg('play', 16)} ${libelle}</button>
         <button class="ch-all" data-k="all">${fini() ? 'Tout remettre à « non lu »' : 'Tout marquer comme lu'}</button>
       </div>
       ${intro ? `<p class="fiche-intro">${rich(intro)}</p>` : ''}
       <div class="lab">Sommaire <span class="n">${tot} sections</span></div>
-      ${o.sections.map((s, k) => {
+      ${ks.map((k, rang) => {
+        const s = o.sections[k];
         const lu = estLu(k), ici = !lu && k === cur;
         return `<button class="secrow ${lu ? 'done' : ''} ${ici ? 'cur' : ''}" data-sec="${k}">
           <span class="dot">${Ic.svg('check', 13)}</span>
-          <span class="stitle"><span class="snum">${k + 1}.</span> ${esc(s.h)}</span>
+          <span class="stitle"><span class="snum">${rang + 1}.</span> ${esc(s.h)}</span>
           ${ici ? `<span class="pill">Reprendre</span>` : `<span class="chev">${Ic.svg('chevron', 17)}</span>`}
         </button>`;
       }).join('')}`;
-    cible.querySelector('[data-k="go"]').onclick = () => ouvrir(fini() ? 0 : cur, null);
+    cible.querySelector('[data-k="go"]').onclick = () => ouvrir(fini() ? ks[0] : cur, null);
     cible.querySelector('[data-k="all"]').onclick = () => {
       const tout = !fini();
-      o.sections.forEach((_, k) => marquer(k, tout));
-      sommaire(cible, intro);
+      ks.forEach(x => marquer(x, tout));
+      sommaire(cible, intro, indices);
       toast(tout ? 'Cours marqué comme lu' : 'Sections remises à « non lu »');
     };
     cible.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => ouvrir(+b.dataset.sec, null));

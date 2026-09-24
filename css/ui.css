@@ -917,6 +917,10 @@ body.has-cta .wrap { padding-bottom: calc(var(--bar) + 112px); }
 
 .rdr-body ol { margin: 0 0 14px; padding-left: 22px; color: var(--ink-2); font-size: 15.5px; line-height: 1.6; }
 .rdr-body i { font-style: italic; }
+.rdr-body code, .keys code, .knote code, .kwarn code, td code {
+  font-family: var(--mono); font-size: .86em; padding: 1px 5px; border-radius: 5px;
+  background: var(--card-2); border: 1px solid var(--edge); color: var(--ink); overflow-wrap: anywhere;
+}
 .rdr-foot .btn.ghost { flex: 0 0 auto; padding-left: 16px; padding-right: 16px; }
 
 /* En-tête du sommaire d'un cours */

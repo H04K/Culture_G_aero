@@ -10,7 +10,7 @@
    Les chiffres sont ceux du contenu réellement embarqué. Ils se
    recomptent à tout moment dans la console de la page concernée
    (Bank.count(), PPL.quizCount(), PASS.quizCount(), CkQuiz.available('tout'),
-   LFCS.QUESTIONS.length).
+   LFCS.QUESTIONS.length, IA.QUESTIONS.length).
    ═══════════════════════════════════════════════════════════ */
 
 const Formations = (() => {
@@ -19,6 +19,7 @@ const Formations = (() => {
   const DOMAINES = [
     { id: 'piloter',  nom: 'Piloter',   desc: 'Le théorique, la machine, le terrain' },
     { id: 'selection', nom: 'Sélections', desc: 'Culture générale et psychotechnique' },
+    { id: 'tech',     nom: 'Tech',      desc: 'L’IA, sous le capot' },
     { id: 'sante',    nom: 'Santé',     desc: 'Première année de médecine' },
     { id: 'pause',    nom: 'Pause',     desc: 'Entre deux séries' }
   ];
@@ -58,6 +59,13 @@ const Formations = (() => {
       desc: 'Tables, carrés, puissances et chaînes d’opérations, au clavier ou au doigt — la partie psychotechnique.',
       chiffres: { questions: 0, cours: 0, minutes: 0 },
       detail: 'Séries chronométrées · tirage adaptatif'
+    },
+    {
+      id: 'ia', domaine: 'tech', page: 'ia.html', mod: 'ia',
+      nom: 'IA technique',
+      desc: 'Du gradient à la frontière : Transformer, pré- et post-training, RL, LoRA, quantization, inférence, vision, son, robotique, alignement, RSI.',
+      chiffres: { questions: 89, cours: 61, minutes: 329 },
+      detail: '17 modules · 61 sections · 89 questions · aide-mémoire'
     },
     {
       id: 'pass', domaine: 'sante', page: 'pass.html', mod: 'pass',
