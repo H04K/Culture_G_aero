@@ -556,7 +556,7 @@ Demos.def('pitot', {
       dernier = { t: now, alt: L.alt };
       peindre();
     }
-    U.anime(c, () => { if (Math.abs(st.vsi) > 1) { st.vsi *= 0.93; peindre(); } else if (st.vsi !== 0) { st.vsi = 0; peindre(); } });
+    U.anime(c, dt => { if (Math.abs(st.vsi) > 1) { st.vsi *= Math.pow(0.93, dt * 60); peindre(); } else if (st.vsi !== 0) { st.vsi = 0; peindre(); } });
     function peindre() {
       const C = U.couleurs(c);
       T.efface();

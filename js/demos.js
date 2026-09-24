@@ -93,8 +93,10 @@ const Demos = (() => {
   const mix = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
 
   /* ───── Nombres ───── */
-  const nf = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: 0 }) : '—');
-  const nfx = (v, d = 1) => (Number.isFinite(v) ? v.toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d }) : '—');
+  /* « −0 » n'existe pas à l'affichage. */
+  const zero = (v, d) => (+v.toFixed(Math.min(20, d)) === 0 ? 0 : v);
+  const nf = (v, d = 1) => (Number.isFinite(v) ? zero(v, d).toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: 0 }) : '—');
+  const nfx = (v, d = 1) => (Number.isFinite(v) ? zero(v, d).toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: d }) : '—');
   const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
   /** 3,6·10²⁵ */
   function sci(v, d = 1) {
@@ -228,6 +230,9 @@ const Demos = (() => {
     return [x, f(x)];
   });
 
+  /** Ne réécrit un élément que si son contenu change (utile à 60 images/s). */
+  const maj = (e, html) => { if (e._h !== html) { e._h = html; e.innerHTML = html; } };
+
   /* ───── Contrôles ───── */
   const grille = (parent, cls = '') => { const g = el('div', 'dm-ctrls ' + cls); parent.appendChild(g); return g; };
 
@@ -294,26 +299,35 @@ const Demos = (() => {
       set(liste) {
         /* Un verdict en toutes lettres ne se lit pas en chasse fixe. */
         const mot = v => /[A-Za-zÀ-ÿ]{5,}/.test(String(v).replace(/<[^>]*>/g, ''));
-        w.innerHTML = liste.map(([v, l, c]) => `<div class="dm-tile ${c || ''}${mot(v) ? ' mot' : ''}"><b>${v}</b><small>${l}</small></div>`).join('');
+        maj(w, liste.map(([v, l, c]) => `<div class="dm-tile ${c || ''}${mot(v) ? ' mot' : ''}"><b>${v}</b><small>${l}</small></div>`).join(''));
       }
     };
   }
   const note = (parent, txt, cls = '') => { const p = el('p', 'dm-note ' + cls, txt); parent.appendChild(p); return p; };
 
   /* ───── Animation et thème ───── */
-  /** Boucle d'animation : s'arrête d'elle-même quand la démo quitte l'écran. */
+  /** Boucle d'animation : pas(dt en s, t en ms depuis le début).
+      Elle se met en veille hors de l'écran et s'arrête d'elle-même
+      quand la démo quitte la page, ou quand pas renvoie false. */
   function anime(noeud, pas) {
-    let on = true, t0 = null;
+    let on = true, t0 = null, prec = null, vu = true;
+    let io = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(e => { vu = e[e.length - 1].isIntersecting; });
+      io.observe(noeud);
+    }
+    const fin = () => { on = false; if (io) io.disconnect(); };
     const f = t => {
-      if (!on || !noeud.isConnected) return;
-      if (t0 === null) t0 = t;
-      if (pas(t - t0, t) === false) { on = false; return; }
+      if (!on || !noeud.isConnected) { fin(); return; }
+      if (t0 === null) { t0 = t; prec = t; }
+      const dt = Math.min(0.1, (t - prec) / 1000);
+      prec = t;
+      if (vu && pas(dt, t - t0) === false) { fin(); return; }
       requestAnimationFrame(f);
     };
     requestAnimationFrame(f);
-    return { stop() { on = false; }, get actif() { return on; } };
+    return { stop: fin, get actif() { return on; } };
   }
-
   const VEILLE = new Set();
   function surTheme(noeud, fn) { VEILLE.add([noeud, fn]); }
   if (typeof MutationObserver !== 'undefined') {
@@ -436,7 +450,7 @@ const Demos = (() => {
   const ui = {
     el, esc, couleurs, alpha, rgb, mix, nf, nfx, sci, si, clamp, lerp, deg, rad, ang180,
     toile, repere, courbe, echantillon, grille, curseur, choix, bascule, bouton, rangee,
-    tuiles, note, anime, surTheme, alea
+    tuiles, note, maj, anime, surTheme, alea
   };
 
   return { def, placer, noms, html, monter, labo, catalogue, compte, ui, REG, PLACES };
