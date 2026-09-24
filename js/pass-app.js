@@ -147,6 +147,18 @@ function renderHome() {
   $('#hello-sub').textContent = g.streak > 1
     ? `${g.streak} jours d'affilée — continue.`
     : `${PASS.matCount()} UE · ${PASS.quizCount()} QCM · ${PASS.exoCount()} exercices · ${PASS.mnemoCount()} mnémos`;
+  const laboSlot = $('#labo-slot');
+  if (laboSlot) {
+    laboSlot.innerHTML = (typeof Demos !== 'undefined' && Demos.compte('pass:') ? `
+    <button class="labo-cta" data-labo="1">
+      <span class="tile">${Ic.svg('sliders', 20)}</span>
+      <span class="txt"><b>Le labo · ${Demos.compte('pass:')} simulateurs</b><small>pH, enzymes, potentiel d’action, pharmacocinétique, tests diagnostiques…</small></span>
+      <span class="chev">${Ic.svg('chevron', 18)}</span>
+    </button>` : '');
+    const b = laboSlot.querySelector('[data-labo]');
+    if (b) b.onclick = () => Demos.labo('pass:', 'Le labo PASS',
+      Object.fromEntries(PASS.all().map(m => ['pass:' + m.id, `${m.code} · ${m.short || m.name}`])));
+  }
 
   $('#ready').innerHTML = ring(PassStore.readiness()) + `
     <div class="ready-txt">
@@ -375,6 +387,7 @@ function openFiche(matId, scrollTo) {
     let html = `<article class="sec ${read ? 'read' : ''}" id="sec-${i}" data-sec="${i}">
       <h3>${esc(s.h)}<button class="sec-check" data-check="${i}" title="Marquer comme lu">✓</button></h3>`;
     (s.p || []).forEach(p => html += `<p>${rich(p)}</p>`);
+    if (typeof Demos !== 'undefined') html += Demos.html('pass:' + matId, s.h);
     if (s.list) html += `<ul>${s.list.map(l => `<li>${rich(l)}</li>`).join('')}</ul>`;
     if (s.table) {
       html += `<div class="tbl-wrap"><table><thead><tr>` +
@@ -417,6 +430,7 @@ function openFiche(matId, scrollTo) {
     ${mnemos}
     ${exos}`;
 
+  if (typeof Demos !== 'undefined') Demos.monter($('#fiche-body'));
   $('#fiche-quiz').onclick = () => startQuiz('mat', matId);
   $('#fiche-all').onclick = () => {
     const all = PassStore.readCount(matId) >= m.sections.length;

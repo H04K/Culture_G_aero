@@ -237,7 +237,19 @@ function renderLearn() {
         <span class="rmeta">${Figs.count()} figures, classées par matière</span>
       </span>
       <span class="chev">${Ic.svg('chevron', 18)}</span>
-    </button>`;
+    </button>
+    ${typeof Demos !== 'undefined' && Demos.compte('ppl:') ? `
+    <button class="row" id="ppl-labo">
+      <span class="tile sm">${Ic.svg('sliders', 19)}</span>
+      <span class="rbody">
+        <span class="rname">Le labo : simulateurs</span>
+        <span class="rmeta">${Demos.compte('ppl:')} démos interactives, classées par matière</span>
+      </span>
+      <span class="chev">${Ic.svg('chevron', 18)}</span>
+    </button>` : ''}`;
+  const lab = $('#ppl-labo');
+  if (lab) lab.onclick = () => Demos.labo('ppl:', 'Le labo PPL',
+    Object.fromEntries(PPL.all().map(m => ['ppl:' + m.id, `${PPL.code(m.id)} · ${m.short || m.name}`])));
 
   $('#learn-foot').textContent =
     `Programme théorique PPL(A) : ${PPL.matCount()} matières, ${PPL.sectionCount()} sections de cours ` +
@@ -380,6 +392,7 @@ function openReader(matId, idx) {
   let html = `<h1>${esc(s.h)}</h1>`;
   (s.p || []).forEach(p => html += `<p>${rich(p)}</p>`);
   if (s.fig) html += Figs.renderAll(s.fig);
+  if (typeof Demos !== 'undefined') html += Demos.html('ppl:' + matId, s.h);
   if (s.list) html += `<ul>${s.list.map(l => `<li>${rich(l)}</li>`).join('')}</ul>`;
   if (s.table) {
     html += `<div class="tbl-wrap"><table><thead><tr>` +
@@ -390,6 +403,7 @@ function openReader(matId, idx) {
   if (s.key) html += `<div class="keys">${s.key.map(k => `<div>${rich(k)}</div>`).join('')}</div>`;
   $('#rdr-body').innerHTML = html;
   bindFigs($('#rdr-body'));
+  if (typeof Demos !== 'undefined') Demos.monter($('#rdr-body'));
 
   $('#rdr-prev').disabled = i === 0;
   $('#rdr-next').innerHTML = (last ? 'Terminer la matière' : 'Section suivante') + ' ' + Ic.svg('right', 18);
