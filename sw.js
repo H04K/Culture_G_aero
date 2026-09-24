@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v24';
+const VERSION = 'maximus-v25';
 
 const ASSETS = [
   './',
@@ -24,6 +24,8 @@ const ASSETS = [
   './js/demos-culture.js',
   './js/demos-ia.js',
   './js/demos-ia2.js',
+  './js/demos-sante.js',
+  './js/demos-sante2.js',
   './js/theme.js',
   './js/icons.js',
   './css/style.css',
