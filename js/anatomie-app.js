@@ -1,232 +1,262 @@
 /* ═══════════════════════════════════════════════════════════
-   anatomie-app.js — la formation « Anatomie »
+   anatomie-app.js — la formation « Anatomie 3D » (module ES)
 
-   Quatre onglets :
-     Atlas   le corps de face et de dos ; un curseur descend de la
-             peau aux muscles superficiels, aux muscles profonds,
-             puis au squelette. Chaque structure a sa fiche :
-             origine, terminaison, action, innervation.
-     Dents   l'arcade (FDI, définitive ou lactéale) et la dent
-             choisie en coupe, qu'on ouvre et qu'on tranche
-     Quiz    toucher le bon muscle, nommer un repère, un os, une
-             insertion, une innervation, une dent, un tissu
-     Index   tout, par ordre alphabétique, avec une recherche
+   Atlas   le corps entier en 3D (modèles Z-Anatomy / BodyParts3D) :
+           un curseur descend de la peau aux muscles superficiels,
+           aux profonds, au squelette ; origines et terminaisons
+           en couleur sur les os ; un plan de coupe qu'on déplace.
+   Dents   les 28 dents définitives, qu'on isole et qu'on tranche :
+           émail, dentine, pulpe.
+   Quiz    toucher la bonne structure sur le corps, la nommer,
+           retrouver insertions, nerfs, dents et tissus.
+   Index   toutes les structures, en français, avec recherche.
    ═══════════════════════════════════════════════════════════ */
 
-(() => {
-const { $, $$, esc, toast } = Kit;
-const MU = ANAT.MUSCLES.filter(m => !m.suite), OS = ANAT.OS;
-const muscle = id => MU.find(m => m.id === id);
+import { Atlas3D, baseNom, cote } from './anatomie-3d.js';
 
-const store = Kit.memoire('anatomie-v1', {});
-const vide = () => ({ vue: 'avant', d: 1, reperes: true, noms: false, fdi: 36, lact: false, quiz: { n: 10, mode: 'touche', best: {} } });
+const { $, $$, esc, toast } = Kit;
+const store = Kit.memoire('anatomie-3d-v1', {});
+const vide = () => ({ d: 1, quiz: { n: 10, mode: 'touche', best: {} } });
 let data = (() => { const p = store.lire() || {}; return { ...vide(), ...p, quiz: { ...vide().quiz, ...(p.quiz || {}) } }; })();
 const save = () => store.ecrire(data);
 
-/* ───────── navigation ───────── */
+let DICO = { noms: {}, defs: {} };
+const dicoPret = fetch('data/anatomie3d/dico.json').then(r => r.json()).then(j => { DICO = j; }).catch(() => {});
 
+/* ───── noms et fiches ───── */
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const FICHE_DE = new Map();
+ANAT.MUSCLES.forEach(m => m.z.forEach(z => FICHE_DE.set(z, m)));
+function osDe(base) {
+  for (const [id, o] of Object.entries(ANAT.OS)) if (new RegExp(o.z, 'i').test(base)) return { id, ...o };
+  return null;
+}
+function nomFr(nom) {
+  const b = baseNom(nom).replace(/ \| (dentine|pulpe)$/, '');
+  const t = DICO.noms[b];
+  return t ? t[0] : b;
+}
+function latin(nom) { const t = DICO.noms[baseNom(nom)]; return t ? t[1] : ''; }
+const CAT = { muscle: 'Muscle', tendon: 'Tendon ou aponévrose', os: 'Os', cartilage: 'Cartilage', email: 'Dent', racine: 'Dent', dentine: 'Dentine', pulpe: 'Pulpe', peau: 'Peau', ongle: 'Ongle', origine: 'Zone d’origine', terminaison: 'Zone de terminaison' };
+
+/* ───── navigation ───── */
 const TABS = [['atlas', 'Atlas', 'body'], ['dents', 'Dents', 'layers'], ['quizhome', 'Quiz', 'target'], ['index', 'Index', 'book']];
-const TAB_OF = { atlas: 'atlas', dents: 'dents', quizhome: 'quizhome', qz: 'quizhome', qzfin: 'quizhome', index: 'index' };
-const SANS_ONGLETS = new Set(['qz']);
+const TAB_OF = { atlas: 'atlas', dents: 'dents', quizhome: 'quizhome', qztxt: 'quizhome', qzfin: 'quizhome', index: 'index' };
 let view = 'atlas';
-
 function show(v) {
   $$('.screen').forEach(s => s.classList.remove('active'));
   $('#screen-' + v).classList.add('active');
   view = v;
-  document.body.classList.toggle('no-tabs', SANS_ONGLETS.has(v));
+  document.body.classList.toggle('no-tabs', v === 'qztxt' || (v === 'atlas' && Q && Q.corps));
   document.body.classList.toggle('has-cta', v === 'quizhome');
   $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB_OF[v]));
   window.scrollTo(0, 0);
+  requestAnimationFrame(() => { if (atlas) { atlas._taille(); atlas.demander(); } if (dents) { dents._taille(); dents.demander(); } });
 }
-
 function go(dest) {
+  if (Q && dest !== 'atlas') finQuizCorps(false);
   switch (dest) {
-    case 'atlas': show('atlas'); montrerAtlas(); break;
+    case 'atlas': show('atlas'); break;
     case 'dents': show('dents'); montrerDents(); break;
     case 'quizhome': renderQuizHome(); show('quizhome'); break;
-    case 'index': renderIndex(); show('index'); break;
+    case 'index': show('index'); renderIndex(); break;
   }
 }
-
-document.addEventListener('click', e => {
-  const el = e.target.closest('[data-nav]');
-  if (el) { e.preventDefault(); go(el.dataset.nav); }
-});
-$('#tabbar').innerHTML = TABS.map(([id, label, icon]) =>
-  `<button data-tab="${id}" data-nav="${id}">${Ic.svg(icon, 21)}<span>${label}</span></button>`).join('');
+document.addEventListener('click', e => { const el = e.target.closest('[data-nav]'); if (el) { e.preventDefault(); go(el.dataset.nav); } });
+$('#tabbar').innerHTML = TABS.map(([id, label, icon]) => `<button data-tab="${id}" data-nav="${id}">${Ic.svg(icon, 21)}<span>${label}</span></button>`).join('');
 
 /* ═══════════════ L'ATLAS ═══════════════ */
 
-let atlas = null;
-const CRANS = ['Peau', 'Muscles', 'Profonds', 'Squelette'];
-
-function montrerAtlas() {
-  if (!atlas) {
-    atlas = AnatVue.creer($('#an-scene'), {
-      vue: data.vue, profondeur: data.d, reperes: data.reperes, noms: data.noms,
-      surChoix: (type, id) => { atlas.choisir(id); fiche(type, id); },
-      surVide: () => { atlas.choisir(null); $('#an-fiche').innerHTML = ''; },
-      surListe: legende
-    });
-    syncCommandes();
-  }
-}
+const atlas = new Atlas3D($('#a3'), {
+  profondeur: data.d,
+  surChoix: info => { if (Q && Q.corps) return reponseCorps(info); fiche(info); },
+  surCharge: (p, f) => { $('#a3-pct').style.width = p + '%'; $('#a3-txt').textContent = `Chargement ${f ? '· ' + ({ squelette: 'squelette', muscles: 'muscles', peau: 'peau', insertions: 'insertions' }[f] || f) : ''} ${p} %`; },
+  surRendu: () => placerEtiquette(atlas, '#a3-etiq')
+});
+atlas.charger(['squelette', 'muscles', 'peau']).then(() => {
+  $('#a3-charge').hidden = true;
+  syncCommandes();
+}).catch(e => { $('#a3-txt').textContent = 'Les modèles 3D n’ont pas pu se charger (' + e.message + ').'; });
+let insChargees = false;
 
 function syncCommandes() {
-  $$('#an-vue button').forEach(b => b.classList.toggle('on', b.dataset.v === data.vue));
   $('#an-prof').value = data.d;
   $$('#an-couches [data-d]').forEach(b => b.classList.toggle('on', Math.round(data.d) === +b.dataset.d));
-  $('#an-reperes').classList.toggle('on', data.reperes); $('#an-reperes').setAttribute('aria-pressed', data.reperes);
-  $('#an-noms').classList.toggle('on', data.noms); $('#an-noms').setAttribute('aria-pressed', data.noms);
 }
-
-$('#an-vue').addEventListener('click', e => {
-  const b = e.target.closest('[data-v]'); if (!b) return;
-  data.vue = b.dataset.v; save(); atlas.vue(data.vue); syncCommandes();
-});
-let animProf = null;
+let anim = null;
 function allerProfondeur(cible) {
-  cancelAnimationFrame(animProf);
+  cancelAnimationFrame(anim);
   const d0 = data.d, t0 = performance.now();
   const pas = t => {
-    const f = Math.min(1, (t - t0) / 420), e = f < 0.5 ? 2 * f * f : 1 - (-2 * f + 2) ** 2 / 2;
+    const f = Math.min(1, (t - t0) / 500), e = f < 0.5 ? 2 * f * f : 1 - (-2 * f + 2) ** 2 / 2;
     data.d = d0 + (cible - d0) * e; atlas.profondeur(data.d); syncCommandes();
-    if (f < 1) animProf = requestAnimationFrame(pas); else save();
+    if (f < 1) anim = requestAnimationFrame(pas); else save();
   };
-  animProf = requestAnimationFrame(pas);
+  anim = requestAnimationFrame(pas);
 }
 $('#an-couches').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) allerProfondeur(+b.dataset.d); });
 $('#an-prof').addEventListener('input', e => { data.d = +e.target.value; atlas.profondeur(data.d); syncCommandes(); });
 $('#an-prof').addEventListener('change', save);
-$('#an-reperes').addEventListener('click', () => { data.reperes = !data.reperes; save(); atlas.reperes(data.reperes); syncCommandes(); });
-$('#an-noms').addEventListener('click', () => {
-  data.noms = !data.noms; save(); atlas.noms(data.noms); syncCommandes();
-  if (data.noms) toast('Les noms apparaissent quand on agrandit');
-});
-
-function legende(L) {
-  const couche = atlas ? atlas.active() : 'mu1';
-  $('#an-leg-t').innerHTML = couche === 'peau' ? 'Légende' : `Légende <span class="n">${L.length} ${couche === 'os' ? 'os' : 'structures'}</span>`;
-  $('#an-legende').innerHTML = couche === 'peau'
-    ? `<p class="an-vide">Descends d’un cran pour ôter la peau et voir les muscles.</p>`
-    : L.map(x => `<button class="an-li" data-leg="${x.id}" data-type="${x.type}"><b>${x.n}</b><span>${esc(x.nom)}</span></button>`).join('');
-}
-$('#an-legende').addEventListener('click', e => {
-  const b = e.target.closest('[data-leg]'); if (!b) return;
-  atlas.choisir(b.dataset.leg); atlas.cadrer(b.dataset.leg); fiche(b.dataset.type, b.dataset.leg);
-  $('#an-scene').scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
-
-const PEAU = { nom: 'Peau', reg: 'Revêtement', lignes: [
-  ['Structure', 'Épiderme (épithélium kératinisé, sans vaisseaux), derme (collagène, vaisseaux, nerfs, glandes, follicules), hypoderme (graisse).'],
-  ['Chiffres', 'Le plus grand organe : environ 2 m² et 4 kg chez l’adulte. L’épiderme se renouvelle en 4 semaines environ.'],
-  ['Rôles', 'Barrière, thermorégulation (sueur, vasomotricité), toucher, synthèse de vitamine D, défense immunitaire.'],
-  ['Innervation', 'Dermatomes : chaque bande de peau dépend d’une racine nerveuse (C6 pouce, T4 mamelons, T10 ombilic, L4 genou, S1 bord latéral du pied).']],
-  n: 'Descends le curseur pour retirer la peau : les muscles superficiels apparaissent, puis les profonds, puis le squelette.' };
-
-function fiche(type, id) {
-  let h = '';
-  if (type === 'muscle') {
-    const m = muscle(id); if (!m) return;
-    const tags = [m.reg, m.tissu || ((m.couche || 1) === 2 ? 'Muscle profond' : 'Muscle superficiel')].concat(m.vues.map(v => v === 'avant' ? 'Face' : 'Dos'));
-    h = carte(m.nom, tags, m.tissu && m.a && m.i === '—'
-      ? [['Du', m.o], ['Au', m.t], ['Rôle', m.a]]
-      : [['Origine', m.o], ['Terminaison', m.t], ['Action', m.a], ['Innervation', m.i]], m.n, id, m.vues);
-  } else if (type === 'os') {
-    const o = OS[id]; if (!o) return;
-    h = carte(o.nom, [o.reg, 'Os'], [['Type', o.type], ['Description', o.d], ['Repères', o.r], ['Articulations', o.art]], null, id);
-  } else if (type === 'peau') {
-    h = carte(PEAU.nom, [PEAU.reg, 'Organe'], PEAU.lignes, PEAU.n, null);
+$('#an-ins').addEventListener('click', async e => {
+  const b = e.currentTarget, on = !b.classList.contains('on');
+  b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+  if (on && !insChargees) {
+    insChargees = true; toast('Chargement des zones d’insertion…');
+    await atlas.charger(['insertions']);
   }
-  $('#an-fiche').innerHTML = h;
-  Kit.icones($('#an-fiche'));
-}
-function carte(nom, tags, lignes, note, id, vues) {
-  const autre = vues && vues.length > 1 ? `<button class="chip-btn" data-autre="${id}">Voir ${data.vue === 'avant' ? 'de dos' : 'de face'}</button>` : '';
-  return `<div class="card an-fiche">
-    <div class="an-f-t"><h2>${esc(nom)}</h2><button class="iconbtn flat" data-fermer aria-label="Fermer" data-ic="close"></button></div>
-    <div class="an-tags">${tags.filter(Boolean).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
-    <dl>${lignes.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
-    ${note ? `<p class="an-note">${esc(note)}</p>` : ''}
-    ${id ? `<div class="an-f-b"><button class="chip-btn" data-cadrer="${id}">Cadrer</button>${autre}</div>` : ''}
-  </div>`;
-}
-$('#an-fiche').addEventListener('click', e => {
-  if (e.target.closest('[data-fermer]')) { $('#an-fiche').innerHTML = ''; atlas.choisir(null); return; }
-  const c = e.target.closest('[data-cadrer]');
-  if (c) { atlas.cadrer(c.dataset.cadrer); $('#an-scene').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
-  const a = e.target.closest('[data-autre]');
-  if (a) { data.vue = data.vue === 'avant' ? 'arriere' : 'avant'; save(); atlas.vue(data.vue); atlas.choisir(a.dataset.autre); syncCommandes(); fiche('muscle', a.dataset.autre); }
+  atlas.insertions(on);
+  if (on && data.d < 2.9) { toast('Rouge : origines · bleu : terminaisons. Descends au squelette pour les voir en entier.'); }
 });
+$('#an-axe').addEventListener('click', e => {
+  const b = e.target.closest('[data-axe]'); if (!b) return;
+  $$('#an-axe button').forEach(x => x.classList.toggle('on', x === b));
+  $('#an-pos').disabled = !b.dataset.axe;
+  atlas.coupe(b.dataset.axe || null, +$('#an-pos').value);
+  if (b.dataset.axe) atlas.vue(b.dataset.axe === 'x' ? 'gauche' : b.dataset.axe === 'y' ? 'dessus' : 'face');
+});
+$('#an-pos').addEventListener('input', e => { const b = $('#an-axe .on'); atlas.coupe(b.dataset.axe || null, +e.target.value); });
+$('#a3-vues').addEventListener('click', e => { const b = e.target.closest('[data-vue]'); if (b) atlas.vue(b.dataset.vue); });
+$('#an-regions').addEventListener('click', e => { const b = e.target.closest('[data-vue]'); if (b) { atlas.vue(b.dataset.vue); $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
 
-/** Ouvrir l'atlas sur une structure (depuis l'index). */
-function montrerDans(type, id) {
-  go('atlas');
-  if (type === 'muscle') {
-    const m = muscle(id);
-    if (!m.vues.includes(data.vue)) { data.vue = m.vues[0]; atlas.vue(data.vue); }
-    data.d = (m.couche || 1) === 2 ? 2 : 1;
-  } else { if (!AnatVue.OS_ANCRES[data.vue]()[id]) { data.vue = data.vue === 'avant' ? 'arriere' : 'avant'; atlas.vue(data.vue); } data.d = 3; }
-  atlas.profondeur(data.d); syncCommandes(); save();
-  atlas.choisir(id); fiche(type, id);
-  requestAnimationFrame(() => atlas.cadrer(id));
+function placerEtiquette(a, sel) {
+  const el = $(sel);
+  const p = a.ecran();
+  if (!p || !p.dedans || !a.sel) { el.hidden = true; return; }
+  el.hidden = false;
+  el.textContent = nomFr(a.sel.userData.nom);
+  el.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
 }
+
+function fiche(info, cible = '#an-fiche') {
+  const zone = $(cible);
+  if (!info) { zone.innerHTML = ''; return; }
+  const base = baseNom(info.nom).replace(/ \| (dentine|pulpe)$/, '');
+  const fr = nomFr(info.nom), la = latin(info.nom), c = cote(info.nom);
+  const cur = FICHE_DE.get(base);
+  const os = (info.cle === 'os' || info.cle === 'cartilage') ? osDe(base) : null;
+  const def = DICO.defs[base];
+  const tags = [CAT[info.cle] || 'Structure', c ? 'côté ' + c : '', info.couche === 'mu2' ? 'profond' : info.couche === 'mu1' ? 'superficiel' : ''].filter(Boolean);
+  let lignes = [], note = '', desc = '';
+  if (cur) {
+    lignes = [['Origine', cur.o], ['Terminaison', cur.t], ['Action', cur.a], ['Innervation', cur.i]];
+    note = cur.n;
+  } else if (def && (def.o || def.t || def.a || def.i)) {
+    lignes = [['Origine', def.o], ['Terminaison', def.t], ['Action', def.a], ['Innervation', def.i], ['Vascularisation', def.v]].filter(x => x[1]);
+  }
+  if (os) lignes = lignes.concat([['Os', os.nom], ['Type', os.type], ['Repères', os.r], ['Articulations', os.art]]);
+  if (def && def.d) desc = def.d;
+  if (!lignes.length && !desc && os) desc = os.d;
+  const insBtn = info.fichier === 'muscles' ? `<button class="chip-btn" data-f="ins">Voir ses insertions</button>` : '';
+  zone.innerHTML = `<div class="card an-fiche">
+    <div class="an-f-t"><div><h2>${esc(fr)}</h2>${la ? `<p class="latin">${esc(la)}</p>` : ''}</div><button class="iconbtn flat" data-f="fermer" aria-label="Fermer" data-ic="close"></button></div>
+    <div class="an-tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+    ${desc ? `<p class="an-txt">${esc(desc)}</p>` : ''}
+    ${lignes.length ? `<dl>${lignes.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
+    ${note ? `<p class="an-note">${esc(note)}</p>` : ''}
+    <div class="an-f-b"><button class="chip-btn" data-f="cadrer">Cadrer</button>${insBtn}<button class="chip-btn" data-f="isoler">${atlas.isole ? 'Tout réafficher' : 'Isoler'}</button></div>
+    ${def && def.src ? `<p class="credit">Définition : Z-Anatomy (CC BY-SA)</p>` : ''}
+  </div>`;
+  Kit.icones(zone);
+}
+$('#an-fiche').addEventListener('click', async e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  const f = b.dataset.f;
+  if (f === 'fermer') { atlas.selectionner(null); return; }
+  if (f === 'cadrer') { atlas.cadrer(); $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  if (f === 'ins') {
+    if (!insChargees) { insChargees = true; toast('Chargement des zones d’insertion…'); await atlas.charger(['insertions']); }
+    atlas.appliquer(); atlas.cadrer(); atlas.demander();
+    toast('Rouge : origines · bleu : terminaisons');
+    $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (f === 'isoler') { atlas.isoler(atlas.isole ? null : atlas.sel); b.textContent = atlas.isole ? 'Tout réafficher' : 'Isoler'; }
+});
 
 /* ═══════════════ LES DENTS ═══════════════ */
 
-let coupe = null;
+let dents = null;
+const FDI_N = { 'medial incisor': 1, 'lateral incisor': 2, canine: 3, 'first premolar': 4, 'second premolar': 5, 'first molar': 6, 'second molar': 7 };
+function fdiDe(nom) {
+  const b = baseNom(nom).replace(/ \| (dentine|pulpe)$/, '').toLowerCase().replace(' tooth', '');
+  const sup = b.startsWith('upper');
+  const k = Object.keys(FDI_N).find(x => b.includes(x));
+  if (!k) return null;
+  const c = cote(nom.replace(/ \| (dentine|pulpe)$/, ''));
+  const q = sup ? (c === 'droit' ? 1 : 2) : (c === 'droit' ? 4 : 3);
+  return q * 10 + FDI_N[k];
+}
 function montrerDents() {
-  $$('#dt-denture button').forEach(b => b.classList.toggle('on', +b.dataset.l === (data.lact ? 1 : 0)));
-  const q = Math.floor(data.fdi / 10);
-  if (data.lact !== (q >= 5)) data.fdi = data.lact ? 75 : 36;
-  AnatDents.arcade($('#dt-arcade'), { lacteales: data.lact, choisie: data.fdi, surChoix: fdi => { data.fdi = fdi; save(); montrerDents(); $('#dt-fiche').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
-  const f = AnatDents.fiche(data.fdi);
-  $('#dt-fiche').innerHTML = `<div class="card an-fiche dt-f">
-    <div class="an-f-t"><span class="dt-num">${f.fdi}</span><h2>${esc(f.titre)}</h2></div>
-    <dl>${f.lignes.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
-    ${f.note ? `<p class="an-note">${esc(f.note)}</p>` : ''}</div>`;
-  $('#dt-plan').textContent = f.plan;
-  dessinerCoupe();
-}
-function dessinerCoupe() {
-  coupe = AnatDents.coupe($('#dt-coupe'), data.fdi, {
-    ouvre: +$('#dt-ouvre').value, hauteur: +$('#dt-haut').value, legendes: $('#dt-leg').classList.contains('on'),
-    surTissu: tissu
+  if (dents) return;
+  dents = new Atlas3D($('#d3'), {
+    profondeur: 3,
+    surChoix: info => {
+      if (!info) { $('#dt-fiche').innerHTML = ''; $('#dt-isoler').disabled = true; return; }
+      const f = fdiDe(info.nom);
+      if (!f) { $('#dt-isoler').disabled = true; $('#dt-fiche').innerHTML = `<div class="card an-fiche"><h2>${esc(nomFr(info.nom))}</h2></div>`; return; }
+      $('#dt-isoler').disabled = false;
+      const F = AnatDents.fiche(f);
+      $('#dt-fiche').innerHTML = `<div class="card an-fiche dt-f">
+        <div class="an-f-t"><span class="dt-num">${f}</span><div><h2>${esc(F.titre)}</h2><p class="latin">${esc(nomFr(info.nom))}</p></div></div>
+        <dl>${F.lignes.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+        ${F.note ? `<p class="an-note">${esc(F.note)}</p>` : ''}</div>`;
+      if (info.cle === 'dentine' || info.cle === 'pulpe' || info.cle === 'email' || info.cle === 'racine') tissu({ dentine: 'dentine', pulpe: 'pulpe', email: 'email', racine: 'cement' }[info.cle]);
+    },
+    surCharge: p => { $('#d3-pct').style.width = p + '%'; },
+    surRendu: () => placerEtiquette(dents, '#d3-etiq')
   });
-  transversale();
-}
-function transversale() {
-  const r = AnatDents.transverse($('#dt-trans'), data.fdi, +$('#dt-haut').value);
-  $('#dt-niveau').textContent = r.niveau;
-  $('#dt-trans').onclick = e => { const g = e.target.closest('[data-t]'); if (g) tissu(g.dataset.t); };
+  dents.cadreDents = true;
+  dents.charger(['dents']).then(() => { $('#d3-charge').hidden = true; dents.vue('dents'); });
+  $('#dt-tissus').innerHTML = [['email', 'Émail'], ['dentine', 'Dentine'], ['pulpe', 'Pulpe'], ['cement', 'Cément'], ['ligament', 'Ligament'], ['os', 'Os alvéolaire']]
+    .map(([k, l]) => `<button class="chip-btn" data-tissu="${k}"><i class="pastille ${k}"></i>${l}</button>`).join('');
+  $('#dt-lait').innerHTML = `<p class="an-txt">Vingt dents, sans prémolaires : incisives, canines, deux molaires par quadrant. On les numérote de 51 à 85.</p>
+    <table class="dt-tab"><thead><tr><th>Dent</th><th>Éruption (haut / bas)</th><th>Chute</th></tr></thead><tbody>${['Incisive centrale', 'Incisive latérale', 'Canine', 'Première molaire', 'Deuxième molaire']
+    .map((n, i) => `<tr><td>${n}</td><td>${AnatDents.ERUPT.lact.sup[i]} / ${AnatDents.ERUPT.lact.inf[i]}</td><td>${AnatDents.ERUPT.chute[i]}</td></tr>`).join('')}</tbody></table>`;
 }
 function tissu(id) {
-  const t = AnatDents.TISSUS[id === 'lamina' ? 'lamina' : id] || AnatDents.TISSUS[{ retzius: 'retzius' }[id]];
-  if (!t) return;
-  $('#dt-tissu').innerHTML = `<div class="card an-fiche"><div class="an-f-t"><h2>${esc(t.nom)}</h2><button class="iconbtn flat" data-fermer aria-label="Fermer" data-ic="close"></button></div><p class="an-txt">${esc(t.t)}</p></div>`;
+  const t = AnatDents.TISSUS[id]; if (!t) return;
+  $('#dt-tissu').innerHTML = `<div class="card an-fiche"><div class="an-f-t"><h2>${esc(t.nom)}</h2><button class="iconbtn flat" data-f="fermer" aria-label="Fermer" data-ic="close"></button></div><p class="an-txt">${esc(t.t)}</p></div>`;
   Kit.icones($('#dt-tissu'));
-  $('#dt-tissu').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-$('#dt-tissu').addEventListener('click', e => { if (e.target.closest('[data-fermer]')) $('#dt-tissu').innerHTML = ''; });
-$('#dt-denture').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (!b) return; data.lact = b.dataset.l === '1'; save(); montrerDents(); });
-$('#dt-ouvre').addEventListener('input', e => coupe && coupe.ouvrir(+e.target.value));
-let tHaut = null;
-$('#dt-haut').addEventListener('input', () => { cancelAnimationFrame(tHaut); tHaut = requestAnimationFrame(dessinerCoupe); });
-$('#dt-leg').addEventListener('click', e => { const b = e.currentTarget; b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); dessinerCoupe(); });
+$('#dt-tissu').addEventListener('click', e => { if (e.target.closest('[data-f="fermer"]')) $('#dt-tissu').innerHTML = ''; });
+$('#dt-tissus').addEventListener('click', e => { const b = e.target.closest('[data-tissu]'); if (b) tissu(b.dataset.tissu); });
+$('#screen-dents').querySelector('.a3-vues').addEventListener('click', e => {
+  const b = e.target.closest('[data-dvue]'); if (!b || !dents) return;
+  dents.isoler(null); $('#dt-isoler').textContent = 'Isoler la dent';
+  dents.vue({ arcade: 'dents', haut: 'dentsHaut', bas: 'dentsBas' }[b.dataset.dvue]);
+});
+$('#dt-isoler').addEventListener('click', () => {
+  if (!dents || !dents.sel) return;
+  if (dents.isole) { dents.isoler(null); $('#dt-isoler').textContent = 'Isoler la dent'; dents.vue('dents'); return; }
+  dents.isoler(dents.sel, true); $('#dt-isoler').textContent = 'Revenir à l’arcade';
+  const ax = $('#dt-axe .on').dataset.axe;
+  if (!ax) { $$('#dt-axe button').forEach(x => x.classList.toggle('on', x.dataset.axe === 'z')); $('#dt-pos').disabled = false; }
+  dents.coupe($('#dt-axe .on').dataset.axe, +$('#dt-pos').value, dents.boiteSel());
+});
+$('#dt-os').addEventListener('click', e => {
+  const b = e.currentTarget, on = !b.classList.contains('on');
+  b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+  dents.montrerOs(on);
+});
+$('#dt-axe').addEventListener('click', e => {
+  const b = e.target.closest('[data-axe]'); if (!b || !dents) return;
+  $$('#dt-axe button').forEach(x => x.classList.toggle('on', x === b));
+  $('#dt-pos').disabled = !b.dataset.axe;
+  dents.coupe(b.dataset.axe || null, +$('#dt-pos').value, dents.isole ? dents.boiteSel() : dents.boiteTout());
+});
+$('#dt-pos').addEventListener('input', e => { const b = $('#dt-axe .on'); dents.coupe(b.dataset.axe || null, +e.target.value, dents.isole ? dents.boiteSel() : dents.boiteTout()); });
 
 /* ═══════════════ LE QUIZ ═══════════════ */
 
 const MODES = [
-  { id: 'touche', nom: 'Touche le muscle', desc: 'Un nom : trouve-le sur le corps', icon: 'target' },
-  { id: 'nomme', nom: 'Nomme le muscle', desc: 'Un muscle s’allume : quel est son nom ?', icon: 'eye' },
-  { id: 'os', nom: 'Les os', desc: 'Un os s’allume sur le squelette', icon: 'bone' },
+  { id: 'touche', nom: 'Touche la structure', desc: 'Un nom : trouve-le sur le corps en 3D', icon: 'target', corps: true },
+  { id: 'nomme', nom: 'Nomme la structure', desc: 'Une structure s’allume : quel est son nom ?', icon: 'eye', corps: true },
   { id: 'insertions', nom: 'Origines et terminaisons', desc: 'D’où part-il, où s’attache-t-il ?', icon: 'layers' },
   { id: 'nerfs', nom: 'Innervation et action', desc: 'Quel nerf, quel mouvement ?', icon: 'sliders' },
+  { id: 'os', nom: 'Les os', desc: 'Repères, articulations, types', icon: 'bone' },
   { id: 'dents', nom: 'Dents et tissus', desc: 'FDI, racines, éruption, histologie', icon: 'microscope' }
 ];
 const melange = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
-const autres = (bonne, pool, n = 3) => melange(pool.filter(x => x !== bonne)).slice(0, n);
+const autres = (bonne, pool, n = 3) => melange([...new Set(pool)].filter(x => x !== bonne)).slice(0, n);
 
 function renderQuizHome() {
   const q = data.quiz;
@@ -234,8 +264,7 @@ function renderQuizHome() {
     <button class="setcard ${q.mode === m.id ? 'on' : ''}" data-mode="${m.id}">
       <span class="si">${Ic.svg(m.icon, 20)}</span>
       <span class="sbody"><span class="sname">${esc(m.nom)}</span><span class="sdesc">${esc(m.desc)}${q.best[m.id] !== undefined ? ` · record ${q.best[m.id]} %` : ''}</span></span>
-      <span class="radio">${Ic.svg('check', 14)}</span>
-    </button>`).join('');
+      <span class="radio">${Ic.svg('check', 14)}</span></button>`).join('');
   $$('#qz-modes [data-mode]').forEach(b => b.onclick = () => { q.mode = b.dataset.mode; save(); renderQuizHome(); });
   $('#qz-len').innerHTML = [5, 10, 20].map(n => `<button data-n="${n}" class="${q.n === n ? 'on' : ''}">${n}</button>`).join('');
   $$('#qz-len [data-n]').forEach(b => b.onclick = () => { q.n = +b.dataset.n; save(); renderQuizHome(); });
@@ -244,156 +273,159 @@ function renderQuizHome() {
   $('#qz-go').onclick = lancer;
 }
 
-/* les questions */
-const couche1 = vue => MU.filter(m => (m.couche || 1) === 1 && m.vues.includes(vue) && !m.tissu);
+/* les muscles repérables : visibles en surface, avec un nom français */
+function cibles() {
+  return atlas.objets.filter(m => m.userData.fichier === 'muscles' && m.userData.couche === 'mu1' && cote(m.userData.nom) === 'droit' && m.userData.cle === 'muscle')
+    .map(m => m.userData.nom).filter(n => DICO.noms[baseNom(n)] && FICHE_DE.has(baseNom(n)));
+}
 function fabriquer(mode, n) {
   const Q = [];
-  const nomsMu = MU.filter(m => !m.tissu).map(m => m.nom);
+  const nomsMu = ANAT.MUSCLES.map(m => m.nom);
   for (let i = 0; i < n; i++) {
     if (mode === 'touche' || mode === 'nomme') {
-      const vue = Math.random() < 0.55 ? 'avant' : 'arriere';
-      const m = melange(couche1(vue))[0];
-      Q.push({ mode, vue, id: m.id, bonne: m.nom, choix: melange([m.nom, ...autres(m.nom, couche1(vue).map(x => x.nom))]) });
-    } else if (mode === 'os') {
-      const vue = Math.random() < 0.6 ? 'avant' : 'arriere';
-      const ids = Object.keys(AnatVue.OS_ANCRES[vue]());
-      const id = melange(ids)[0];
-      Q.push({ mode, vue, id, bonne: OS[id].nom, choix: melange([OS[id].nom, ...autres(OS[id].nom, ids.map(x => OS[x].nom))]) });
+      const L = cibles(); const nom = melange(L)[0];
+      const bonne = nomFr(nom);
+      Q.push({ mode, nom, bonne, choix: melange([bonne, ...autres(bonne, L.map(nomFr))]) });
     } else if (mode === 'insertions') {
-      const m = melange(MU.filter(x => !x.tissu))[0];
+      const m = melange(ANAT.MUSCLES.filter(x => !x.tissu))[0];
       const sens = Math.random() < 0.5;
-      Q.push({ mode, texte: sens ? `Il naît de : ${m.o}. Il se termine sur : ${m.t}.` : `Quel muscle se termine sur : ${m.t} ?`, id: m.id, bonne: m.nom, choix: melange([m.nom, ...autres(m.nom, nomsMu)]) });
+      Q.push({ mode, texte: sens ? `Il naît de : ${m.o}. Il se termine sur : ${m.t}.` : `Quel muscle se termine sur : ${m.t} ?`, bonne: m.nom, choix: melange([m.nom, ...autres(m.nom, nomsMu)]) });
     } else if (mode === 'nerfs') {
-      const m = melange(MU.filter(x => !x.tissu && x.i && x.i !== '—'))[0];
+      const m = melange(ANAT.MUSCLES.filter(x => !x.tissu && x.i && x.i !== '—'))[0];
       if (Math.random() < 0.5) {
-        const nerfs = [...new Set(MU.filter(x => x.i && x.i !== '—' && x.i !== m.i).map(x => x.i))];
-        Q.push({ mode, texte: `Quel est le nerf du muscle ${m.nom.toLowerCase()} ?`, bonne: m.i, choix: melange([m.i, ...melange(nerfs).slice(0, 3)]), id: m.id, long: true });
-      } else Q.push({ mode, texte: `Quel muscle : ${m.a.split('.')[0]} ?`, bonne: m.nom, choix: melange([m.nom, ...autres(m.nom, nomsMu)]), id: m.id });
-    } else {
-      Q.push(questionDent());
-    }
+        const nerfs = ANAT.MUSCLES.filter(x => x.i && x.i !== '—').map(x => x.i);
+        Q.push({ mode, texte: `Quel est le nerf du muscle ${m.nom.toLowerCase()} ?`, bonne: m.i, choix: melange([m.i, ...autres(m.i, nerfs)]), long: true });
+      } else Q.push({ mode, texte: `Quel muscle : ${m.a.split('.')[0]} ?`, bonne: m.nom, choix: melange([m.nom, ...autres(m.nom, nomsMu)]) });
+    } else if (mode === 'os') {
+      const ids = Object.keys(ANAT.OS), id = melange(ids)[0], o = ANAT.OS[id];
+      const r = Math.random();
+      const texte = r < 0.4 ? `Quel os porte ces repères : ${o.r}` : r < 0.7 ? `Quel os : ${o.d}` : `Quel os s’articule ainsi : ${o.art}`;
+      Q.push({ mode, texte, bonne: o.nom, choix: melange([o.nom, ...autres(o.nom, ids.map(x => ANAT.OS[x].nom))]) });
+    } else Q.push(questionDent());
   }
   return Q;
 }
 function questionDent() {
-  const r = Math.random();
   const perm = [11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48];
-  if (r < 0.34) {
-    const f = melange(perm)[0], F = AnatDents.fiche(f);
-    const noms = [...new Set(perm.map(x => AnatDents.fiche(x).titre))];
-    return { mode: 'dents', texte: `En numérotation FDI, qui est la dent ${f} ?`, bonne: F.titre, choix: melange([F.titre, ...autres(F.titre, noms)]) };
-  }
-  if (r < 0.55) {
-    const f = melange(perm)[0], F = AnatDents.fiche(f), rac = F.lignes.find(l => l[0] === 'Racines')[1];
-    const opts = ['1', '2', '3', '1 à 3, souvent fusionnées', '2, souvent fusionnées'];
-    return { mode: 'dents', texte: `Combien de racines a la dent ${f} (${F.titre.toLowerCase()}) ?`, bonne: rac, choix: melange([rac, ...autres(rac, opts)]) };
-  }
-  if (r < 0.72) {
-    const f = melange(perm.filter(x => x % 10 !== 8))[0], F = AnatDents.fiche(f), er = F.lignes.find(l => l[0] === 'Éruption')[1];
-    const ages = [...new Set(perm.map(x => AnatDents.fiche(x).lignes.find(l => l[0] === 'Éruption')[1]))];
-    return { mode: 'dents', texte: `À quel âge fait éruption la dent ${f} (${F.titre.toLowerCase()}) ?`, bonne: er, choix: melange([er, ...autres(er, ages)]) };
-  }
-  const T = AnatDents.TISSUS, ids = Object.keys(T);
-  const id = melange(ids)[0];
+  const r = Math.random(), f = melange(perm)[0], F = AnatDents.fiche(f);
+  const L = k => F.lignes.find(l => l[0] === k)[1];
+  if (r < 0.34) return { texte: `En numérotation FDI, qui est la dent ${f} ?`, bonne: F.titre, choix: melange([F.titre, ...autres(F.titre, perm.map(x => AnatDents.fiche(x).titre))]) };
+  if (r < 0.55) { const rac = L('Racines'); return { texte: `Combien de racines a la dent ${f} (${F.titre.toLowerCase()}) ?`, bonne: rac, choix: melange([rac, ...autres(rac, ['1', '2', '3', '1 à 3, souvent fusionnées', '2, souvent fusionnées'])]) }; }
+  if (r < 0.72) { const er = L('Éruption'); return { texte: `À quel âge fait éruption la dent ${f} (${F.titre.toLowerCase()}) ?`, bonne: er, choix: melange([er, ...autres(er, perm.map(x => AnatDents.fiche(x).lignes.find(l => l[0] === 'Éruption')[1]))]) }; }
+  const T = AnatDents.TISSUS, ids = Object.keys(T), id = melange(ids)[0];
   const def = T[id].t.split('.').slice(0, 2).join('.').replace(new RegExp(T[id].nom, 'gi'), '…');
-  return { mode: 'dents', texte: `Quel tissu ou structure ? « ${def}. »`, bonne: T[id].nom, choix: melange([T[id].nom, ...autres(T[id].nom, ids.map(x => T[x].nom))]) };
+  return { texte: `Quel tissu ou structure ? « ${def}. »`, bonne: T[id].nom, choix: melange([T[id].nom, ...autres(T[id].nom, ids.map(x => T[x].nom))]) };
 }
 
-let S = null, qv = null;
-function lancer() {
-  S = { mode: data.quiz.mode, Q: fabriquer(data.quiz.mode, data.quiz.n), i: 0, bons: 0, verrou: false };
-  show('qz');
+let Q = null;
+async function lancer() {
+  const mode = data.quiz.mode, m = MODES.find(x => x.id === mode);
+  await dicoPret;
+  if (m.corps && !atlas.objets.length) { toast('Les modèles 3D chargent encore, un instant…'); return; }
+  Q = { mode, corps: !!m.corps, Q: fabriquer(mode, data.quiz.n), i: 0, bons: 0, verrou: false };
+  if (Q.corps) {
+    show('atlas');
+    document.body.classList.add('qz3d', 'no-tabs');
+    $('#qz-bandeau').hidden = false;
+    atlas.selectionner(null); atlas.isoler(null); atlas.coupe(null);
+    data.d = 1; atlas.profondeur(1); syncCommandes();
+  } else show('qztxt');
   poser();
 }
+const el = (a, b) => (Q.corps ? $(a) : $(b));
 function poser() {
-  const q = S.Q[S.i];
-  S.verrou = false;
-  $('#qz-bar').style.width = `${(S.i / S.Q.length) * 100}%`;
-  $('#qz-n').textContent = `${S.i + 1} / ${S.Q.length}`;
-  const avecCorps = ['touche', 'nomme', 'os'].includes(q.mode);
-  $('#qz-scene').hidden = !avecCorps;
-  document.body.classList.toggle('qz-corps', avecCorps);
-  if (avecCorps) {
-    if (!qv) qv = AnatVue.creer($('#qz-scene'), { vue: q.vue, profondeur: 1, reperes: false, surChoix: (type, id) => repondreCorps(id) });
-    qv.vue(q.vue); qv.profondeur(q.mode === 'os' ? 3 : 1); qv.choisir(null); qv.marquer(null); qv.reset();
-  }
+  const q = Q.Q[Q.i];
+  Q.verrou = false;
+  el('#qz-bar', '#qz-bar2').style.width = `${(Q.i / Q.Q.length) * 100}%`;
+  el('#qz-n', '#qz-n2').textContent = `${Q.i + 1} / ${Q.Q.length}`;
+  const zq = el('#qz-q', '#qz-q2'), zc = el('#qz-choix', '#qz-choix2');
   if (q.mode === 'touche') {
-    $('#qz-q').innerHTML = `<small>${q.vue === 'avant' ? 'De face' : 'De dos'}</small>Touche : <b>${esc(q.bonne)}</b>`;
-    $('#qz-choix').innerHTML = `<button class="btn ghost" id="qz-passe">Je ne sais pas</button>`;
-    $('#qz-passe').onclick = () => repondreCorps(null);
+    atlas.selectionner(null); atlas.vue('face');
+    zq.innerHTML = `Touche : <b>${esc(q.bonne)}</b> <small>(côté droit du sujet)</small>`;
+    zc.innerHTML = `<button class="btn ghost" id="qz-passe">Je ne sais pas</button>`;
+    $('#qz-passe').onclick = () => reponseCorps(null, true);
   } else {
-    if (q.mode === 'nomme' || q.mode === 'os') { qv.choisir(q.id); requestAnimationFrame(() => qv.cadrer(q.id, q.mode === 'os' ? 2.2 : 2.6)); }
-    $('#qz-q').innerHTML = q.texte ? esc(q.texte) : (q.mode === 'os' ? 'Quel est cet os ?' : 'Quel est ce muscle ?');
-    $('#qz-choix').innerHTML = q.choix.map((c, k) => `<button class="qz-c${q.long ? ' long' : ''}" data-k="${k}">${esc(c)}</button>`).join('');
-    $$('#qz-choix [data-k]').forEach(b => b.onclick = () => repondreChoix(+b.dataset.k));
+    if (q.mode === 'nomme') { atlas.choisir(q.nom); }
+    zq.innerHTML = q.texte ? esc(q.texte) : 'Quelle est cette structure ?';
+    zc.innerHTML = q.choix.map((c, k) => `<button class="qz-c${q.long ? ' long' : ''}" data-k="${k}">${esc(c)}</button>`).join('');
+    zc.querySelectorAll('[data-k]').forEach(b => b.onclick = () => repondreChoix(+b.dataset.k, zc));
   }
 }
 function suite(ok, delai) {
-  if (ok) S.bons++;
-  setTimeout(() => { S.i++; if (S.i >= S.Q.length) fin(); else poser(); }, delai);
+  if (ok) Q.bons++;
+  setTimeout(() => { Q.i++; if (Q.i >= Q.Q.length) fin(); else poser(); }, delai);
 }
-function repondreCorps(id) {
-  const q = S.Q[S.i];
-  if (S.verrou) return;
-  S.verrou = true;
-  const ok = id === q.id;
-  if (!ok && id) qv.marquer(id, 'ko');
-  qv.choisir(q.id);
-  if (!ok) { qv.cadrer(q.id, 2.2); }
-  $('#qz-q').innerHTML = ok ? `<span class="qz-ok">Oui : ${esc(q.bonne)}</span>` : `<span class="qz-ko">${id ? `Non, c’est ${esc(muscle(id) ? muscle(id).nom : (OS[id] ? OS[id].nom : 'autre chose'))}.` : 'Le voici.'}</span> ${esc(q.bonne)} est en surbrillance.`;
-  suite(ok, ok ? 900 : 2200);
+function reponseCorps(info, passe) {
+  const q = Q.Q[Q.i];
+  if (q.mode !== 'touche' || Q.verrou) return;
+  if (!info && !passe) return;
+  Q.verrou = true;
+  const ok = info && baseNom(info.nom) === baseNom(q.nom);
+  const dit = info ? nomFr(info.nom) : '';
+  atlas.choisir(q.nom);
+  $('#qz-q').innerHTML = ok ? `<span class="qz-ok">Oui : ${esc(q.bonne)}</span>` : `<span class="qz-ko">${info ? `Non, c’est : ${esc(dit)}.` : 'Le voici.'}</span> ${esc(q.bonne)} est en surbrillance.`;
+  suite(ok, ok ? 1100 : 2600);
 }
-function repondreChoix(k) {
-  const q = S.Q[S.i];
-  if (S.verrou) return;
-  S.verrou = true;
+function repondreChoix(k, zc) {
+  const q = Q.Q[Q.i];
+  if (Q.verrou) return;
+  Q.verrou = true;
   const ok = q.choix[k] === q.bonne;
-  $$('#qz-choix [data-k]').forEach(b => {
+  zc.querySelectorAll('[data-k]').forEach(b => {
     const c = q.choix[+b.dataset.k];
-    b.classList.toggle('ok', c === q.bonne);
-    b.classList.toggle('ko', +b.dataset.k === k && !ok);
-    b.disabled = true;
+    b.classList.toggle('ok', c === q.bonne); b.classList.toggle('ko', +b.dataset.k === k && !ok); b.disabled = true;
   });
   suite(ok, ok ? 900 : 2000);
 }
+function finQuizCorps() {
+  document.body.classList.remove('qz3d', 'no-tabs');
+  $('#qz-bandeau').hidden = true;
+}
 function fin() {
-  const p = Math.round(S.bons / S.Q.length * 100);
-  const q = data.quiz;
-  const record = q.best[S.mode] === undefined || p > q.best[S.mode];
-  if (record) q.best[S.mode] = p;
+  const p = Math.round(Q.bons / Q.Q.length * 100), q = data.quiz;
+  const record = q.best[Q.mode] === undefined || p > q.best[Q.mode];
+  if (record) q.best[Q.mode] = p;
   save();
-  const m = MODES.find(x => x.id === S.mode);
+  const m = MODES.find(x => x.id === Q.mode);
+  if (Q.corps) { finQuizCorps(); atlas.selectionner(null); }
   $('#qz-fin').innerHTML = `<div class="top"><div><h1>Résultat</h1><p class="sub">${esc(m.nom)}</p></div></div>
     <div class="card qz-res">${Kit.anneau(p, 132, 12, '<small>%</small>', 'var(--card-2)')}
-      <p><b>${S.bons} sur ${S.Q.length}</b>${record ? ' · nouveau record' : ''}</p>
-      <p class="an-aide">${p >= 90 ? 'Excellent : tu lis le corps comme une carte.' : p >= 60 ? 'Bien. Repasse par l’atlas pour les fiches manquées.' : 'Retourne explorer l’atlas couche par couche, puis retente.'}</p></div>
+      <p><b>${Q.bons} sur ${Q.Q.length}</b>${record ? ' · nouveau record' : ''}</p>
+      <p class="an-aide">${p >= 90 ? 'Excellent : tu lis le corps comme une carte.' : p >= 60 ? 'Bien. Repasse par l’atlas pour les structures manquées.' : 'Explore l’atlas couche par couche, puis retente.'}</p></div>
     <div class="duo"><button class="btn ghost" data-nav="quizhome">Changer d’épreuve</button><button class="btn go" id="qz-re">Recommencer</button></div>`;
   $('#qz-re').onclick = lancer;
-  document.body.classList.remove('qz-corps');
+  Q = null;
   show('qzfin');
 }
-$('#qz-quit').addEventListener('click', () => { document.body.classList.remove('qz-corps'); go('quizhome'); });
+$('#qz-quit').addEventListener('click', () => { finQuizCorps(); Q = null; atlas.selectionner(null); go('quizhome'); });
+$('#qz-quit2').addEventListener('click', () => { Q = null; go('quizhome'); });
 
 /* ═══════════════ L'INDEX ═══════════════ */
 
-const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 let filtre = 'tout';
 function entrees() {
-  const L = [];
-  MU.forEach(m => L.push({ type: 'muscle', id: m.id, nom: m.nom, reg: m.reg, sous: m.tissu || ((m.couche || 1) === 2 ? 'profond' : 'superficiel'), txt: [m.o, m.t, m.a, m.i, m.n].join(' ') }));
-  Object.keys(OS).forEach(id => L.push({ type: 'os', id, nom: OS[id].nom, reg: OS[id].reg, sous: 'os', txt: [OS[id].type, OS[id].d, OS[id].r, OS[id].art].join(' ') }));
-  Object.keys(AnatDents.TISSUS).forEach(id => L.push({ type: 'tissu', id, nom: AnatDents.TISSUS[id].nom, reg: 'Dent', sous: 'tissu dentaire', txt: AnatDents.TISSUS[id].t }));
-  return L.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  const vus = new Map();
+  for (const m of atlas.objets.concat(dents ? dents.objets : [])) {
+    const u = m.userData;
+    if (u.couche === 'ins' || u.fichier === 'peau' || / \| /.test(u.nom)) continue;
+    const b = baseNom(u.nom);
+    if (vus.has(b)) continue;
+    const type = u.fichier === 'muscles' ? 'muscle' : (u.cle === 'email' || u.cle === 'racine') ? 'dent' : 'os';
+    vus.set(b, { type, nom: u.nom, fr: nomFr(u.nom), la: latin(u.nom), base: b, sous: type === 'muscle' ? (u.cle === 'tendon' ? 'tendon' : u.couche === 'mu1' ? 'superficiel' : 'profond') : type === 'dent' ? 'dent' : (u.cle === 'cartilage' ? 'cartilage' : 'os') });
+  }
+  return [...vus.values()].sort((a, b) => a.fr.localeCompare(b.fr, 'fr'));
 }
-function renderIndex() {
+async function renderIndex() {
+  await dicoPret;
+  if (!atlas.objets.length) { $('#ix-liste').innerHTML = '<p class="an-vide">Les modèles 3D chargent…</p>'; setTimeout(() => view === 'index' && renderIndex(), 800); return; }
   const L = entrees();
-  $('#ix-sub').textContent = `${MU.length} muscles et structures · ${Object.keys(OS).length} os · ${Object.keys(AnatDents.TISSUS).length} tissus dentaires`;
-  const F = [['tout', 'Tout'], ['muscle', 'Muscles'], ['os', 'Os'], ['tissu', 'Dents']];
+  $('#ix-sub').textContent = `${L.filter(x => x.type === 'muscle').length} muscles et tendons · ${L.filter(x => x.type === 'os').length} os et cartilages`;
+  const F = [['tout', 'Tout'], ['muscle', 'Muscles'], ['os', 'Os']];
   $('#ix-f').innerHTML = F.map(([id, l]) => `<button data-f="${id}" class="${filtre === id ? 'on' : ''}">${l}</button>`).join('');
   const q = norm($('#ix-q').value.trim());
-  const res = L.filter(x => (filtre === 'tout' || x.type === filtre) && (!q || norm(x.nom).includes(q) || norm(x.txt).includes(q)));
-  $('#ix-liste').innerHTML = res.length ? res.map(x => `<button class="row" data-ix="${x.type}:${x.id}">
-      <span class="rbody"><span class="rname">${esc(x.nom)}</span><span class="rmeta">${esc(x.reg)} · ${esc(x.sous)}</span></span>
+  const res = L.filter(x => (filtre === 'tout' || x.type === filtre) && (!q || norm(x.fr).includes(q) || norm(x.base).includes(q) || norm(x.la).includes(q)));
+  $('#ix-liste').innerHTML = res.length ? res.slice(0, 400).map(x => `<button class="row" data-ix="${esc(x.nom)}" data-type="${x.type}">
+      <span class="rbody"><span class="rname">${esc(x.fr)}</span><span class="rmeta">${esc(x.la || x.base)} · ${esc(x.sous)}</span></span>
       <span class="chev" data-ic="chevron"></span></button>`).join('') : `<p class="an-vide">Rien ne correspond.</p>`;
   Kit.icones($('#ix-liste'));
 }
@@ -401,19 +433,22 @@ $('#ix-q').addEventListener('input', renderIndex);
 $('#ix-f').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { filtre = b.dataset.f; renderIndex(); } });
 $('#ix-liste').addEventListener('click', e => {
   const b = e.target.closest('[data-ix]'); if (!b) return;
-  const [type, id] = b.dataset.ix.split(':');
-  if (type === 'tissu') { go('dents'); tissu(id); }
-  else montrerDans(type, id);
+  const nom = b.dataset.ix;
+  go('atlas');
+  const m = atlas.objets.find(x => x.userData.nom === nom);
+  if (m) {
+    const c = m.userData.couche;
+    data.d = c === 'mu1' ? 1 : c === 'mu2' ? 2 : 3; atlas.profondeur(data.d); syncCommandes();
+    const droit = nom.replace(/\.l$/, '.r');
+    requestAnimationFrame(() => atlas.choisir(atlas.objets.some(x => x.userData.nom === droit) ? droit : nom));
+  }
 });
 
 /* ═══════════════ DÉMARRAGE ═══════════════ */
 
 Kit.icones();
+dicoPret.then(() => { if (atlas.sel) fiche({ nom: atlas.sel.userData.nom, ...atlas.sel.userData }); });
 const ANCRES = { atlas: 'atlas', dents: 'dents', quiz: 'quizhome', index: 'index' };
 go(ANCRES[location.hash.slice(1)] || 'atlas');
 window.addEventListener('hashchange', () => { const v = ANCRES[location.hash.slice(1)]; if (v) go(v); });
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-}
-})();
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));

@@ -76,10 +76,10 @@ const Formations = (() => {
     },
     {
       id: 'anatomie', domaine: 'sante', page: 'anatomie.html', mod: 'anat',
-      nom: 'Anatomie',
-      desc: 'Un atlas vectoriel qu’on agrandit sans fin : de la peau aux muscles fibre par fibre, puis au squelette ; origines, terminaisons, innervation ; et les dents tranchées tissu par tissu.',
-      chiffres: { questions: 60, cours: 90, minutes: 90 },
-      detail: '68 muscles et structures · 23 os · 52 dents en coupe · 6 épreuves'
+      nom: 'Anatomie 3D',
+      desc: 'Un vrai corps en 3D (Z-Anatomy / BodyParts3D) : peau, 250 muscles, squelette, origines et terminaisons sur les os, plan de coupe, et les 28 dents tranchées émail, dentine, pulpe.',
+      chiffres: { questions: 60, cours: 400, minutes: 90 },
+      detail: '257 muscles et tendons · 145 os · 28 dents en coupe · 6 épreuves'
     },
     {
       id: 'jeux', domaine: 'pause', page: 'jeux.html', mod: 'jeux',

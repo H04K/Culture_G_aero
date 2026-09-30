@@ -1,0 +1,20 @@
+Modèles anatomiques 3D de l'atlas (peau, muscles, squelette, insertions, dents)
+
+Source : Z-Anatomy — l'atlas d'anatomie open source (https://www.z-anatomy.com,
+https://github.com/LluisV/Z-Anatomy), lui-même dérivé de BodyParts3D.
+
+  « BodyParts3D, © The Database Center for Life Science, licensed under CC Attribution-Share Alike 2.1 Japan »
+  « Z-Anatomy — The open source atlas of anatomy — CC BY-SA 4.0 »
+
+Licence de ces fichiers : Creative Commons Attribution - Partage dans les mêmes
+conditions 4.0 International (CC BY-SA 4.0)
+https://creativecommons.org/licenses/by-sa/4.0/deed.fr
+
+Modifications apportées ici : conversion FBX → glTF, simplification des
+maillages, compression Draco, matières regroupées par tissu (os, cartilage,
+émail, racine, muscle, tendon, peau), classement des muscles superficiels et
+profonds par lancer de rayons depuis la peau, coquilles internes de dentine et
+de pulpe calculées pour chaque dent (approximation pédagogique, pas une mesure).
+
+Noms français et définitions (dico.json) : tirés des traductions et des
+définitions françaises de Z-Anatomy, même licence.
