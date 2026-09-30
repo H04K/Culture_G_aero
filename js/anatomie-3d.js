@@ -124,6 +124,8 @@ export class Atlas3D {
         tailles[f] = ev.total ? ev.loaded / ev.total : 0;
         if (this.o.surCharge) this.o.surCharge(Math.round((fait + tailles[f]) / fichiers.length * 100), f);
       }, ko));
+      const cle = f.replace(/-hd$/, '');
+      if (this.racines && this.racines[cle]) this._retirer(cle);
       this._ranger(f, g.scene);
       fait++; maj();
       this.appliquer();
@@ -132,13 +134,41 @@ export class Atlas3D {
     draco.dispose();
   }
 
+  /** Retire les maillages d'un fichier (avant d'en poser une autre définition). */
+  _retirer(fichier) {
+    const r = this.racines[fichier];
+    if (!r) return;
+    const nomSel = this.sel && this.sel.userData.fichier === fichier ? this.sel.userData.nom : null;
+    if (nomSel) this.selectionner(null);
+    this.objets = this.objets.filter(m => m.userData.fichier !== fichier);
+    for (const k of Object.keys(this.parCouche)) this.parCouche[k] = this.parCouche[k].filter(m => m.userData.fichier !== fichier);
+    this.scene.remove(r.racine);
+    r.racine.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+    delete this.racines[fichier];
+    if (nomSel) this._aReselectionner = nomSel;
+  }
+  /** Haute (true) ou basse définition : recharge les fichiers déjà présents. */
+  async definition(hd) {
+    this.hd = hd;
+    const presents = Object.keys(this.racines || {}).filter(f => f !== 'dents');
+    const voulus = presents.filter(f => (this.racines[f].source.endsWith('-hd')) !== hd);
+    if (!voulus.length) return;
+    await this.charger(voulus.map(f => hd ? f + '-hd' : f));
+    if (this._aReselectionner) { const n = this._aReselectionner; this._aReselectionner = null; const m = this.objets.find(x => x.userData.nom === n); if (m) this.selectionner(m); }
+  }
+  /** Nom de fichier selon la définition courante. */
+  version(f) { return this.hd && f !== 'dents' ? f + '-hd' : f; }
+
   _mat(couche, cle) {
     const k = couche + ':' + cle;
     if (!this.mats[k]) { this.mats[k] = matiere(cle, this.plan); this.mats[k].userData.couche = couche; }
     return this.mats[k];
   }
 
-  _ranger(fichier, racine) {
+  _ranger(source, racine) {
+    const fichier = source.replace(/-hd$/, '');
+    this.racines = this.racines || {};
+    this.racines[fichier] = { racine, source };
     racine.updateMatrixWorld(true);
     const liste = [];
     racine.traverse(o => { if (o.isMesh) liste.push(o); });
@@ -158,7 +188,7 @@ export class Atlas3D {
       m.material = this._mat(couche, cleM);
       m.userData = { nom, cle: cleM, couche, fichier };
       /* normales lissées : on recoud les sommets dédoublés par l'export */
-      if (fichier === 'muscles' || fichier === 'peau') {
+      if ((fichier === 'muscles' || fichier === 'peau') && !source.endsWith('-hd')) {
         const g = mergeVertices(m.geometry.deleteAttribute('normal') && m.geometry, 1e-4);
         g.computeVertexNormals();
         m.geometry.dispose(); m.geometry = g;

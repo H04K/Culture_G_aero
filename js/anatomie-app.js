@@ -16,7 +16,7 @@ import { Atlas3D, baseNom, cote } from './anatomie-3d.js';
 
 const { $, $$, esc, toast } = Kit;
 const store = Kit.memoire('anatomie-3d-v1', {});
-const vide = () => ({ d: 1, quiz: { n: 10, mode: 'touche', best: {} } });
+const vide = () => ({ d: 1, hd: null, quiz: { n: 10, mode: 'touche', best: {} } });
 let data = (() => { const p = store.lire() || {}; return { ...vide(), ...p, quiz: { ...vide().quiz, ...(p.quiz || {}) } }; })();
 const save = () => store.ecrire(data);
 
@@ -70,14 +70,33 @@ $('#tabbar').innerHTML = TABS.map(([id, label, icon]) => `<button data-tab="${id
 const atlas = new Atlas3D($('#a3'), {
   profondeur: data.d,
   surChoix: info => { if (Q && Q.corps) return reponseCorps(info); fiche(info); },
-  surCharge: (p, f) => { $('#a3-pct').style.width = p + '%'; $('#a3-txt').textContent = `Chargement ${f ? '· ' + ({ squelette: 'squelette', muscles: 'muscles', peau: 'peau', insertions: 'insertions' }[f] || f) : ''} ${p} %`; },
+  surCharge: (p, f) => { $('#a3-pct').style.width = p + '%'; if (f) $('#a3-txt').textContent = `${/-hd$/.test(f) ? 'Haute définition' : 'Chargement'} · ${f.replace(/-hd$/, '')} ${p} %`; },
   surRendu: () => placerEtiquette(atlas, '#a3-etiq')
 });
-atlas.charger(['squelette', 'muscles', 'peau']).then(() => {
+/* haute définition : d'office sur ordinateur, au choix sur téléphone */
+const hdAuto = matchMedia('(pointer: fine)').matches && Math.min(screen.width, screen.height) >= 700;
+atlas.hd = data.hd === null ? hdAuto : data.hd;
+syncHD();
+atlas.charger(['squelette', 'muscles', 'peau'].map(f => atlas.version(f))).then(() => {
   $('#a3-charge').hidden = true;
   syncCommandes();
 }).catch(e => { $('#a3-txt').textContent = 'Les modèles 3D n’ont pas pu se charger (' + e.message + ').'; });
 let insChargees = false;
+function syncHD() { $('#an-hd').classList.toggle('on', !!atlas.hd); $('#an-hd').setAttribute('aria-pressed', !!atlas.hd); }
+let bascule = false;
+$('#an-hd').addEventListener('click', async () => {
+  if (bascule || !atlas.objets.length) return;
+  bascule = true;
+  const hd = !atlas.hd;
+  data.hd = hd; save();
+  $('#a3-charge').hidden = false; $('#a3-pct').style.width = '0%';
+  $('#a3-txt').textContent = hd ? 'Haute définition : 4 millions de triangles…' : 'Retour à la définition légère…';
+  atlas.hd = hd; syncHD();
+  if (hd) toast('Haute définition : environ 20 Mo à télécharger la première fois');
+  try { await atlas.definition(hd); } catch (e) { toast('Échec du chargement : ' + e.message); }
+  $('#a3-charge').hidden = true;
+  bascule = false;
+});
 
 function syncCommandes() {
   $('#an-prof').value = data.d;
@@ -102,7 +121,7 @@ $('#an-ins').addEventListener('click', async e => {
   b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
   if (on && !insChargees) {
     insChargees = true; toast('Chargement des zones d’insertion…');
-    await atlas.charger(['insertions']);
+    await atlas.charger([atlas.version('insertions')]);
   }
   atlas.insertions(on);
   if (on && data.d < 2.9) { toast('Rouge : origines · bleu : terminaisons. Descends au squelette pour les voir en entier.'); }
@@ -164,7 +183,7 @@ $('#an-fiche').addEventListener('click', async e => {
   if (f === 'fermer') { atlas.selectionner(null); return; }
   if (f === 'cadrer') { atlas.cadrer(); $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   if (f === 'ins') {
-    if (!insChargees) { insChargees = true; toast('Chargement des zones d’insertion…'); await atlas.charger(['insertions']); }
+    if (!insChargees) { insChargees = true; toast('Chargement des zones d’insertion…'); await atlas.charger([atlas.version('insertions')]); }
     atlas.appliquer(); atlas.cadrer(); atlas.demander();
     toast('Rouge : origines · bleu : terminaisons');
     $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' });
