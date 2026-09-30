@@ -31,7 +31,7 @@ const BASE = 'data/anatomie3d/';
 
 /* ───── les matières ───── */
 const TEINTES = {
-  peau:        { c: 0xd8a282, r: 0.62, cut: 0xe8b8a0, sheen: 0.35 },
+  peau:        { c: 0xd8a282, r: 0.62, cut: 0xc8906f, sheen: 0.35 },
   ongle:       { c: 0xf0d7cf, r: 0.35, cut: 0xf0d7cf },
   muscle:      { c: 0x8f1d24, r: 0.48, cut: 0x6e141b, sheen: 0.55, clear: 0.22 },
   tendon:      { c: 0xe9e2cf, r: 0.38, cut: 0xd9ceb4, sheen: 0.4, clear: 0.2 },
@@ -45,6 +45,56 @@ const TEINTES = {
   terminaison: { c: 0x2f7cf0, r: 0.5, cut: 0x2f7cf0, e: 0x001236 }
 };
 
+/* ───── les textures calculées ─────
+   Aucune image : le grain est calculé à chaque pixel, en millimètres
+   réels, donc net à n'importe quel zoom. 1 fibres musculaires, dans
+   l'axe du muscle, groupées en faisceaux ; 2 tendon, fibres fines ;
+   3 os, grain poreux ; 4 peau, pores. Le détail s'efface quand il
+   devient plus fin qu'un pixel (pas de scintillement). */
+const RELIEF = { muscle: 1, tendon: 2, os: 3, peau: 4 };
+const GLSL_RELIEF = `
+float h3(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float bruit(vec3 x) {
+  vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h3(i), h3(i + vec3(1,0,0)), f.x), mix(h3(i + vec3(0,1,0)), h3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h3(i + vec3(0,0,1)), h3(i + vec3(1,0,1)), f.x), mix(h3(i + vec3(0,1,1)), h3(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+#if RELIEF == 1
+  #define TEINTE_RELIEF 0.30
+  #define BOSSE_RELIEF 0.0009
+#elif RELIEF == 2
+  #define TEINTE_RELIEF 0.10
+  #define BOSSE_RELIEF 0.0004
+#elif RELIEF == 3
+  #define TEINTE_RELIEF 0.16
+  #define BOSSE_RELIEF 0.0005
+#else
+  #define TEINTE_RELIEF 0.08
+  #define BOSSE_RELIEF 0.00025
+#endif
+float relief(vec3 p, vec3 f, inout float w) {
+  float px = length(fwidth(p));                 /* taille d'un pixel, en mètres */
+#if RELIEF == 1 || RELIEF == 2
+  vec3 a = length(f) > 0.5 ? normalize(f) : vec3(0.0, 1.0, 0.0);
+  vec3 t1 = normalize(cross(a, abs(a.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0))), t2 = cross(a, t1);
+  vec3 q = vec3(dot(p, t1), dot(p, t2), dot(p, a));
+  float F = RELIEF == 1 ? 1400.0 : 2600.0;
+  float fin = bruit(vec3(q.xy * F, q.z * F * 0.035));
+  float fais = bruit(vec3(q.xy * F * 0.22, q.z * F * 0.012) + 7.3);
+  w = clamp(1.6 - px * F * 1.2, 0.0, 1.0);
+  float wf = clamp(1.6 - px * F * 0.22 * 1.2, 0.0, 1.0);
+  return RELIEF == 1 ? (fin * 0.55 * w + smoothstep(0.35, 0.75, fais) * 0.45 * wf) : fin;
+#elif RELIEF == 3
+  float F = 900.0;
+  w = clamp(1.6 - px * F * 1.2, 0.0, 1.0);
+  return bruit(p * F) * 0.6 + bruit(p * F * 0.25 + 3.1) * 0.4;
+#else
+  float F = 2200.0;
+  w = clamp(1.6 - px * F * 1.2, 0.0, 1.0);
+  return smoothstep(0.55, 0.9, bruit(p * F)) * 0.7 + bruit(p * F * 0.2) * 0.3;
+#endif
+}`;
+
 function matiere(cle, plan) {
   const t = TEINTES[cle] || TEINTES.os;
   const m = new THREE.MeshPhysicalMaterial({
@@ -57,13 +107,54 @@ function matiere(cle, plan) {
      prennent la couleur du tissu coupé, à plat */
   const cut = new THREE.Color(t.cut);
   m.userData.cut = { value: new THREE.Vector3(cut.r, cut.g, cut.b) };
+  const relief = RELIEF[cle] || 0;
   m.onBeforeCompile = sh => {
     sh.uniforms.uCut = m.userData.cut;
+    if (relief) {
+      sh.vertexShader = 'attribute vec3 fibre;\nvarying vec3 vP;\nvarying vec3 vF;\n' + sh.vertexShader
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\n vP = position; vF = fibre;');
+      sh.fragmentShader = `#define RELIEF ${relief}\nvarying vec3 vP;\nvarying vec3 vF;\n${GLSL_RELIEF}\n` + sh.fragmentShader
+        .replace('#include <color_fragment>', `#include <color_fragment>
+  float gW = 1.0, gH = relief(vP, vF, gW);
+  diffuseColor.rgb *= 1.0 - TEINTE_RELIEF * gH * gW;`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+  {
+    vec3 sp = -vViewPosition, sx = dFdx(sp), sy = dFdy(sp);
+    vec2 dh = vec2(dFdx(gH), dFdy(gH)) * BOSSE_RELIEF * gW;
+    vec3 r1 = cross(sy, normal), r2 = cross(normal, sx);
+    float det = dot(sx, r1) * (gl_FrontFacing ? 1.0 : -1.0);
+    vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);
+    normal = normalize(abs(det) * normal - grad);
+  }`);
+    }
     sh.fragmentShader = 'uniform vec3 uCut;\n' + sh.fragmentShader.replace('#include <dithering_fragment>',
       '#include <dithering_fragment>\n if (!gl_FrontFacing) { gl_FragColor = vec4(uCut * 0.92, gl_FragColor.a); }');
   };
+  m.customProgramCacheKey = () => 'anat-' + relief;
   m.userData.cle = cle;
   return m;
+}
+
+/** L'axe principal d'un muscle (analyse en composantes principales) :
+    les fibres courent à peu près dans cet axe. */
+function axeFibres(g) {
+  const P = g.attributes.position, n = P.count, pas = Math.max(1, Math.floor(n / 3000));
+  let cx = 0, cy = 0, cz = 0, k = 0;
+  for (let i = 0; i < n; i += pas) { cx += P.getX(i); cy += P.getY(i); cz += P.getZ(i); k++; }
+  cx /= k; cy /= k; cz /= k;
+  const C = [0, 0, 0, 0, 0, 0];
+  for (let i = 0; i < n; i += pas) {
+    const x = P.getX(i) - cx, y = P.getY(i) - cy, z = P.getZ(i) - cz;
+    C[0] += x * x; C[1] += x * y; C[2] += x * z; C[3] += y * y; C[4] += y * z; C[5] += z * z;
+  }
+  let v = [0.3, 1, 0.2];
+  for (let it = 0; it < 30; it++) {
+    const w = [C[0] * v[0] + C[1] * v[1] + C[2] * v[2], C[1] * v[0] + C[3] * v[1] + C[4] * v[2], C[2] * v[0] + C[4] * v[1] + C[5] * v[2]];
+    const l = Math.hypot(...w) || 1; v = w.map(x => x / l);
+  }
+  const a = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { a[i * 3] = v[0]; a[i * 3 + 1] = v[1]; a[i * 3 + 2] = v[2]; }
+  g.setAttribute('fibre', new THREE.BufferAttribute(a, 3));
 }
 
 /* ───── la classe ───── */
@@ -188,11 +279,13 @@ export class Atlas3D {
       m.material = this._mat(couche, cleM);
       m.userData = { nom, cle: cleM, couche, fichier };
       /* normales lissées : on recoud les sommets dédoublés par l'export */
-      if ((fichier === 'muscles' || fichier === 'peau') && !source.endsWith('-hd')) {
-        const g = mergeVertices(m.geometry.deleteAttribute('normal') && m.geometry, 1e-4);
+      if (fichier === 'peau' || (fichier === 'muscles' && !source.endsWith('-hd'))) {
+        /* la peau est faite de régions cousues : on soude large pour effacer les coutures */
+        const g = mergeVertices(m.geometry.deleteAttribute('normal') && m.geometry, fichier === 'peau' ? 8e-4 : 1e-4);
         g.computeVertexNormals();
         m.geometry.dispose(); m.geometry = g;
       }
+      if (cleM === 'muscle' || cleM === 'tendon') axeFibres(m.geometry);
       m.geometry.computeBoundingSphere();
       this.parCouche[couche].push(m);
       this.objets.push(m);
@@ -216,7 +309,9 @@ export class Atlas3D {
       m.opacity = a;
       m.transparent = a < 0.999;
       m.depthWrite = a > 0.55;
-      m.visible = a > 0.015;
+      /* peau opaque : rien à dessiner dessous (plus rapide, et plus de coutures) */
+      const cache = op.peau >= 0.999 && this.parCouche.peau.length && c !== 'peau' && !this.axe;
+      m.visible = a > 0.015 && !cache;
       m.needsUpdate = true;
     }
     /* les insertions du muscle choisi restent visibles */
@@ -245,12 +340,13 @@ export class Atlas3D {
   /* ───── coupe ───── */
   coupe(axe, t, boite) {
     this.axe = axe;
-    if (!axe) { this.plan.set(new THREE.Vector3(0, -1, 0), 1e6); this.demander(); return; }
+    if (!axe) { this.plan.set(new THREE.Vector3(0, -1, 0), 1e6); this.appliquer(); this.demander(); return; }
     const b = boite || new THREE.Box3(new THREE.Vector3(-0.42, 0, -0.24), new THREE.Vector3(0.42, 1.76, 0.24));
     const k = { x: 'x', y: 'y', z: 'z' }[axe];
     const v = b.min[k] + (b.max[k] - b.min[k]) * t;
     const n = { x: new THREE.Vector3(-1, 0, 0), y: new THREE.Vector3(0, -1, 0), z: new THREE.Vector3(0, 0, -1) }[axe];
     this.plan.set(n, v);
+    this.appliquer();
     this.demander();
   }
   boite(liste) {
@@ -292,6 +388,7 @@ export class Atlas3D {
       x.userData.matAvant = x.material;
       const hm = x.material.clone();
       hm.onBeforeCompile = x.userData.matAvant.onBeforeCompile;
+      hm.customProgramCacheKey = x.userData.matAvant.customProgramCacheKey;
       hm.userData = { ...x.userData.matAvant.userData };
       hm.clippingPlanes = [this.plan];
       hm.emissive = new THREE.Color(0x4a3000); hm.emissiveIntensity = 1;
