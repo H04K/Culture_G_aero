@@ -145,7 +145,7 @@ export class Atlas3D {
     this.scene.remove(r.racine);
     r.racine.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
     delete this.racines[fichier];
-    this._aReselectionner = nomSel;
+    if (nomSel) this._aReselectionner = nomSel;
   }
   /** Haute (true) ou basse définition : recharge les fichiers déjà présents. */
   async definition(hd) {

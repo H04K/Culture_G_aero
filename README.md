@@ -431,7 +431,11 @@ Center for Life Science), reconstruits à partir de coupes d'un corps réel.
   origines et terminaisons, innervation et action, os, dents et tissus.
 - **Index** : toutes les structures, cherchables en français, en latin ou en anglais.
 
-Les modèles (`data/anatomie3d/`, 6,4 Mo compressés en Draco) ne sont pas mis en cache
+Deux définitions : une version légère (6,4 Mo, maillages simplifiés) et une **haute
+définition** à pleine résolution (14,7 Mo : 2 millions de triangles de muscles,
+700 000 d'os), active d'office sur ordinateur et au choix sur téléphone (bouton
+« Haute définition »). La bascule garde couches, coupe et sélection.
+Les modèles (`data/anatomie3d/`, compressés en Draco) ne sont pas mis en cache
 à l'installation : ils le sont à la première ouverture, puis restent hors ligne.
 Rendu : Three.js (`js/vendor/three`, licence MIT), dessin à la demande seulement.
 
