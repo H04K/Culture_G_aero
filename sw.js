@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v26';
+const VERSION = 'maximus-v27';
 
 const ASSETS = [
   './',
@@ -128,6 +128,20 @@ const ASSETS = [
   './data/aerodrome-lfcs.js',
   './js/aerodrome-figs.js',
   './js/aerodrome-app.js',
+  './anatomie.html',
+  './css/anatomie.css',
+  './data/anatomie-atlas.js',
+  './js/anatomie-dents.js',
+  './js/anatomie-3d.js',
+  './js/anatomie-app.js',
+  './js/vendor/three/three.module.min.js',
+  './js/vendor/three/addons/controls/OrbitControls.js',
+  './js/vendor/three/addons/loaders/GLTFLoader.js',
+  './js/vendor/three/addons/loaders/DRACOLoader.js',
+  './js/vendor/three/addons/utils/BufferGeometryUtils.js',
+  './js/vendor/three/addons/environments/RoomEnvironment.js',
+  './js/vendor/three/draco/draco_wasm_wrapper.js',
+  './js/vendor/three/draco/draco_decoder.wasm',
   './jeux.html',
   './css/jeux.css',
   './js/jeux-solids.js',

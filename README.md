@@ -23,9 +23,10 @@ progression, ses propres onglets et sa couleur.
 | Sélections | **Culture générale aéro** | 22 thèmes, 1 763 questions, 22 fiches de cours, 36 démos |
 | Sélections | **Calcul mental** | Tables, carrés, puissances, chaînes — tirage adaptatif |
 | Santé | **PASS — Bordeaux** | 19 UE, 97 sections, 608 QCM, 65 exercices corrigés, 98 mnémos, 29 démos |
+| Santé | **Anatomie 3D** | Corps en 3D : peau, 257 muscles et tendons, 145 os et cartilages, insertions, coupes, 28 dents tranchées, 6 épreuves |
 | Pause | **Tri de vis** | 40 niveaux d'un jeu de démontage en 3D |
 
-Soit **8 formations**, **3 215 questions** et **301 fiches ou sections de cours**,
+Soit **9 formations**, **3 215 questions** et **301 fiches ou sections de cours**,
 environ 25 h de lecture. Les formations sont déclarées dans `data/formations.js` : en ajouter une
 se fait là, et elle apparaît au bon endroit sur le portail.
 
@@ -406,6 +407,37 @@ parcours thématiques ou un module, et chaque correction renvoie à sa section.
 > Écrit en 2026 : les mécanismes durent, les noms de modèles et les records
 > vieillissent vite.
 
+## Anatomie 3D
+
+Un atlas en trois dimensions bâti sur de vraies formes anatomiques : les modèles
+de [Z-Anatomy](https://www.z-anatomy.com), eux-mêmes dérivés de BodyParts3D (Database
+Center for Life Science), reconstruits à partir de coupes d'un corps réel.
+
+- **Atlas** : on tourne, on zoome, on déplace (souris ou doigts). Un curseur descend
+  de la peau aux muscles superficiels, aux muscles profonds, puis au squelette ;
+  les muscles sont rangés en superficiels ou profonds par lancer de rayons depuis
+  la peau. Un bouton affiche les **zones d'origine (rouge) et de terminaison (bleu)**
+  sur les os ; toucher un muscle allume les siennes. Un **plan de coupe** sagittal,
+  frontal ou transversal se déplace à travers le corps, la tranche prend la couleur
+  du tissu coupé.
+- **Fiches** : nom français et latin, origine, terminaison, action, innervation. Les
+  muscles principaux ont une fiche rédigée ; les autres structures reprennent les
+  définitions françaises de Z-Anatomy.
+- **Dents** : les 28 dents définitives en 3D dans leurs mâchoires. On isole une dent
+  et on la tranche : émail, dentine et pulpe apparaissent (coquilles internes
+  calculées pour chaque dent, approximation pédagogique). Fiche FDI : éruption,
+  racines, canaux, cuspides ; tableau des dents de lait ; tissus dentaires en clair.
+- **Quiz** : toucher la bonne structure sur le corps, nommer une structure allumée,
+  origines et terminaisons, innervation et action, os, dents et tissus.
+- **Index** : toutes les structures, cherchables en français, en latin ou en anglais.
+
+Les modèles (`data/anatomie3d/`, 6,4 Mo compressés en Draco) ne sont pas mis en cache
+à l'installation : ils le sont à la première ouverture, puis restent hors ligne.
+Rendu : Three.js (`js/vendor/three`, licence MIT), dessin à la demande seulement.
+
+**Licence des modèles** : CC BY-SA 4.0 (Z-Anatomy) — BodyParts3D © DBCLS, CC BY-SA 2.1 JP.
+Voir `data/anatomie3d/LICENCE.txt`.
+
 ## Jeux
 
 Page dédiée (`jeux.html`), accessible depuis le portail : la pause entre deux
@@ -591,6 +623,14 @@ js/jeux-levels.js       composition, vérification et couleurs des 40 scènes
 js/jeux-store.js        étoiles, records et niveaux débloqués
 js/jeux-screw.js        moteur du jeu : rendu 3D, animations, règles
 js/jeux-app.js          navigation de l'onglet Jeux
+anatomie.html           module Anatomie 3D (atlas, dents, quiz, index)
+css/anatomie.css        styles de l'anatomie
+js/anatomie-3d.js       le visualiseur 3D : couches, coupe, insertions, sélection
+js/anatomie-app.js      écrans, fiches, dents, quiz, index (module ES)
+js/anatomie-dents.js    les dents : numérotation FDI, éruption, racines, tissus
+data/anatomie-atlas.js  les fiches rédigées des muscles et des os
+data/anatomie3d/        les modèles 3D (glTF Draco), noms français, définitions, licence
+js/vendor/three/        Three.js et ses modules (contrôles, chargeurs, décodeur Draco)
 js/demos.js             le moteur des démos : placement, montage, Labo, briques
 js/demos-vol.js         physique du vol et instruments (atmosphère ISA, avion type DR400)
 js/demos-moteur.js      moteur, hélice, performances, centrage, plané

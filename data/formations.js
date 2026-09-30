@@ -75,6 +75,13 @@ const Formations = (() => {
       detail: '19 UE · 97 sections · 608 QCM · 65 exercices'
     },
     {
+      id: 'anatomie', domaine: 'sante', page: 'anatomie.html', mod: 'anat',
+      nom: 'Anatomie 3D',
+      desc: 'Un vrai corps en 3D (Z-Anatomy / BodyParts3D) : peau, 250 muscles, squelette, origines et terminaisons sur les os, plan de coupe, et les 28 dents tranchées émail, dentine, pulpe.',
+      chiffres: { questions: 60, cours: 400, minutes: 90 },
+      detail: '257 muscles et tendons · 145 os · 28 dents en coupe · 6 épreuves'
+    },
+    {
       id: 'jeux', domaine: 'pause', page: 'jeux.html', mod: 'jeux',
       nom: 'Tri de vis',
       desc: 'Démonte des meubles et des maisons en 3D et range les vis par couleur. Quarante niveaux, pour souffler.',

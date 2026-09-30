@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f3f6">
+<meta name="description" content="Atlas d'anatomie en 3D : peau, muscles, squelette, insertions, dents en coupe. Modèles Z-Anatomy / BodyParts3D, fiches en français et questionnaire">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anatomie">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/anatomie.css">
+<title>Anatomie 3D — Maximus Knowledge</title>
+<script src="js/theme.js"></script>
+<script src="js/trace.js" data-formation="anatomie"></script>
+<script type="importmap">{ "imports": { "three": "./js/vendor/three/three.module.min.js" } }</script>
+</head>
+<body>
+
+<!-- ══════════════ L'ATLAS ══════════════ -->
+<section class="screen active" id="screen-atlas">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Anatomie 3D</h1>
+        <p class="sub">Tourne, zoome, ouvre le corps couche par couche</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="qz-bandeau" id="qz-bandeau" hidden>
+      <div class="qz-haut"><button class="iconbtn flat" id="qz-quit" aria-label="Quitter le quiz" data-ic="close"></button>
+        <div class="qz-prog"><i id="qz-bar"></i></div><span class="qz-n" id="qz-n"></span></div>
+      <div class="qz-q" id="qz-q"></div>
+      <div class="qz-choix" id="qz-choix"></div>
+    </div>
+
+    <div class="a3-scene" id="a3">
+      <div class="a3-charge" id="a3-charge"><div class="a3-barre"><i id="a3-pct"></i></div><span id="a3-txt">Chargement des modèles…</span></div>
+      <div class="a3-vues" id="a3-vues">
+        <button data-vue="face">Face</button><button data-vue="dos">Dos</button><button data-vue="droite">Profil</button>
+      </div>
+      <div class="a3-etiq" id="a3-etiq" hidden></div>
+    </div>
+    <p class="an-aide">Un doigt pour tourner, deux pour zoomer et déplacer. Touche une structure pour sa fiche.</p>
+
+    <div class="an-couches card" id="an-couches">
+      <div class="an-cran"><button data-d="0">Peau</button><button data-d="1" class="on">Muscles</button><button data-d="2">Profonds</button><button data-d="3">Squelette</button></div>
+      <input type="range" id="an-prof" min="0" max="3" step="0.01" value="1" aria-label="Profondeur : de la peau au squelette">
+      <div class="an-outils">
+        <button class="chip-btn" id="an-ins" aria-pressed="false"><i class="pastille o"></i><i class="pastille t"></i>Origines et terminaisons</button>
+      </div>
+      <div class="an-coupe">
+        <div class="seg" id="an-axe"><button data-axe="" class="on">Sans coupe</button><button data-axe="x">Sagittale</button><button data-axe="z">Frontale</button><button data-axe="y">Transversale</button></div>
+        <input type="range" id="an-pos" min="0" max="1" step="0.002" value="0.5" disabled aria-label="Position du plan de coupe">
+      </div>
+    </div>
+
+    <div class="lab">Aller à</div>
+    <div class="filters" id="an-regions">
+      <button data-vue="tete">Tête</button><button data-vue="tronc">Tronc</button><button data-vue="bras">Bras</button><button data-vue="jambe">Jambe</button><button data-vue="face">Corps entier</button>
+    </div>
+
+    <div id="an-fiche"></div>
+    <p class="credit">Modèles 3D : <a href="https://www.z-anatomy.com" target="_blank" rel="noopener">Z-Anatomy</a> d'après <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D</a> (DBCLS), licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
+  </div>
+</section>
+
+<!-- ══════════════ LES DENTS ══════════════ -->
+<section class="screen" id="screen-dents">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Les dents</h1>
+        <p class="sub">Les 28 dents en 3D, qu'on isole et qu'on tranche</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="a3-scene dt-scene" id="d3">
+      <div class="a3-charge" id="d3-charge"><div class="a3-barre"><i id="d3-pct"></i></div><span>Chargement des dents…</span></div>
+      <div class="a3-vues"><button data-dvue="arcade">Arcades</button><button data-dvue="haut">Maxillaire</button><button data-dvue="bas">Mandibule</button></div>
+      <div class="a3-etiq" id="d3-etiq" hidden></div>
+    </div>
+    <p class="an-aide">Touche une dent, puis « Isoler » pour la trancher : émail, dentine et pulpe apparaissent dans la coupe.</p>
+
+    <div class="an-couches card">
+      <div class="an-outils"><button class="chip-btn" id="dt-isoler" disabled>Isoler la dent</button><button class="chip-btn on" id="dt-os" aria-pressed="true">Os des mâchoires</button></div>
+      <div class="an-coupe">
+        <div class="seg" id="dt-axe"><button data-axe="" class="on">Sans coupe</button><button data-axe="x">Mésio-distale</button><button data-axe="z">Vestibulo-linguale</button><button data-axe="y">Transversale</button></div>
+        <input type="range" id="dt-pos" min="0" max="1" step="0.002" value="0.5" disabled aria-label="Position du plan de coupe">
+      </div>
+      <div class="dt-tissus" id="dt-tissus"></div>
+    </div>
+
+    <div id="dt-fiche"></div>
+    <div id="dt-tissu"></div>
+
+    <div class="lab">Les dents de lait</div>
+    <div class="card dt-lait" id="dt-lait"></div>
+  </div>
+</section>
+
+<!-- ══════════════ LE QUIZ ══════════════ -->
+<section class="screen" id="screen-quizhome">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Quiz</h1>
+        <p class="sub">Reconnaître, nommer, situer</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <div class="lab">Choisis ton épreuve</div>
+    <div id="qz-modes"></div>
+    <div class="lab">Longueur</div>
+    <div class="seg wide-seg" id="qz-len"></div>
+  </div>
+  <div class="rfoot"><div class="inner"><button class="btn go wide" id="qz-go"></button></div></div>
+</section>
+
+<section class="screen" id="screen-qztxt">
+  <div class="qz-plein">
+    <div class="qz-haut"><button class="iconbtn flat" id="qz-quit2" aria-label="Quitter" data-ic="close"></button>
+      <div class="qz-prog"><i id="qz-bar2"></i></div><span class="qz-n" id="qz-n2"></span></div>
+    <div class="qz-q" id="qz-q2"></div>
+    <div class="qz-choix" id="qz-choix2"></div>
+  </div>
+</section>
+
+<section class="screen" id="screen-qzfin">
+  <div class="wrap" id="qz-fin"></div>
+</section>
+
+<!-- ══════════════ L'INDEX ══════════════ -->
+<section class="screen" id="screen-index">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Index</h1>
+        <p class="sub" id="ix-sub">Toutes les structures de l'atlas</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <input class="field" id="ix-q" type="search" placeholder="Chercher : deltoïde, fémur, canine, latissimus…" autocomplete="off">
+    <div class="filters" id="ix-f"></div>
+    <div id="ix-liste"></div>
+  </div>
+</section>
+
+<nav class="tabbar" id="tabbar"></nav>
+<div id="toast" class="toast"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/kit.js"></script>
+<script src="data/anatomie-atlas.js"></script>
+<script src="js/anatomie-dents.js"></script>
+<script type="module" src="js/anatomie-app.js"></script>
+</body>
+</html>
