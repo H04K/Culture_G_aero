@@ -438,6 +438,11 @@ définition** à pleine résolution (14,7 Mo : 2 millions de triangles de muscle
 Les modèles (`data/anatomie3d/`, compressés en Draco) ne sont pas mis en cache
 à l'installation : ils le sont à la première ouverture, puis restent hors ligne.
 Rendu : Three.js (`js/vendor/three`, licence MIT), dessin à la demande seulement.
+Les modèles n'ont pas de texture : le grain est **calculé à chaque pixel** dans le
+shader, en millimètres réels, donc net à tous les zooms — fibres musculaires dans
+l'axe principal de chaque muscle (analyse en composantes principales) et groupées
+en faisceaux, fibres fines des tendons, grain poreux des os, pores de la peau. Le
+détail s'efface quand il devient plus fin qu'un pixel.
 
 **Licence des modèles** : CC BY-SA 4.0 (Z-Anatomy) — BodyParts3D © DBCLS, CC BY-SA 2.1 JP.
 Voir `data/anatomie3d/LICENCE.txt`.
