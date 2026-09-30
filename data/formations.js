@@ -75,6 +75,13 @@ const Formations = (() => {
       detail: '19 UE · 97 sections · 608 QCM · 65 exercices'
     },
     {
+      id: 'anatomie', domaine: 'sante', page: 'anatomie.html', mod: 'anat',
+      nom: 'Anatomie',
+      desc: 'Un atlas vectoriel qu’on agrandit sans fin : de la peau aux muscles fibre par fibre, puis au squelette ; origines, terminaisons, innervation ; et les dents tranchées tissu par tissu.',
+      chiffres: { questions: 60, cours: 90, minutes: 90 },
+      detail: '68 muscles et structures · 23 os · 52 dents en coupe · 6 épreuves'
+    },
+    {
       id: 'jeux', domaine: 'pause', page: 'jeux.html', mod: 'jeux',
       nom: 'Tri de vis',
       desc: 'Démonte des meubles et des maisons en 3D et range les vis par couleur. Quarante niveaux, pour souffler.',

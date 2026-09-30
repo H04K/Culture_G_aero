@@ -213,7 +213,7 @@ const Ic = (() => {
   /* Les modules de l'accueil. */
   const MOD = {
     culture: 'globe', calcul: 'keypad', pass: 'stetho', ppl: 'plane',
-    jeux: 'screw',   check: 'clipboard', aero: 'runway', ia: 'chip'
+    jeux: 'screw',   check: 'clipboard', aero: 'runway', ia: 'chip', anat: 'body'
   };
 
   function svg(name, size = 20) {

@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v26';
+const VERSION = 'maximus-v27';
 
 const ASSETS = [
   './',
@@ -128,6 +128,15 @@ const ASSETS = [
   './data/aerodrome-lfcs.js',
   './js/aerodrome-figs.js',
   './js/aerodrome-app.js',
+  './anatomie.html',
+  './css/anatomie.css',
+  './data/anatomie-atlas.js',
+  './js/anatomie-geo.js',
+  './js/anatomie-os.js',
+  './js/anatomie-muscles.js',
+  './js/anatomie-vue.js',
+  './js/anatomie-dents.js',
+  './js/anatomie-app.js',
   './jeux.html',
   './css/jeux.css',
   './js/jeux-solids.js',

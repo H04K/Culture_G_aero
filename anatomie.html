@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f3f6">
+<meta name="description" content="Atlas d'anatomie vectoriel : peau, muscles fibre par fibre, os, dents en coupe. Origines, terminaisons, actions, innervation, et un questionnaire">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Anatomie">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/anatomie.css">
+<title>Anatomie — Maximus Knowledge</title>
+<script src="js/theme.js"></script>
+<script src="js/trace.js" data-formation="anatomie"></script>
+</head>
+<body>
+
+<!-- ══════════════ L'ATLAS ══════════════ -->
+<section class="screen active" id="screen-atlas">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Anatomie</h1>
+        <p class="sub">L'atlas du corps, couche par couche</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="an-barre">
+      <div class="seg" id="an-vue"><button data-v="avant" class="on">Face</button><button data-v="arriere">Dos</button></div>
+      <div class="an-bascules">
+        <button class="chip-btn on" id="an-reperes" aria-pressed="true">Repères</button>
+        <button class="chip-btn" id="an-noms" aria-pressed="false">Noms</button>
+      </div>
+    </div>
+
+    <div class="an-couches" id="an-couches">
+      <div class="an-cran"><button data-d="0">Peau</button><button data-d="1" class="on">Muscles</button><button data-d="2">Profonds</button><button data-d="3">Squelette</button></div>
+      <input type="range" id="an-prof" min="0" max="3" step="0.01" value="1" aria-label="Profondeur : de la peau au squelette">
+    </div>
+
+    <div class="an-scene" id="an-scene"></div>
+    <p class="an-aide">Pince ou molette pour agrandir, glisse pour te déplacer. Touche une structure pour sa fiche.</p>
+
+    <div id="an-fiche"></div>
+
+    <div class="lab" id="an-leg-t">Légende</div>
+    <div class="an-legende" id="an-legende"></div>
+  </div>
+</section>
+
+<!-- ══════════════ LES DENTS ══════════════ -->
+<section class="screen" id="screen-dents">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Les dents</h1>
+        <p class="sub">L'arcade, puis la dent tranchée tissu par tissu</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+
+    <div class="an-barre">
+      <div class="seg" id="dt-denture"><button data-l="0" class="on">Définitive · 32</button><button data-l="1">Lactéale · 20</button></div>
+    </div>
+    <div class="dt-arcade card" id="dt-arcade"></div>
+    <p class="an-aide">Numérotation FDI : le premier chiffre donne le quadrant, le second la dent. Touche une dent.</p>
+
+    <div id="dt-fiche"></div>
+
+    <div class="lab">La dent en coupe <span class="n" id="dt-plan"></span></div>
+    <div class="dt-coupe card" id="dt-coupe"></div>
+    <div class="dt-reglages card">
+      <label class="dt-reg"><span>Ouvrir la coupe</span><input type="range" id="dt-ouvre" min="0" max="1" step="0.005" value="1"></label>
+      <label class="dt-reg"><span>Coupe transversale</span><input type="range" id="dt-haut" min="0" max="1" step="0.005" value="0.35"></label>
+      <div class="dt-bas"><button class="chip-btn on" id="dt-leg" aria-pressed="true">Légendes</button><span class="dt-niveau" id="dt-niveau"></span></div>
+    </div>
+
+    <div class="lab">Coupe transversale</div>
+    <div class="dt-trans card" id="dt-trans"></div>
+
+    <div id="dt-tissu"></div>
+  </div>
+</section>
+
+<!-- ══════════════ LE QUIZ ══════════════ -->
+<section class="screen" id="screen-quizhome">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Quiz</h1>
+        <p class="sub">Reconnaître, nommer, situer</p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <div class="lab">Choisis ton épreuve</div>
+    <div id="qz-modes"></div>
+    <div class="lab">Longueur</div>
+    <div class="seg wide-seg" id="qz-len"></div>
+  </div>
+  <div class="rfoot"><div class="inner"><button class="btn go wide" id="qz-go"></button></div></div>
+</section>
+
+<section class="screen" id="screen-qz">
+  <div class="qz-haut">
+    <button class="iconbtn flat" id="qz-quit" aria-label="Quitter" data-ic="close"></button>
+    <div class="qz-prog"><i id="qz-bar"></i></div>
+    <span class="qz-n" id="qz-n"></span>
+  </div>
+  <div class="qz-q" id="qz-q"></div>
+  <div class="qz-scene" id="qz-scene"></div>
+  <div class="qz-choix" id="qz-choix"></div>
+</section>
+
+<section class="screen" id="screen-qzfin">
+  <div class="wrap" id="qz-fin"></div>
+</section>
+
+<!-- ══════════════ L'INDEX ══════════════ -->
+<section class="screen" id="screen-index">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Index</h1>
+        <p class="sub" id="ix-sub"></p>
+      </div>
+      <div class="acts">
+        <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
+        <button class="theme-btn" data-theme-toggle aria-label="Mode jour ou nuit">◑</button>
+      </div>
+    </div>
+    <input class="field" id="ix-q" type="search" placeholder="Chercher : deltoïde, radial, patte d'oie…" autocomplete="off">
+    <div class="filters" id="ix-f"></div>
+    <div id="ix-liste"></div>
+  </div>
+</section>
+
+<nav class="tabbar" id="tabbar"></nav>
+<div id="toast" class="toast"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/kit.js"></script>
+<script src="js/anatomie-geo.js"></script>
+<script src="js/anatomie-os.js"></script>
+<script src="js/anatomie-muscles.js"></script>
+<script src="data/anatomie-atlas.js"></script>
+<script src="js/anatomie-vue.js"></script>
+<script src="js/anatomie-dents.js"></script>
+<script src="js/anatomie-app.js"></script>
+</body>
+</html>
