@@ -13,6 +13,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 import { Atlas3D, baseNom, cote } from './anatomie-3d.js';
+import { ScanDent } from './anatomie-scan.js';
 
 const { $, $$, esc, toast } = Kit;
 const store = Kit.memoire('anatomie-3d-v1', {});
@@ -51,7 +52,7 @@ function show(v) {
   document.body.classList.toggle('has-cta', v === 'quizhome');
   $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB_OF[v]));
   window.scrollTo(0, 0);
-  requestAnimationFrame(() => { if (atlas) { atlas._taille(); atlas.demander(); } if (dents) { dents._taille(); dents.demander(); } });
+  requestAnimationFrame(() => { if (atlas) { atlas._taille(); atlas.demander(); } if (dents) { dents._taille(); dents.demander(); } if (scan) { scan._taille(); scan.demander(); } });
 }
 function go(dest) {
   if (Q && dest !== 'atlas') finQuizCorps(false);
@@ -204,7 +205,31 @@ function fdiDe(nom) {
   const q = sup ? (c === 'droit' ? 1 : 2) : (c === 'droit' ? 4 : 3);
   return q * 10 + FDI_N[k];
 }
+/* les vraies dents scannées (micro-CT) */
+let scan = null;
+function montrerScan() {
+  if (scan) return;
+  scan = new ScanDent($('#s3'), { surCharge: p => { $('#s3-pct').style.width = p + '%'; } });
+  const charger = n => { $('#s3-charge').hidden = false; return scan.charger(n).then(() => { $('#s3-charge').hidden = true; scan.regarderCoupe(); }); };
+  scan.coupe('z', 0.5);
+  charger(1);
+  $('#s3-n').addEventListener('click', e => {
+    const b = e.target.closest('[data-n]'); if (!b) return;
+    $$('#s3-n button').forEach(x => x.classList.toggle('on', x === b));
+    charger(+b.dataset.n);
+  });
+  $('#s3-axe').addEventListener('click', e => {
+    const b = e.target.closest('[data-axe]'); if (!b) return;
+    $$('#s3-axe button').forEach(x => x.classList.toggle('on', x === b));
+    $('#s3-pos').disabled = !b.dataset.axe;
+    scan.coupe(b.dataset.axe || null, +$('#s3-pos').value);
+    scan.regarderCoupe();
+  });
+  $('#s3-pos').addEventListener('input', e => scan.coupe($('#s3-axe .on').dataset.axe || null, +e.target.value));
+}
+
 function montrerDents() {
+  montrerScan();
   if (dents) return;
   dents = new Atlas3D($('#d3'), {
     profondeur: 3,

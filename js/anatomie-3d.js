@@ -279,9 +279,9 @@ export class Atlas3D {
       m.material = this._mat(couche, cleM);
       m.userData = { nom, cle: cleM, couche, fichier };
       /* normales lissées : on recoud les sommets dédoublés par l'export */
-      if (fichier === 'peau' || (fichier === 'muscles' && !source.endsWith('-hd'))) {
+      if (fichier === 'peau' || fichier.startsWith('scan') || (fichier === 'muscles' && !source.endsWith('-hd'))) {
         /* la peau est faite de régions cousues : on soude large pour effacer les coutures */
-        const g = mergeVertices(m.geometry.deleteAttribute('normal') && m.geometry, fichier === 'peau' ? 8e-4 : 1e-4);
+        const g = mergeVertices(m.geometry.deleteAttribute('normal') && m.geometry, fichier === 'peau' ? 8e-4 : fichier.startsWith('scan') ? 1e-7 : 1e-4);
         g.computeVertexNormals();
         m.geometry.dispose(); m.geometry = g;
       }

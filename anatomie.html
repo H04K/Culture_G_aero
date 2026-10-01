@@ -106,6 +106,22 @@
     <div id="dt-fiche"></div>
     <div id="dt-tissu"></div>
 
+    <div class="lab">Vraies dents au micro-scanner <span class="n">micro-CT · 20 µm</span></div>
+    <p class="an-aide">Quatre dents humaines extraites, scannées aux rayons X à 20 µm. Ici, rien n'est dessiné : l'émail, la dentine et le canal pulpaire viennent du scanner. La coupe montre la vraie tranche, jusqu'à l'apex.</p>
+    <div class="a3-scene dt-scene" id="s3">
+      <div class="a3-charge" id="s3-charge"><div class="a3-barre"><i id="s3-pct"></i></div><span>Chargement du scanner…</span></div>
+      <div class="a3-vues" id="s3-n"><button data-n="1" class="on">Dent 1</button><button data-n="2">Dent 2</button><button data-n="3">Dent 3</button><button data-n="4">Dent 4</button></div>
+    </div>
+    <div class="an-couches card">
+      <div class="an-coupe">
+        <div class="seg" id="s3-axe"><button data-axe="">Entière</button><button data-axe="z" class="on">Coupe de face</button><button data-axe="x">Coupe de profil</button><button data-axe="y">Transversale</button></div>
+        <input type="range" id="s3-pos" min="0" max="1" step="0.002" value="0.5" aria-label="Position du plan de coupe">
+      </div>
+      <div class="dt-tissus"><span class="chip-btn"><i class="pastille email"></i>Émail</span><span class="chip-btn"><i class="pastille dentine"></i>Dentine</span><span class="chip-btn"><i class="pastille pulpe"></i>Pulpe et canal</span></div>
+      <p class="an-txt">Des incisives monoradiculées, probablement mandibulaires d'après leurs dimensions (couronne d'environ 5,5 × 6,5 mm, une racine, un canal aplati en ruban). Leurs couronnes ont été arasées pour l'étude d'origine : seul le bord incisif manque. Le canal n'est pas un tube régulier : il s'aplatit, se rétrécit, parfois s'interrompt presque, comme dans la réalité.</p>
+    </div>
+    <p class="credit">Scanners : A. Pereira, S. Tonelli, M. A. Antunes, A. Miranda, F. F. Silveira, « ds-uct-002: Root Canal Strain », Zenodo, <a href="https://doi.org/10.5281/zenodo.3877625" target="_blank" rel="noopener">doi:10.5281/zenodo.3877625</a>, licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noopener">CC BY 4.0</a>. Segmentation et surfaces : faites pour cette app.</p>
+
     <div class="lab">Les dents de lait</div>
     <div class="card dt-lait" id="dt-lait"></div>
   </div>

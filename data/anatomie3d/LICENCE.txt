@@ -18,3 +18,20 @@ de pulpe calculées pour chaque dent (approximation pédagogique, pas une mesure
 
 Noms français et définitions (dico.json) : tirés des traductions et des
 définitions françaises de Z-Anatomy, même licence.
+
+────────────────────────────────────────────────────────────
+Dents scannées (scan1.glb à scan4.glb)
+
+Source : A. Pereira, S. Tonelli, M. A. Antunes, A. Miranda, F. F. Silveira,
+« ds-uct-002: Root Canal Strain: X-Ray micro-CT of four teeth before and after
+root canal procedure », Zenodo, 2020. https://doi.org/10.5281/zenodo.3877625
+Micro-CT Zeiss Xradia Versa 510, UFF micro-CT Facility ; volumes « avant
+traitement » (Tomo1B à Tomo4B), voxel de 20 µm.
+
+Licence : Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/deed.fr
+
+Modifications : volumes ramenés à 40 µm et filtrés (médian), segmentation par
+seuils de densité (dentine > 84, émail > 145 sur 255, pulpe = cavité fermée
+dans la dent), surfaces extraites par marching cubes, simplifiées et
+compressées en Draco ; couleur de l'émail par sommet.
