@@ -12,8 +12,8 @@
    Index   toutes les structures, en français, avec recherche.
    ═══════════════════════════════════════════════════════════ */
 
-import { Atlas3D, baseNom, cote } from './anatomie-3d.js';
-import { ScanDent } from './anatomie-scan.js';
+import { Atlas3D, ARTICULATIONS, baseNom, cote } from './anatomie-3d.js';
+import { ScanDent, CARIE } from './anatomie-scan.js';
 
 const { $, $$, esc, toast } = Kit;
 const store = Kit.memoire('anatomie-3d-v1', {});
@@ -47,7 +47,8 @@ function nomsDent(f) {
   return [['Nom courant', N.usage], ['Anatomie', N.anatomie], ['Archéologie', N.archeo],
     ['Notations', `FDI ${N.fdi} · universelle ${N.universel} · Palmer ${N.palmer}`]];
 }
-const CAT = { muscle: 'Muscle', tendon: 'Tendon ou aponévrose', os: 'Os', cartilage: 'Cartilage', email: 'Dent', racine: 'Dent', dentine: 'Dentine', pulpe: 'Pulpe', peau: 'Peau', ongle: 'Ongle', origine: 'Zone d’origine', terminaison: 'Zone de terminaison' };
+const CAT = { muscle: 'Muscle', tendon: 'Tendon ou aponévrose', os: 'Os', cartilage: 'Cartilage', email: 'Dent', racine: 'Dent', dentine: 'Dentine', pulpe: 'Pulpe', peau: 'Peau', ongle: 'Ongle', origine: 'Zone d’origine', terminaison: 'Zone de terminaison',
+  artere: 'Artère (sang oxygéné)', veine: 'Veine (sang pauvre en oxygène)', coeur: 'Cœur', valve: 'Valve ou cordage du cœur', nerf: 'Nerf', cerveau: 'Encéphale', oeil: 'Œil' };
 
 /* ───── navigation ───── */
 const TABS = [['atlas', 'Atlas', 'body'], ['dents', 'Dents', 'layers'], ['quizhome', 'Quiz', 'target'], ['index', 'Index', 'book']];
@@ -136,6 +137,22 @@ $('#an-ins').addEventListener('click', async e => {
   atlas.insertions(on);
   if (on && data.d < 2.9) { toast('Rouge : origines · bleu : terminaisons. Descends au squelette pour les voir en entier.'); }
 });
+/* vaisseaux et nerfs : chargés au premier clic ; ils sont sous les
+   muscles, on descend donc au squelette pour les montrer */
+async function basculerSysteme(b, k) {
+  const on = !b.classList.contains('on');
+  b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+  const f = k === 'vx' ? 'vaisseaux' : 'nerfs';
+  if (on && !(atlas.racines && atlas.racines[f])) {
+    $('#a3-charge').hidden = false; $('#a3-pct').style.width = '0%';
+    $('#a3-txt').textContent = k === 'vx' ? 'Chargement des vaisseaux et du cœur…' : 'Chargement des nerfs et de l’encéphale…';
+  }
+  try { await atlas.systeme(k, on); } catch (e) { toast('Échec du chargement : ' + e.message); }
+  $('#a3-charge').hidden = true;
+  if (on && data.d < 2.5) { allerProfondeur(3); toast(k === 'vx' ? 'Artères en rouge, veines en bleu. Remonte le curseur pour remettre les muscles.' : 'Nerfs en jaune. Remonte le curseur pour remettre les muscles.'); }
+}
+$('#an-vx').addEventListener('click', e => basculerSysteme(e.currentTarget, 'vx'));
+$('#an-nf').addEventListener('click', e => basculerSysteme(e.currentTarget, 'nf'));
 $('#an-axe').addEventListener('click', e => {
   const b = e.target.closest('[data-axe]'); if (!b) return;
   $$('#an-axe button').forEach(x => x.classList.toggle('on', x === b));
@@ -147,10 +164,52 @@ $('#an-pos').addEventListener('input', e => { const b = $('#an-axe .on'); atlas.
 $('#a3-vues').addEventListener('click', e => { const b = e.target.closest('[data-vue]'); if (b) atlas.vue(b.dataset.vue); });
 $('#an-regions').addEventListener('click', e => { const b = e.target.closest('[data-vue]'); if (b) { atlas.vue(b.dataset.vue); $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
 
+/* ───── articulations en mouvement ───── */
+let artCle = 'coude', artAnim = null;
+const artPose = {};
+$('#art-j').innerHTML = Object.entries(ARTICULATIONS).map(([k, A]) => `<button data-art="${k}" class="${k === artCle ? 'on' : ''}">${A.nom}</button>`).join('');
+function syncArt() {
+  const A = ARTICULATIONS[artCle], v = artPose[artCle] || 0;
+  $$('#art-j [data-art]').forEach(b => b.classList.toggle('on', b.dataset.art === artCle));
+  $('#art-geste').textContent = A.geste;
+  Object.assign($('#art-deg'), { min: A.min, max: A.max });
+  $('#art-deg').value = v;
+  $('#art-val').textContent = Math.round(v) + '°';
+}
+function articuler(cle, v) {
+  if (!atlas.objets.length) return;
+  const avant = atlas.enPose();
+  artPose[cle] = v; atlas.articuler(cle, v);
+  if (!avant && atlas.enPose()) { if (data.d < 2.9) allerProfondeur(3); atlas.selectionner(null); }
+  if (cle === artCle) { $('#art-deg').value = v; $('#art-val').textContent = Math.round(v) + '°'; }
+}
+function arreterAnim() { cancelAnimationFrame(artAnim); artAnim = null; $('#art-jouer').textContent = '▶ Animer'; }
+$('#art-j').addEventListener('click', e => { const b = e.target.closest('[data-art]'); if (!b) return; arreterAnim(); artCle = b.dataset.art; syncArt(); });
+$('#art-deg').addEventListener('input', e => { arreterAnim(); articuler(artCle, +e.target.value); });
+$('#art-jouer').addEventListener('click', () => {
+  if (artAnim) return arreterAnim();
+  $('#art-jouer').textContent = '❚❚ Pause';
+  const A = ARTICULATIONS[artCle], t0 = performance.now(), cle = artCle;
+  /* aller-retour doux entre le repos (ou le minimum) et l'amplitude maximale */
+  const bas = A.min < 0 ? A.min : 0;
+  const pas = t => {
+    const f = (1 - Math.cos((t - t0) / 1600 * Math.PI)) / 2;
+    articuler(cle, bas + (A.max - bas) * f);
+    artAnim = requestAnimationFrame(pas);
+  };
+  artAnim = requestAnimationFrame(pas);
+});
+$('#art-repos').addEventListener('click', () => {
+  arreterAnim();
+  for (const k of Object.keys(artPose)) delete artPose[k];
+  atlas.repos(); syncArt();
+});
+syncArt();
+
 function placerEtiquette(a, sel) {
   const el = $(sel);
   const p = a.ecran();
-  if (!p || !p.dedans || !a.sel) { el.hidden = true; return; }
+  if (!p || !p.dedans || !a.sel || (a === dents && montrerNumeros && fdiDe(a.sel.userData.nom))) { el.hidden = true; return; }
   el.hidden = false;
   el.textContent = nomFr(a.sel.userData.nom);
   el.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
@@ -237,6 +296,15 @@ function montrerScan() {
     scan.regarderCoupe();
   });
   $('#s3-pos').addEventListener('input', e => scan.coupe($('#s3-axe .on').dataset.axe || null, +e.target.value));
+  const COUL = ['#e9e4d8', '#fafafa', '#a8733a', '#6b4320', '#ff5a5a', '#e0102a', '#5b524a', '#5a1a14'];
+  const stade = p => {
+    const i = CARIE.findLastIndex(e => p >= e[0]), e = CARIE[i];
+    $('#s3-carie-val').textContent = Math.round(p * 100) + ' %';
+    $('#s3-stade').innerHTML = `<h3><i style="background:${COUL[i]}"></i>${esc(e[1])}</h3><p>${esc(e[2])}</p>
+      <ol>${CARIE.map((_, j) => `<li class="${j <= i ? 'on' : ''}"></li>`).join('')}</ol>`;
+  };
+  stade(0);
+  $('#s3-carie').addEventListener('input', e => { const p = +e.target.value; scan.carie(p); stade(p); });
 }
 
 function montrerDents() {
@@ -260,16 +328,58 @@ function montrerDents() {
       if (info.cle === 'dentine' || info.cle === 'pulpe' || info.cle === 'email' || info.cle === 'racine') tissu({ dentine: 'dentine', pulpe: 'pulpe', email: 'email', racine: 'cement' }[info.cle]);
     },
     surCharge: p => { $('#d3-pct').style.width = p + '%'; },
-    surRendu: () => placerEtiquette(dents, '#d3-etiq')
+    surRendu: () => { placerEtiquette(dents, '#d3-etiq'); placerNumeros(); }
   });
   dents.cadreDents = true;
-  dents.charger(['dents']).then(() => { $('#d3-charge').hidden = true; dents.vue('dents'); });
+  dents.charger(['dents']).then(() => { $('#d3-charge').hidden = true; preparerNumeros(); dents.vue('dents'); });
   $('#dt-tissus').innerHTML = [['email', 'Émail'], ['dentine', 'Dentine'], ['pulpe', 'Pulpe'], ['cement', 'Cément'], ['ligament', 'Ligament'], ['os', 'Os alvéolaire']]
     .map(([k, l]) => `<button class="chip-btn" data-tissu="${k}"><i class="pastille ${k}"></i>${l}</button>`).join('');
   $('#dt-lait').innerHTML = `<p class="an-txt">Vingt dents, sans prémolaires : incisives, canines, deux molaires par quadrant. On les numérote de 51 à 85.</p>
     <table class="dt-tab"><thead><tr><th>Dent</th><th>Éruption (haut / bas)</th><th>Chute</th></tr></thead><tbody>${['Incisive centrale', 'Incisive latérale', 'Canine', 'Première molaire', 'Deuxième molaire']
     .map((n, i) => `<tr><td>${n}</td><td>${AnatDents.ERUPT.lact.sup[i]} / ${AnatDents.ERUPT.lact.inf[i]}</td><td>${AnatDents.ERUPT.chute[i]}</td></tr>`).join('')}</tbody></table>`;
 }
+/* ───── les numéros FDI, posés sur chaque dent ───── */
+let numeros = [], montrerNumeros = true;
+function preparerNumeros() {
+  const zone = $('#d3');
+  /* une dent = plusieurs maillages (couronne, racine, dentine, pulpe) : un seul numéro */
+  const parDent = new Map();
+  for (const m of dents.objets) {
+    if (/ \| /.test(m.userData.nom) || !fdiDe(m.userData.nom)) continue;
+    if (!parDent.has(m.userData.nom)) parDent.set(m.userData.nom, []);
+    parDent.get(m.userData.nom).push(m);
+  }
+  numeros = [...parDent].map(([nom, ms]) => {
+    const f = fdiDe(nom), sup = Math.floor(f / 10) <= 2;
+    const el = document.createElement('span');
+    el.className = 'dt-n'; el.textContent = f; el.hidden = true;
+    zone.appendChild(el);
+    return { m: ms[0], f, el, cle: nom, p: dents.bout(ms, sup) };
+  });
+  dents.demander();
+}
+function placerNumeros() {
+  if (!numeros.length) return;
+  const sel = dents.sel ? fdiDe(dents.sel.userData.nom) : null;
+  const pos = montrerNumeros ? dents.reperes(numeros, dents.objets) : [];
+  numeros.forEach((n, i) => {
+    const q = pos[i], vu = montrerNumeros && q && q.vu && n.m.visible && (!dents.isole || n.f === sel);
+    n.el.hidden = !vu;
+    if (!vu) return;
+    n.el.classList.toggle('on', n.f === sel);
+    n.el.style.transform = `translate(${Math.round(q.x)}px, ${Math.round(q.y)}px)`;
+  });
+}
+$('#dt-bouche').addEventListener('input', e => {
+  const v = +e.target.value; $('#dt-bouche-val').textContent = Math.round(v) + '°';
+  if (dents && dents.objets.length) dents.articuler('machoire', v);
+});
+$('#dt-num').addEventListener('click', e => {
+  const b = e.currentTarget; montrerNumeros = !b.classList.contains('on');
+  b.classList.toggle('on', montrerNumeros); b.setAttribute('aria-pressed', montrerNumeros);
+  if (dents) { placerNumeros(); dents.demander(); }
+});
+
 function tissu(id) {
   const t = AnatDents.TISSUS[id]; if (!t) return;
   $('#dt-tissu').innerHTML = `<div class="card an-fiche"><div class="an-f-t"><h2>${esc(t.nom)}</h2><button class="iconbtn flat" data-f="fermer" aria-label="Fermer" data-ic="close"></button></div><p class="an-txt">${esc(t.t)}</p></div>`;
@@ -468,8 +578,11 @@ function entrees() {
     if (u.couche === 'ins' || u.fichier === 'peau' || / \| /.test(u.nom)) continue;
     const b = baseNom(u.nom);
     if (vus.has(b)) continue;
-    const type = u.fichier === 'muscles' ? 'muscle' : (u.cle === 'email' || u.cle === 'racine') ? 'dent' : 'os';
-    vus.set(b, { type, nom: u.nom, fr: type === 'dent' ? nomFr(u.nom).replace(/ (droite|gauche)$/, '') : nomFr(u.nom), la: latin(u.nom), base: b, sous: type === 'muscle' ? (u.cle === 'tendon' ? 'tendon' : u.couche === 'mu1' ? 'superficiel' : 'profond') : type === 'dent' ? 'dent' : (u.cle === 'cartilage' ? 'cartilage' : 'os') });
+    const type = u.fichier === 'muscles' ? 'muscle' : u.fichier === 'vaisseaux' ? 'vaisseau' : u.fichier === 'nerfs' ? 'nerf' : (u.cle === 'email' || u.cle === 'racine') ? 'dent' : 'os';
+    const sous = type === 'muscle' ? (u.cle === 'tendon' ? 'tendon' : u.couche === 'mu1' ? 'superficiel' : 'profond')
+      : type === 'vaisseau' || type === 'nerf' ? (CAT[u.cle] || type).replace(/ \(.*\)$/, '').toLowerCase()
+      : type === 'dent' ? 'dent' : (u.cle === 'cartilage' ? 'cartilage' : 'os');
+    vus.set(b, { type, nom: u.nom, fr: type === 'dent' ? nomFr(u.nom).replace(/ (droite|gauche)$/, '') : nomFr(u.nom), la: latin(u.nom), base: b, sous });
   }
   return [...vus.values()].sort((a, b) => a.fr.localeCompare(b.fr, 'fr'));
 }
@@ -477,8 +590,9 @@ async function renderIndex() {
   await dicoPret;
   if (!atlas.objets.length) { $('#ix-liste').innerHTML = '<p class="an-vide">Les modèles 3D chargent…</p>'; setTimeout(() => view === 'index' && renderIndex(), 800); return; }
   const L = entrees();
-  $('#ix-sub').textContent = `${L.filter(x => x.type === 'muscle').length} muscles et tendons · ${L.filter(x => x.type === 'os').length} os et cartilages`;
-  const F = [['tout', 'Tout'], ['muscle', 'Muscles'], ['os', 'Os']];
+  const nb = t => L.filter(x => x.type === t).length;
+  $('#ix-sub').textContent = `${nb('muscle')} muscles et tendons · ${nb('os')} os et cartilages` + (nb('vaisseau') ? ` · ${nb('vaisseau')} vaisseaux` : '') + (nb('nerf') ? ` · ${nb('nerf')} nerfs et centres` : '');
+  const F = [['tout', 'Tout'], ['muscle', 'Muscles'], ['os', 'Os'], ['vaisseau', 'Vaisseaux'], ['nerf', 'Nerfs']];
   $('#ix-f').innerHTML = F.map(([id, l]) => `<button data-f="${id}" class="${filtre === id ? 'on' : ''}">${l}</button>`).join('');
   const q = norm($('#ix-q').value.trim());
   const res = L.filter(x => (filtre === 'tout' || x.type === filtre) && (!q || norm(x.fr).includes(q) || norm(x.base).includes(q) || norm(x.la).includes(q)));

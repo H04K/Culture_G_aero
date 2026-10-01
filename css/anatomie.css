@@ -11,8 +11,21 @@
 @import url('ui.css');
 
 body { --m: var(--m-anat); }
-:root[data-theme="jour"] { --a3-1: #f7f8fb; --a3-2: #d9dee7; --a3-sel: #1f6fff; }
-:root[data-theme="nuit"], :root:not([data-theme]) { --a3-1: #2a303b; --a3-2: #0c0f14; --a3-sel: #ffd23f; }
+/* le fond de studio est gris foncé dans les deux thèmes : les os, les
+   dents et la couleur de sélection y ressortent mieux */
+:root { --a3-1: #2a303b; --a3-2: #0c0f14; --a3-sel: #ffd23f; }
+
+/* ───────────── Les onglets, en haut ─────────────
+   En bas, la barre flottante masquait la scène 3D et ses commandes. */
+.tabbar {
+  top: 0; bottom: auto; left: 0; right: 0; transform: none; justify-content: center; gap: 2px;
+  padding: calc(5px + var(--safe-top)) 8px 5px; border-radius: 0; border-width: 0 0 1px;
+  background: var(--veil); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: none;
+}
+.tabbar button { flex-direction: row; gap: 6px; padding: 7px 12px; font-size: 13px; }
+.tabbar button svg { width: 17px; height: 17px; }
+body:not(.no-tabs) .wrap { padding-top: calc(48px + var(--safe-top)); padding-bottom: calc(40px + var(--safe-bottom)); }
+body:not(.no-tabs) .qz-bandeau { top: calc(48px + var(--safe-top)); }
 
 /* ───────────── La scène ───────────── */
 .a3-scene {
@@ -24,15 +37,16 @@ body { --m: var(--m-anat); }
 .dt-scene { height: min(62vh, 700px); }
 .a3-canvas { display: block; width: 100%; height: 100%; cursor: grab; }
 .a3-canvas:active { cursor: grabbing; }
-.a3-charge { position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; text-align: center; font-size: 13px; color: var(--dim); background: color-mix(in srgb, var(--a3-2) 55%, transparent); }
+.a3-charge { position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; text-align: center; font-size: 13px; color: #aab2bf; background: color-mix(in srgb, var(--a3-2) 55%, transparent); }
 .a3-charge[hidden] { display: none; }
 .a3-barre { width: 220px; height: 6px; border-radius: 99px; background: var(--card-2); overflow: hidden; }
 .a3-barre i { display: block; height: 100%; width: 0; background: var(--m); transition: width .25s; }
 .a3-vues { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; z-index: 2; }
 .a3-vues button {
-  padding: 7px 11px; border-radius: 10px; font-size: 12.5px; font-weight: 650; color: var(--ink);
-  background: var(--veil); border: 1px solid var(--edge); backdrop-filter: blur(6px);
+  padding: 7px 11px; border-radius: 10px; font-size: 12.5px; font-weight: 650; color: #eef1f6;
+  background: rgba(20, 24, 31, .62); border: 1px solid rgba(255, 255, 255, .12); backdrop-filter: blur(6px);
 }
+.a3-vues button.on { color: #111; background: var(--a3-sel); border-color: var(--a3-sel); }
 .a3-etiq {
   position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; white-space: nowrap;
   margin: -34px 0 0 -8px; padding: 5px 10px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
@@ -40,6 +54,26 @@ body { --m: var(--m-anat); }
 }
 .a3-etiq::after { content: ''; position: absolute; left: 6px; bottom: -5px; border: 5px solid transparent; border-top-color: var(--a3-sel); border-bottom: 0; }
 .a3-etiq[hidden] { display: none; }
+/* articulations */
+.an-art-j { flex-wrap: wrap; }
+.an-art-l { display: flex; justify-content: space-between; align-items: baseline; margin: 12px 2px 2px; font-size: 13.5px; color: var(--ink-2); }
+.an-art-l b { font: 800 15px var(--mono); color: var(--ink); }
+/* la carie */
+.an-carie { margin-top: 10px; padding: 12px 13px; border-radius: var(--r-m); background: var(--card-2); }
+.an-carie h3 { font-size: 15.5px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.an-carie h3 i { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.an-carie p { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.an-carie ol { display: flex; gap: 3px; margin: 10px 0 0; padding: 0; list-style: none; }
+.an-carie li { flex: 1; height: 5px; border-radius: 9px; background: var(--edge); }
+.an-carie li.on { background: var(--m); }
+/* les numéros FDI des dents */
+.dt-n {
+  position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; margin: -10px 0 0 -12px; min-width: 24px; padding: 2px 5px;
+  border-radius: 7px; font: 800 11.5px/16px var(--mono); text-align: center; color: #fff;
+  background: rgba(16, 20, 27, .72); border: 1px solid rgba(255, 255, 255, .22);
+}
+.dt-n.on { color: #111; background: var(--a3-sel); border-color: var(--a3-sel); font-size: 14px; line-height: 19px; padding: 3px 7px; margin: -13px 0 0 -16px; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+.dt-n[hidden] { display: none; }
 .an-aide { font-size: 12.5px; color: var(--dim); margin: 8px 2px 0; line-height: 1.5; }
 
 /* ───────────── Couches, insertions, coupe ───────────── */
@@ -58,6 +92,7 @@ body { --m: var(--m-anat); }
 .chip-btn[disabled] { opacity: .45; }
 .pastille { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; border: 1px solid rgba(0,0,0,.2); }
 .pastille.o { background: #e23b3b; margin-right: 2px; } .pastille.t { background: #2f7cf0; }
+.pastille.art { background: #c4202a; margin-right: 2px; } .pastille.vei { background: #3556c0; } .pastille.nrf { background: #f0c94a; }
 .pastille.email { background: #f8f6ee; } .pastille.dentine { background: #efd49a; } .pastille.pulpe { background: #d9505c; }
 .pastille.cement { background: #e6d29e; } .pastille.ligament { background: #f1c9c2; } .pastille.os { background: #e6dac0; }
 

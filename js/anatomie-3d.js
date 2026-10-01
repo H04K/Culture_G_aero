@@ -28,6 +28,8 @@ import { RoomEnvironment } from './vendor/three/addons/environments/RoomEnvironm
 import { mergeVertices } from './vendor/three/addons/utils/BufferGeometryUtils.js';
 
 const BASE = 'data/anatomie3d/';
+/* fichiers en une seule définition */
+const SANS_HD = new Set(['dents', 'vaisseaux', 'nerfs']);
 
 /* ───── les matières ───── */
 const TEINTES = {
@@ -41,6 +43,13 @@ const TEINTES = {
   racine:      { c: 0xe6d29e, r: 0.45, cut: 0xefd9a5 },
   dentine:     { c: 0xf0d9a4, r: 0.5, cut: 0xefd49a },
   pulpe:       { c: 0xd9505c, r: 0.6, cut: 0xd9505c },
+  artere:      { c: 0xb3141e, r: 0.34, cut: 0x8a0f17, clear: 0.45, sheen: 0.3 },
+  veine:       { c: 0x2c4aa8, r: 0.38, cut: 0x223a85, clear: 0.4, sheen: 0.3 },
+  coeur:       { c: 0x8e2424, r: 0.42, cut: 0x6e1a1a, sheen: 0.5, clear: 0.25 },
+  valve:       { c: 0xe8dcc6, r: 0.4, cut: 0xd8cbb2 },
+  nerf:        { c: 0xf0c94a, r: 0.42, cut: 0xe6bd3c, clear: 0.25, sheen: 0.3 },
+  cerveau:     { c: 0xd8a49c, r: 0.55, cut: 0xe8d6cf, sheen: 0.3, clear: 0.15 },
+  oeil:        { c: 0xf3f1ea, r: 0.18, cut: 0xe6e3da, clear: 0.6 },
   origine:     { c: 0xe23b3b, r: 0.5, cut: 0xe23b3b, e: 0x3a0000 },
   terminaison: { c: 0x2f7cf0, r: 0.5, cut: 0x2f7cf0, e: 0x001236 }
 };
@@ -50,7 +59,8 @@ const TEINTES = {
    qu'elle ressorte, même au milieu des autres muscles. */
 const CHOIX = {
   os: 0xf0b429, cartilage: 0x46b4e6, email: 0xf0b429, racine: 0xf0b429, dentine: 0xf0b429, pulpe: 0xff5a6a,
-  muscle: 0xffb21e, tendon: 0xffe27a, peau: 0xf0a070, ongle: 0xf0a070
+  muscle: 0xffb21e, tendon: 0xffe27a, peau: 0xf0a070, ongle: 0xf0a070,
+  artere: 0xffb21e, veine: 0x48e0ff, coeur: 0xffb21e, valve: 0xffe27a, nerf: 0x48e0ff, cerveau: 0xffb21e, oeil: 0x48e0ff
 };
 const ATTENUE = 0.35;
 
@@ -174,9 +184,9 @@ function axeFibres(g) {
     (les modèles viennent de coupes d'un corps réel, empilées) sans faire
     maigrir l'os. Alternance d'un pas qui lisse (λ) et d'un pas qui
     regonfle (μ) ; les sommets dédoublés sont d'abord recousus. */
-function lisser(g, tours) {
+export function lisser(g, tours, garder = []) {
   g.deleteAttribute('normal');
-  for (const k of Object.keys(g.attributes)) if (k !== 'position') g.deleteAttribute(k);
+  for (const k of Object.keys(g.attributes)) if (k !== 'position' && !garder.includes(k)) g.deleteAttribute(k);
   const m = mergeVertices(g, 1e-5);
   const P = m.attributes.position.array, I = m.index.array, n = P.length / 3;
   const deg = new Uint32Array(n + 1);
@@ -249,6 +259,74 @@ function dentsDeSagesse(liste, racine) {
   return nouveaux;
 }
 
+/* ───── les articulations ─────
+   Chaque articulation fait tourner des os autour d'un pivot calculé sur
+   la forme des os eux-mêmes (tête humérale, trochlée, tête fémorale,
+   condyles…), autour d'un axe simple. Elles s'enchaînent : la hanche
+   emporte le genou, qui emporte la cheville. Seul le squelette bouge :
+   les muscles, la peau, les vaisseaux et les nerfs ne sont pas articulés
+   (ils sont masqués le temps du mouvement).
+   sens : +1 si un angle positif tourne dans le sens direct autour de
+   l'axe, pour le côté droit (le gauche est en miroir si miroir). */
+const CARPE = 'Scaphoid|Lunate|Triquetrum|Pisiform|Trapezium|Trapezoid|Capitate|Hamate';
+const TARSE = 'Talus|Calcaneus|Navicular|Cuboid|cuneiform|metatarsal|of foot';
+export const ARTICULATIONS = {
+  machoire: { nom: 'Mâchoire', geste: 'Ouverture de la bouche', min: 0, max: 35, axe: 'x', sens: 1, cotes: [''],
+    os: n => /^Mandible/.test(n) || /^Lower .*(incisor|canine|premolar|molar)/.test(n) },
+  epaule: { nom: 'Épaule', geste: 'Abduction (bras sur le côté)', min: 0, max: 90, axe: 'z', sens: -1, miroir: true, cotes: ['r', 'l'],
+    os: n => /^Humerus/.test(n) },
+  coude: { nom: 'Coude', geste: 'Flexion', min: 0, max: 145, axe: 'x', sens: -1, cotes: ['r', 'l'], parent: 'epaule',
+    os: n => new RegExp(`^(Radius|Ulna|(${CARPE}) bone|.* metacarpal bone|.* finger of hand)`).test(n) },
+  hanche: { nom: 'Hanche', geste: 'Flexion (cuisse vers l’avant)', min: 0, max: 120, axe: 'x', sens: -1, cotes: ['r', 'l'],
+    os: n => /^Femur/.test(n) },
+  genou: { nom: 'Genou', geste: 'Flexion', min: 0, max: 135, axe: 'x', sens: 1, cotes: ['r', 'l'], parent: 'hanche',
+    os: n => /^(Tibia|Fibula|Patella)/.test(n) },
+  cheville: { nom: 'Cheville', geste: 'Flexion dorsale (+) et plantaire (−)', min: -45, max: 20, axe: 'x', sens: -1, cotes: ['r', 'l'], parent: 'genou',
+    os: n => new RegExp(`(${TARSE})`).test(n) && !/hand/.test(n) }
+};
+function coteLR(nom) { const m = String(nom).match(/\.([lr])$/); return m ? m[1] : ''; }
+function sommets(liste) {
+  const v = new THREE.Vector3(), pts = [];
+  for (const m of liste) {
+    const P = m.geometry.attributes.position, pas = Math.max(1, Math.floor(P.count / 4000));
+    for (let i = 0; i < P.count; i += pas) pts.push(v.fromBufferAttribute(P, i).applyMatrix4(m.matrixWorld).clone());
+  }
+  return pts;
+}
+const moyenne = pts => pts.reduce((a, p) => a.add(p), new THREE.Vector3()).multiplyScalar(1 / Math.max(1, pts.length));
+/** Le pivot d'une articulation, d'après les os qui l'entourent. */
+function pivot(cle, os) {
+  const de = re => os.filter(m => re.test(m.userData.nom));
+  const boite = pts => pts.reduce((b, p) => b.expandByPoint(p), new THREE.Box3());
+  if (cle === 'machoire') {
+    const P = sommets(de(/^Mandible/)), b = boite(P), h = b.max.y - b.min.y, zc = (b.min.z + b.max.z) / 2;
+    const haut = P.filter(p => p.y > b.max.y - h * 0.15 && p.z < zc);      // les condyles, en arrière
+    const c = moyenne(haut); c.x = (b.min.x + b.max.x) / 2; return c;
+  }
+  if (cle === 'epaule') {
+    const P = sommets(de(/^Humerus/)), b = boite(P), h = b.max.y - b.min.y;
+    return moyenne(P.filter(p => p.y > b.max.y - h * 0.07));             // la tête humérale
+  }
+  if (cle === 'coude') {
+    const P = sommets(de(/^Humerus/)), b = boite(P);
+    const c = moyenne(P.filter(p => p.y < b.min.y + 0.03)); c.y = b.min.y + 0.012; return c;   // la trochlée
+  }
+  if (cle === 'hanche') {
+    const P = sommets(de(/^Femur/)), b = boite(P), h = b.max.y - b.min.y;
+    const haut = P.filter(p => p.y > b.max.y - h * 0.1);
+    const xs = haut.map(p => Math.abs(p.x)).sort((a, z) => a - z), lim = xs[Math.floor(xs.length * 0.4)];
+    return moyenne(haut.filter(p => Math.abs(p.x) <= lim));                 // la tête fémorale, côté médial
+  }
+  if (cle === 'genou') {
+    const P = sommets(de(/^Femur/)), b = boite(P);
+    const c = moyenne(P.filter(p => p.y < b.min.y + 0.04)); c.y = b.min.y + 0.02; return c;    // les condyles fémoraux
+  }
+  if (cle === 'cheville') {
+    const P = sommets(de(/^Tibia/)), b = boite(P);
+    const c = moyenne(P.filter(p => p.y < b.min.y + 0.02)); c.y = b.min.y + 0.008; return c;   // le dôme du talus
+  }
+}
+
 /* ───── la classe ───── */
 export class Atlas3D {
   constructor(el, o = {}) {
@@ -259,7 +337,8 @@ export class Atlas3D {
     this.uCoupe = { value: o.tranches ? 1 : 0 };
     this.d = o.profondeur ?? 1;
     this.objets = [];            // tous les maillages
-    this.parCouche = { peau: [], mu1: [], mu2: [], os: [], ins: [] };
+    this.parCouche = { peau: [], mu1: [], mu2: [], os: [], ins: [], vx: [], nf: [] };
+    this.systemes = { vx: false, nf: false };   // vaisseaux, nerfs
     this.mats = {};              // une matière par couche et par tissu
     this.sel = null; this.vueIns = false;
     this.seuilVu = 12;
@@ -318,12 +397,14 @@ export class Atlas3D {
       this.demander();
     }
     draco.dispose();
+    if (this.enPose()) { this._art = null; this._poser(); }
   }
 
   /** Retire les maillages d'un fichier (avant d'en poser une autre définition). */
   _retirer(fichier) {
     const r = this.racines[fichier];
     if (!r) return;
+    this._art = null;
     const nomSel = this.sel && this.sel.userData.fichier === fichier ? this.sel.userData.nom : null;
     if (nomSel) this.selectionner(null);
     this.objets = this.objets.filter(m => m.userData.fichier !== fichier);
@@ -336,14 +417,14 @@ export class Atlas3D {
   /** Haute (true) ou basse définition : recharge les fichiers déjà présents. */
   async definition(hd) {
     this.hd = hd;
-    const presents = Object.keys(this.racines || {}).filter(f => f !== 'dents');
+    const presents = Object.keys(this.racines || {}).filter(f => !SANS_HD.has(f));
     const voulus = presents.filter(f => (this.racines[f].source.endsWith('-hd')) !== hd);
     if (!voulus.length) return;
     await this.charger(voulus.map(f => hd ? f + '-hd' : f));
     if (this._aReselectionner) { const n = this._aReselectionner; this._aReselectionner = null; const m = this.objets.find(x => x.userData.nom === n); if (m) this.selectionner(m); }
   }
   /** Nom de fichier selon la définition courante. */
-  version(f) { return this.hd && f !== 'dents' ? f + '-hd' : f; }
+  version(f) { return this.hd && !SANS_HD.has(f) ? f + '-hd' : f; }
 
   _mat(couche, cle) {
     const k = couche + ':' + cle;
@@ -373,6 +454,8 @@ export class Atlas3D {
       let couche;
       if (fichier === 'peau') couche = 'peau';
       else if (fichier === 'insertions') couche = 'ins';
+      else if (fichier === 'vaisseaux') couche = 'vx';
+      else if (fichier === 'nerfs') couche = 'nf';
       else if (fichier === 'muscles') couche = (info.vu ?? 0) >= this.seuilVu ? 'mu1' : 'mu2';
       else couche = 'os';
       m.material = this._mat(couche, cleM);
@@ -403,7 +486,7 @@ export class Atlas3D {
   opacites() {
     const cl = x => Math.max(0, Math.min(1, x));
     const d = this.d;
-    return { peau: cl(1 - d), mu1: cl(2 - d), mu2: cl(3 - d), os: 1, ins: this.vueIns ? 1 : 0 };
+    return { peau: cl(1 - d), mu1: cl(2 - d), mu2: cl(3 - d), os: 1, ins: this.vueIns ? 1 : 0, vx: this.systemes.vx ? 1 : 0, nf: this.systemes.nf ? 1 : 0 };
   }
   appliquer() {
     const op = this.opacites();
@@ -414,7 +497,8 @@ export class Atlas3D {
       m.depthWrite = a > 0.55;
       /* peau opaque : rien à dessiner dessous (plus rapide, et plus de coutures) */
       const cache = op.peau >= 0.999 && this.parCouche.peau.length && c !== 'peau' && !this.axe;
-      m.visible = a > 0.015 && !cache;
+      const horsPose = this.enPose() && c !== 'os';
+      m.visible = a > 0.015 && !cache && !horsPose;
       m.needsUpdate = true;
     }
     /* les insertions du muscle choisi restent visibles */
@@ -430,10 +514,19 @@ export class Atlas3D {
       let v = true;
       if (this.isole) v = cleSel(m.userData.nom) === this.isole;
       else if (this.osCache && m.userData.cle === 'os') v = false;
+      if (v && this.arcade && !this.isole) v = arcadeDe(m.userData.nom) === this.arcade;
       m.visible = v;
     }
     if (this.mats['insSel:origine']) { this.mats['insSel:origine'].opacity = 1; this.mats['insSel:origine'].visible = true; }
     if (this.mats['insSel:terminaison']) { this.mats['insSel:terminaison'].opacity = 1; this.mats['insSel:terminaison'].visible = true; }
+  }
+  /** Montre ou cache un système (vx : vaisseaux et cœur, nf : nerfs et encéphale), chargé à la demande. */
+  async systeme(k, on) {
+    this.systemes[k] = on;
+    const f = k === 'vx' ? 'vaisseaux' : 'nerfs';
+    if (on && !(this.racines && this.racines[f])) await this.charger([f]);
+    if (!on && this.sel && this.sel.userData.couche === k) this.selectionner(null);
+    this.appliquer(); this.demander();
   }
   coucheActive() {
     const op = this.opacites();
@@ -464,9 +557,26 @@ export class Atlas3D {
   /* ───── isoler, montrer ───── */
   isoler(m, coquilles) {
     this.isole = m ? cleSel(m.userData.nom) : null;
+    this._surligner(!m && !!this.sel);
     this.appliquer();
     if (m) this.cadrer(m, coquilles ? 2.6 : 3.2);
+    this._borner(!!m);
     this.demander();
+  }
+  /** Structure isolée : la caméra reste accrochée à elle. On tourne autour,
+      on zoome dans des limites raisonnables, mais on ne peut plus la
+      perdre en dézoomant ou en glissant à côté. */
+  _borner(on) {
+    const c = this.controls;
+    if (!this._libre) this._libre = { min: c.minDistance, max: c.maxDistance, pan: c.enablePan };
+    if (on) {
+      const s = new THREE.Sphere(); this.boite(this.selSet && this.selSet.length ? this.selSet : []).getBoundingSphere(s);
+      c.minDistance = s.radius * 0.8; c.maxDistance = s.radius * 9; c.enablePan = false;
+      this._ancre = s.center.clone();
+    } else {
+      Object.assign(c, { minDistance: this._libre.min, maxDistance: this._libre.max, enablePan: this._libre.pan });
+      this._ancre = null;
+    }
   }
   montrerOs(b) { this.osCache = !b; this.appliquer(); this.demander(); }
 
@@ -485,13 +595,25 @@ export class Atlas3D {
     this.selectionner(h ? h.object : null);
   }
   selectionner(m) {
-    for (const x of this.selSet || []) {
-      x.material = x.userData.matAvant;
-      if (x.userData.fantome) { x.remove(x.userData.fantome); x.userData.fantome.material.dispose(); delete x.userData.fantome; }
-    }
+    this._surligner(false);
     this.sel = m;
     this.selSet = m ? this.objets.filter(x => cleSel(x.userData.nom) === cleSel(m.userData.nom) && x.userData.couche !== 'ins') : [];
-    for (const x of this.selSet) {
+    /* une structure isolée garde ses vraies couleurs (la coupe montre
+       ses tissus) : la surbrillance ne sert qu'au milieu des autres */
+    if (!this.isole) this._surligner(true);
+    this.appliquer();
+    this.demander();
+    if (this.o.surChoix) this.o.surChoix(m ? { nom: m.userData.nom, cle: m.userData.cle, couche: m.userData.couche, fichier: m.userData.fichier } : null);
+  }
+  /** Couleur franche et fantôme sur la sélection, le reste assombri (ou l'inverse). */
+  _surligner(on) {
+    for (const x of this.selSet || []) {
+      if (x.userData.matAvant) { x.material = x.userData.matAvant; delete x.userData.matAvant; }
+      if (x.userData.fantome) { x.remove(x.userData.fantome); x.userData.fantome.material.dispose(); delete x.userData.fantome; }
+    }
+    this._attenuer(on && !!this.sel);
+    if (!on) return;
+    for (const x of this.selSet || []) {
       x.userData.matAvant = x.material;
       const hm = x.material.clone();
       hm.onBeforeCompile = x.userData.matAvant.onBeforeCompile;
@@ -511,10 +633,6 @@ export class Atlas3D {
       f.renderOrder = 10; f.raycast = () => {};
       x.add(f); x.userData.fantome = f;
     }
-    this._attenuer(!!m);
-    this.appliquer();
-    this.demander();
-    if (this.o.surChoix) this.o.surChoix(m ? { nom: m.userData.nom, cle: m.userData.cle, couche: m.userData.couche, fichier: m.userData.fichier } : null);
   }
   /** Assombrit tout ce qui n'est pas choisi (ou rend les couleurs d'origine). */
   _attenuer(on) {
@@ -551,6 +669,9 @@ export class Atlas3D {
       tete: [0, 1.6, 0.9], tronc: [0, 1.2, 1.9], bras: [-1.2, 1.1, 1.6], jambe: [-0.5, 0.45, 2.1]
     }[nom] || [0, 0.95, 4.2];
     if (nom && nom.startsWith('dents')) {
+      /* vue d'une arcade par sa face occlusale : l'autre mâchoire s'efface */
+      this.arcade = nom === 'dentsHaut' ? 'haut' : nom === 'dentsBas' ? 'bas' : null;
+      this.appliquer(); this.demander();
       const b = this.boite(this.objets.filter(m => m.userData.cle !== 'os'));
       const c = b.getCenter(new THREE.Vector3()), r = b.getSize(new THREE.Vector3()).length();
       const pos = { dents: [0, 0.15, 1], dentsHaut: [0, -1, 0.35], dentsBas: [0, 1, 0.35] }[nom];
@@ -588,6 +709,88 @@ export class Atlas3D {
     return { x: (s.x + 1) / 2 * r.width, y: (1 - s.y) / 2 * r.height, dedans: s.z < 1 };
   }
 
+  /** Repères posés sur des structures (les numéros des dents) : position
+      à l'écran, et vu ou caché par une autre structure de la liste.
+      reperes : [{ p: Vector3 monde, cle }] ; obstacles : maillages. */
+  reperes(liste, obstacles) {
+    const r = this.renderer.domElement.getBoundingClientRect(), cam = this.camera.position;
+    const vis = obstacles.filter(m => m.visible && m.material.visible);
+    return liste.map(({ p, cle }) => {
+      const s = p.clone().project(this.camera);
+      if (s.z >= 1 || Math.abs(s.x) > 1.05 || Math.abs(s.y) > 1.05) return { vu: false };
+      const dir = p.clone().sub(cam), d = dir.length();
+      this.ray.set(cam, dir.normalize()); this.ray.far = d;
+      const h = this.ray.intersectObjects(vis, false)[0];
+      this.ray.far = Infinity;
+      const vu = !h || cleSel(h.object.userData.nom) === cle;
+      return { vu, x: (s.x + 1) / 2 * r.width, y: (1 - s.y) / 2 * r.height };
+    });
+  }
+  /** Le point d'une structure (un ou plusieurs maillages) proche de
+      l'extrémité choisie, le bord libre d'une couronne : bas (y min) ou
+      haut (y max) de sa boîte. */
+  bout(ms, versLeBas, k = 0.18) {
+    const b = new THREE.Box3(); [].concat(ms).forEach(m => b.expandByObject(m));
+    const c = b.getCenter(new THREE.Vector3()), h = b.max.y - b.min.y;
+    c.y = versLeBas ? b.min.y + h * k : b.max.y - h * k;
+    return c;
+  }
+
+  /* ───── articulations ───── */
+  /** Pose une articulation : angle en degrés (les deux côtés ensemble). */
+  articuler(cle, deg) {
+    this.pose = this.pose || {};
+    this.pose[cle] = deg;
+    this._poser();
+  }
+  /** Remet tout le squelette au repos. */
+  repos() { this.pose = {}; this._poser(); }
+  enPose() { return !!this.pose && Object.values(this.pose).some(v => Math.abs(v) > 0.01); }
+  _preparerArticulations() {
+    if (this._art) return this._art;
+    const os = this.objets.filter(m => m.userData.couche === 'os');
+    const art = {};
+    for (const [cle, A] of Object.entries(ARTICULATIONS)) for (const c of A.cotes) {
+      const liste = os.filter(m => A.os(m.userData.nom.replace(/ \| (dentine|pulpe)$/, '')) && (!c || coteLR(m.userData.nom.replace(/ \| (dentine|pulpe)$/, '')) === c));
+      if (!liste.length) continue;
+      const pv = pivot(cle, c ? os.filter(m => coteLR(m.userData.nom) === c) : os);
+      if (!pv) continue;
+      art[cle + c] = { cle, c, A, liste, pv };
+      for (const m of liste) {
+        m.updateMatrixWorld(true);
+        m.userData.repos = { monde: m.matrixWorld.clone(), parentInv: m.parent.matrixWorld.clone().invert() };
+        m.matrixAutoUpdate = false;
+      }
+    }
+    return (this._art = art);
+  }
+  _poser() {
+    const art = this._preparerArticulations();
+    const mat = {};
+    const de = k => {
+      if (mat[k]) return mat[k];
+      const J = art[k]; if (!J) return new THREE.Matrix4();
+      const deg = (this.pose && this.pose[J.cle]) || 0;
+      const signe = J.A.sens * (J.A.miroir && J.c === 'l' ? -1 : 1);
+      const ax = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) }[J.A.axe];
+      const loc = new THREE.Matrix4().makeTranslation(J.pv.x, J.pv.y, J.pv.z)
+        .multiply(new THREE.Matrix4().makeRotationAxis(ax, THREE.MathUtils.degToRad(deg * signe)))
+        .multiply(new THREE.Matrix4().makeTranslation(-J.pv.x, -J.pv.y, -J.pv.z));
+      const par = J.A.parent ? de(J.A.parent + J.c) : new THREE.Matrix4();
+      return (mat[k] = par.clone().multiply(loc));
+    };
+    for (const k of Object.keys(art)) {
+      const M = de(k);
+      for (const m of art[k].liste) {
+        m.matrix.copy(m.userData.repos.parentInv).multiply(M).multiply(m.userData.repos.monde);
+        m.matrixWorldNeedsUpdate = true;
+      }
+    }
+    this.scene.updateMatrixWorld();
+    this.appliquer();
+    this.demander();
+  }
+
   /* ───── rendu à la demande ───── */
   demander() {
     if (this._dem) return;
@@ -615,6 +818,9 @@ export class Atlas3D {
   }
 }
 
+/** L'arcade d'une pièce de la vue des dents : la mandibule et les dents
+    inférieures en bas, le reste (maxillaires, palais, dents supérieures) en haut. */
+function arcadeDe(n) { return /^Lower |^Mandible/.test(String(n)) ? 'bas' : 'haut'; }
 /** « Deltoid muscle.l » → « Deltoid muscle » ; « Biceps brachii muscle.ol » → « Biceps brachii muscle ». */
 /** La clé qui réunit les pièces d'une même structure (ventre, tendon, coquilles d'une dent). */
 function cleSel(n) { return String(n).replace(/ \| (dentine|pulpe)$/, ''); }

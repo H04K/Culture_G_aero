@@ -26,7 +26,7 @@
     <div class="top">
       <div>
         <h1>Anatomie 3D</h1>
-        <p class="sub">Tourne, zoome, ouvre le corps couche par couche</p>
+        <p class="sub">Tourne, zoome, ouvre le corps couche par couche : muscles, os, vaisseaux, nerfs</p>
       </div>
       <div class="acts">
         <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
@@ -55,12 +55,23 @@
       <input type="range" id="an-prof" min="0" max="3" step="0.01" value="1" aria-label="Profondeur : de la peau au squelette">
       <div class="an-outils">
         <button class="chip-btn" id="an-ins" aria-pressed="false"><i class="pastille o"></i><i class="pastille t"></i>Origines et terminaisons</button>
+        <button class="chip-btn" id="an-vx" aria-pressed="false"><i class="pastille art"></i><i class="pastille vei"></i>Vaisseaux</button>
+        <button class="chip-btn" id="an-nf" aria-pressed="false"><i class="pastille nrf"></i>Nerfs</button>
         <button class="chip-btn" id="an-hd" aria-pressed="false">Haute définition</button>
       </div>
       <div class="an-coupe">
         <div class="seg" id="an-axe"><button data-axe="" class="on">Sans coupe</button><button data-axe="x">Sagittale</button><button data-axe="z">Frontale</button><button data-axe="y">Transversale</button></div>
         <input type="range" id="an-pos" min="0" max="1" step="0.002" value="0.5" disabled aria-label="Position du plan de coupe">
       </div>
+    </div>
+
+    <div class="lab">Articulations en mouvement</div>
+    <div class="an-couches card an-art" id="an-art">
+      <div class="seg an-art-j" id="art-j"></div>
+      <div class="an-art-l"><span id="art-geste"></span><b id="art-val">0°</b></div>
+      <input type="range" id="art-deg" min="0" max="90" step="0.5" value="0" aria-label="Angle de l'articulation">
+      <div class="an-outils"><button class="chip-btn" id="art-jouer">▶ Animer</button><button class="chip-btn" id="art-repos">Position de repos</button></div>
+      <p class="an-aide">Seul le squelette bouge : muscles, peau, vaisseaux et nerfs s'effacent le temps du mouvement. Les deux côtés bougent ensemble.</p>
     </div>
 
     <div class="lab">Aller à</div>
@@ -79,7 +90,7 @@
     <div class="top">
       <div>
         <h1>Les dents</h1>
-        <p class="sub">Les 28 dents en 3D, qu'on isole et qu'on tranche</p>
+        <p class="sub">Les 32 dents en 3D, numérotées, qu'on isole et qu'on tranche</p>
       </div>
       <div class="acts">
         <a class="iconbtn" href="index.html" title="Mes formations" aria-label="Mes formations" data-ic="home"></a>
@@ -95,11 +106,13 @@
     <p class="an-aide">Touche une dent, puis « Isoler » pour la trancher : émail, dentine et pulpe apparaissent dans la coupe.</p>
 
     <div class="an-couches card">
-      <div class="an-outils"><button class="chip-btn" id="dt-isoler" disabled>Isoler la dent</button><button class="chip-btn on" id="dt-os" aria-pressed="true">Os des mâchoires</button></div>
+      <div class="an-outils"><button class="chip-btn" id="dt-isoler" disabled>Isoler la dent</button><button class="chip-btn on" id="dt-os" aria-pressed="true">Os des mâchoires</button><button class="chip-btn on" id="dt-num" aria-pressed="true">Numéros</button></div>
       <div class="an-coupe">
         <div class="seg" id="dt-axe"><button data-axe="" class="on">Sans coupe</button><button data-axe="x">Mésio-distale</button><button data-axe="z">Vestibulo-linguale</button><button data-axe="y">Transversale</button></div>
         <input type="range" id="dt-pos" min="0" max="1" step="0.002" value="0.5" disabled aria-label="Position du plan de coupe">
       </div>
+      <div class="an-art-l"><span>Ouverture de la bouche</span><b id="dt-bouche-val">0°</b></div>
+      <input type="range" id="dt-bouche" min="0" max="35" step="0.5" value="0" aria-label="Ouverture de la bouche">
       <div class="dt-tissus" id="dt-tissus"></div>
     </div>
 
@@ -118,6 +131,9 @@
         <input type="range" id="s3-pos" min="0" max="1" step="0.002" value="0.5" aria-label="Position du plan de coupe">
       </div>
       <div class="dt-tissus"><span class="chip-btn"><i class="pastille email"></i>Émail</span><span class="chip-btn"><i class="pastille dentine"></i>Dentine</span><span class="chip-btn"><i class="pastille pulpe"></i>Pulpe et canal</span></div>
+      <div class="an-art-l"><span>La carie, pas à pas</span><b id="s3-carie-val">0 %</b></div>
+      <input type="range" id="s3-carie" min="0" max="1" step="0.005" value="0" aria-label="Avancée de la carie">
+      <div class="an-carie" id="s3-stade"></div>
       <p class="an-txt">Des incisives monoradiculées, probablement mandibulaires d'après leurs dimensions (couronne d'environ 5,5 × 6,5 mm, une racine, un canal aplati en ruban). Leurs couronnes ont été arasées pour l'étude d'origine : seul le bord incisif manque. Le canal n'est pas un tube régulier : il s'aplatit, se rétrécit, parfois s'interrompt presque, comme dans la réalité.</p>
     </div>
     <p class="credit">Scanners : A. Pereira, S. Tonelli, M. A. Antunes, A. Miranda, F. F. Silveira, « ds-uct-002: Root Canal Strain », Zenodo, <a href="https://doi.org/10.5281/zenodo.3877625" target="_blank" rel="noopener">doi:10.5281/zenodo.3877625</a>, licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noopener">CC BY 4.0</a>. Segmentation et surfaces : faites pour cette app.</p>

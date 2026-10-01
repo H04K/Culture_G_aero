@@ -1,4 +1,5 @@
-Modèles anatomiques 3D de l'atlas (peau, muscles, squelette, insertions, dents)
+Modèles anatomiques 3D de l'atlas (peau, muscles, squelette, insertions, dents,
+vaisseaux et cœur, nerfs et encéphale)
 
 Source : Z-Anatomy — l'atlas d'anatomie open source (https://www.z-anatomy.com,
 https://github.com/LluisV/Z-Anatomy), lui-même dérivé de BodyParts3D.
@@ -15,6 +16,15 @@ maillages, compression Draco, matières regroupées par tissu (os, cartilage,
 émail, racine, muscle, tendon, peau), classement des muscles superficiels et
 profonds par lancer de rayons depuis la peau, coquilles internes de dentine et
 de pulpe calculées pour chaque dent (approximation pédagogique, pas une mesure).
+
+Vaisseaux (vaisseaux.glb) et nerfs (nerfs.glb) : fichiers CardioVascular41 et
+NervousSystem100 de Z-Anatomy, simplifiés et compressés ; artères en rouge,
+veines en bleu (artères pulmonaires en bleu, veines pulmonaires en rouge,
+d'après l'oxygénation du sang) ; noyaux profonds et substance blanche de
+l'encéphale retirés pour alléger.
+
+Dents de sagesse : absentes des modèles d'origine, recréées dans l'app à partir
+de la deuxième molaire (forme réduite et décalée), à titre d'illustration.
 
 Noms français et définitions (dico.json) : tirés des traductions et des
 définitions françaises de Z-Anatomy, même licence.
