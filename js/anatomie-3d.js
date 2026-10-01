@@ -263,25 +263,32 @@ function dentsDeSagesse(liste, racine) {
    Chaque articulation fait tourner des os autour d'un pivot calculé sur
    la forme des os eux-mêmes (tête humérale, trochlée, tête fémorale,
    condyles…), autour d'un axe simple. Elles s'enchaînent : la hanche
-   emporte le genou, qui emporte la cheville. Seul le squelette bouge :
-   les muscles, la peau, les vaisseaux et les nerfs ne sont pas articulés
-   (ils sont masqués le temps du mouvement).
+   emporte le genou, qui emporte la cheville. Les os réels sont posés
+   directement ; muscles, peau, vaisseaux et nerfs suivent par un
+   squelette virtuel (voir _ponderer).
    sens : +1 si un angle positif tourne dans le sens direct autour de
    l'axe, pour le côté droit (le gauche est en miroir si miroir). */
+/* les fichiers dont les maillages se déforment avec le squelette */
+const SOUPLES = new Set(['muscles', 'peau', 'vaisseaux', 'nerfs', 'insertions']);
+/* les os virtuels : l'os fixe (tronc, crâne) puis un par articulation et par côté */
+const OS_VIRTUELS = ['fixe', 'machoire', 'epauler', 'epaulel', 'couder', 'coudel', 'hancher', 'hanchel', 'genour', 'genoul', 'cheviller', 'chevillel'];
+/* le membre de chaque os virtuel */
+const REGION = { machoire: 'tete', epauler: 'brasr', couder: 'brasr', epaulel: 'brasl', coudel: 'brasl',
+  hancher: 'jamber', genour: 'jamber', cheviller: 'jamber', hanchel: 'jambel', genoul: 'jambel', chevillel: 'jambel' };
 const CARPE = 'Scaphoid|Lunate|Triquetrum|Pisiform|Trapezium|Trapezoid|Capitate|Hamate';
 const TARSE = 'Talus|Calcaneus|Navicular|Cuboid|cuneiform|metatarsal|of foot';
 export const ARTICULATIONS = {
-  machoire: { nom: 'Mâchoire', geste: 'Ouverture de la bouche', min: 0, max: 35, axe: 'x', sens: 1, cotes: [''],
+  machoire: { nom: 'Mâchoire', geste: 'Ouverture de la bouche', min: 0, max: 35, fondu: 0.03, axe: 'x', sens: 1, cotes: [''],
     os: n => /^Mandible/.test(n) || /^Lower .*(incisor|canine|premolar|molar)/.test(n) },
-  epaule: { nom: 'Épaule', geste: 'Abduction (bras sur le côté)', min: 0, max: 90, axe: 'z', sens: -1, miroir: true, cotes: ['r', 'l'],
+  epaule: { nom: 'Épaule', geste: 'Abduction (bras sur le côté)', min: 0, max: 90, fondu: 0.09, axe: 'z', sens: -1, miroir: true, cotes: ['r', 'l'],
     os: n => /^Humerus/.test(n) },
-  coude: { nom: 'Coude', geste: 'Flexion', min: 0, max: 145, axe: 'x', sens: -1, cotes: ['r', 'l'], parent: 'epaule',
+  coude: { nom: 'Coude', geste: 'Flexion', min: 0, max: 145, fondu: 0.05, axe: 'x', sens: -1, cotes: ['r', 'l'], parent: 'epaule',
     os: n => new RegExp(`^(Radius|Ulna|(${CARPE}) bone|.* metacarpal bone|.* finger of hand)`).test(n) },
-  hanche: { nom: 'Hanche', geste: 'Flexion (cuisse vers l’avant)', min: 0, max: 120, axe: 'x', sens: -1, cotes: ['r', 'l'],
+  hanche: { nom: 'Hanche', geste: 'Flexion (cuisse vers l’avant)', min: 0, max: 120, fondu: 0.26, axe: 'x', sens: -1, cotes: ['r', 'l'],
     os: n => /^Femur/.test(n) },
-  genou: { nom: 'Genou', geste: 'Flexion', min: 0, max: 135, axe: 'x', sens: 1, cotes: ['r', 'l'], parent: 'hanche',
+  genou: { nom: 'Genou', geste: 'Flexion', min: 0, max: 135, fondu: 0.06, axe: 'x', sens: 1, cotes: ['r', 'l'], parent: 'hanche',
     os: n => /^(Tibia|Fibula|Patella)/.test(n) },
-  cheville: { nom: 'Cheville', geste: 'Flexion dorsale (+) et plantaire (−)', min: -45, max: 20, axe: 'x', sens: -1, cotes: ['r', 'l'], parent: 'genou',
+  cheville: { nom: 'Cheville', geste: 'Flexion dorsale (+) et plantaire (−)', min: -45, max: 20, fondu: 0.04, axe: 'x', sens: -1, cotes: ['r', 'l'], parent: 'genou',
     os: n => new RegExp(`(${TARSE})`).test(n) && !/hand/.test(n) }
 };
 function coteLR(nom) { const m = String(nom).match(/\.([lr])$/); return m ? m[1] : ''; }
@@ -369,6 +376,11 @@ export class Atlas3D {
     c.update();
 
     this.ray = new THREE.Raycaster();
+    /* le squelette virtuel : un os par articulation (et un os fixe pour le
+       tronc). Muscles, peau, vaisseaux et nerfs y sont attachés et suivent
+       les mouvements ; les os réels, eux, sont posés directement. */
+    this.osVirtuels = OS_VIRTUELS.map(() => { const b = new THREE.Bone(); b.matrixAutoUpdate = false; this.scene.add(b); return b; });
+    this.squel = new THREE.Skeleton(this.osVirtuels, this.osVirtuels.map(() => new THREE.Matrix4()));
     this._gestes();
     this._taille();
     if ('ResizeObserver' in window) new ResizeObserver(() => { this._taille(); this.demander(); }).observe(el);
@@ -473,10 +485,29 @@ export class Atlas3D {
       }
       if (cleM === 'muscle' || cleM === 'tendon') axeFibres(m.geometry);
       m.geometry.computeBoundingSphere();
-      this.parCouche[couche].push(m);
-      this.objets.push(m);
+      const mm = SOUPLES.has(fichier) ? this._souple(m) : m;
+      this.parCouche[couche].push(mm);
+      this.objets.push(mm);
     }
     this.scene.add(racine);
+    racine.updateMatrixWorld(true);
+    if (this._poidsPrets) this._ponderer(this.objets.filter(m => m.isSkinnedMesh && !m.userData.pondere));
+  }
+  /** Remplace un maillage de tissu souple par sa version déformable,
+      attachée d'abord en entier à l'os fixe (poids calculés à la demande). */
+  _souple(m) {
+    const g = m.geometry, n = g.attributes.position.count;
+    const w = new Float32Array(n * 4); for (let i = 0; i < n; i++) w[i * 4] = 1;
+    g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(new Uint16Array(n * 4), 4));
+    g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(w, 4));
+    const sm = new THREE.SkinnedMesh(g, m.material);
+    sm.name = m.name; sm.userData = m.userData; sm.renderOrder = m.renderOrder;
+    sm.position.copy(m.position); sm.quaternion.copy(m.quaternion); sm.scale.copy(m.scale);
+    sm.frustumCulled = false;
+    const par = m.parent; par.add(sm); par.remove(m);
+    sm.updateMatrixWorld(true);
+    sm.bind(this.squel, sm.matrixWorld.clone());
+    return sm;
   }
 
   /* ───── couches ───── */
@@ -497,8 +528,7 @@ export class Atlas3D {
       m.depthWrite = a > 0.55;
       /* peau opaque : rien à dessiner dessous (plus rapide, et plus de coutures) */
       const cache = op.peau >= 0.999 && this.parCouche.peau.length && c !== 'peau' && !this.axe;
-      const horsPose = this.enPose() && c !== 'os';
-      m.visible = a > 0.015 && !cache && !horsPose;
+      m.visible = a > 0.015 && !cache;
       m.needsUpdate = true;
     }
     /* les insertions du muscle choisi restent visibles */
@@ -629,7 +659,8 @@ export class Atlas3D {
       /* son fantôme : la structure choisie se devine à travers ce qui la
          cache (une dent de sagesse dans l'os, un muscle profond) */
       const fm = new THREE.MeshBasicMaterial({ color: vif, transparent: true, opacity: 0.38, depthTest: false, depthWrite: false, clippingPlanes: [this.plan] });
-      const f = new THREE.Mesh(x.geometry, fm);
+      const f = x.isSkinnedMesh ? new THREE.SkinnedMesh(x.geometry, fm) : new THREE.Mesh(x.geometry, fm);
+      if (x.isSkinnedMesh) { f.frustumCulled = false; f.bind(this.squel, x.bindMatrix); }
       f.renderOrder = 10; f.raycast = () => {};
       x.add(f); x.userData.fantome = f;
     }
@@ -704,7 +735,9 @@ export class Atlas3D {
   /** Position à l'écran du centre de la sélection (pour l'étiquette). */
   ecran(m = this.sel) {
     if (!m) return null;
-    const s = m.geometry.boundingSphere.center.clone().applyMatrix4(m.matrixWorld).project(this.camera);
+    /* un maillage déformable : sa sphère tient compte de la pose */
+    if (m.isSkinnedMesh && !m.boundingSphere) m.computeBoundingSphere();
+    const s = (m.isSkinnedMesh ? m.boundingSphere : m.geometry.boundingSphere).center.clone().applyMatrix4(m.matrixWorld).project(this.camera);
     const r = this.renderer.domElement.getBoundingClientRect();
     return { x: (s.x + 1) / 2 * r.width, y: (1 - s.y) / 2 * r.height, dedans: s.z < 1 };
   }
@@ -737,12 +770,15 @@ export class Atlas3D {
   }
 
   /* ───── articulations ───── */
-  /** Pose une articulation : angle en degrés (les deux côtés ensemble). */
-  articuler(cle, deg) {
+  /** Pose une articulation, en degrés. c : 'r' (droite), 'l' (gauche) ;
+      sans c, les deux côtés ensemble. */
+  articuler(cle, deg, c) {
     this.pose = this.pose || {};
-    this.pose[cle] = deg;
+    const A = ARTICULATIONS[cle];
+    for (const x of (c === undefined ? A.cotes : [c])) this.pose[cle + x] = Math.max(A.min, Math.min(A.max, deg));
     this._poser();
   }
+  angle(cle, c = ARTICULATIONS[cle].cotes[0]) { return (this.pose && this.pose[cle + c]) || 0; }
   /** Remet tout le squelette au repos. */
   repos() { this.pose = {}; this._poser(); }
   enPose() { return !!this.pose && Object.values(this.pose).some(v => Math.abs(v) > 0.01); }
@@ -755,10 +791,12 @@ export class Atlas3D {
       if (!liste.length) continue;
       const pv = pivot(cle, c ? os.filter(m => coteLR(m.userData.nom) === c) : os);
       if (!pv) continue;
-      art[cle + c] = { cle, c, A, liste, pv };
+      art[cle + c] = { k: cle + c, cle, c, A, liste, pv, axe: { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) }[A.axe],
+        signe: A.sens * (A.miroir && c === 'l' ? -1 : 1) };
       for (const m of liste) {
         m.updateMatrixWorld(true);
         m.userData.repos = { monde: m.matrixWorld.clone(), parentInv: m.parent.matrixWorld.clone().invert() };
+        m.userData.segment = cle + c;
         m.matrixAutoUpdate = false;
       }
     }
@@ -766,15 +804,14 @@ export class Atlas3D {
   }
   _poser() {
     const art = this._preparerArticulations();
+    if (this.enPose()) this.preparerMouvement();
     const mat = {};
     const de = k => {
       if (mat[k]) return mat[k];
-      const J = art[k]; if (!J) return new THREE.Matrix4();
-      const deg = (this.pose && this.pose[J.cle]) || 0;
-      const signe = J.A.sens * (J.A.miroir && J.c === 'l' ? -1 : 1);
-      const ax = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) }[J.A.axe];
+      const J = art[k]; if (!J) return (mat[k] = new THREE.Matrix4());
+      const deg = (this.pose && this.pose[k]) || 0;
       const loc = new THREE.Matrix4().makeTranslation(J.pv.x, J.pv.y, J.pv.z)
-        .multiply(new THREE.Matrix4().makeRotationAxis(ax, THREE.MathUtils.degToRad(deg * signe)))
+        .multiply(new THREE.Matrix4().makeRotationAxis(J.axe, THREE.MathUtils.degToRad(deg * J.signe)))
         .multiply(new THREE.Matrix4().makeTranslation(-J.pv.x, -J.pv.y, -J.pv.z));
       const par = J.A.parent ? de(J.A.parent + J.c) : new THREE.Matrix4();
       return (mat[k] = par.clone().multiply(loc));
@@ -786,9 +823,246 @@ export class Atlas3D {
         m.matrixWorldNeedsUpdate = true;
       }
     }
+    /* le squelette virtuel suit : les tissus souples se déforment */
+    OS_VIRTUELS.forEach((k, i) => this.osVirtuels[i].matrix.copy(art[k] ? de(k) : new THREE.Matrix4()));
+    for (const m of this.objets) if (m.isSkinnedMesh) m.boundingSphere = m.boundingBox = null;   // recalculées à la demande
+    this._mats = mat;
     this.scene.updateMatrixWorld();
     this.appliquer();
     this.demander();
+  }
+
+  /** Attache les tissus souples aux os (une fois, ~1 s) : nécessaire avant de bouger. */
+  preparerMouvement() {
+    if (this._poidsPrets) return;
+    this._preparerArticulations();
+    this._poidsPrets = true;
+    this._ponderer(this.objets.filter(m => m.isSkinnedMesh && !m.userData.pondere));
+  }
+  /** Le nuage de points des os, par segment (os virtuel), en grille de 4 cm ;
+      et pour chaque segment mobile, son côté « distal » : la direction du
+      pivot vers ses os. */
+  _nuage() {
+    if (this._nuageOs) return this._nuageOs;
+    const art = this._preparerArticulations(), H = 0.04, grille = new Map(), vu = new Set(), v = new THREE.Vector3();
+    const cle = (i, j, k) => ((i + 600) * 1200 + (j + 600)) * 1200 + (k + 600);
+    const somme = OS_VIRTUELS.map(() => new THREE.Vector3()), nb = OS_VIRTUELS.map(() => 0);
+    for (const m of this.objets) {
+      if (m.userData.couche !== 'os') continue;
+      const seg = OS_VIRTUELS.indexOf(m.userData.segment || 'fixe');
+      const M = m.userData.repos ? m.userData.repos.monde : m.matrixWorld;
+      const P = m.geometry.attributes.position;
+      for (let i = 0; i < P.count; i++) {
+        v.fromBufferAttribute(P, i).applyMatrix4(M);
+        /* un point par centimètre cube et par segment suffit */
+        const fin = (Math.round(v.x * 100) * 4000 + Math.round(v.y * 100)) * 4000 + Math.round(v.z * 100), u = fin * 16 + seg;
+        if (vu.has(u)) continue; vu.add(u);
+        somme[seg].add(v); nb[seg]++;
+        const c = cle(Math.floor(v.x / H), Math.floor(v.y / H), Math.floor(v.z / H));
+        let t = grille.get(c); if (!t) grille.set(c, t = []);
+        t.push(v.x, v.y, v.z, seg);
+      }
+    }
+    /* un segment n'emporte que ce qui est au-delà de son articulation :
+       la peau du ventre ne suit pas la cuisse */
+    const cote = OS_VIRTUELS.map((k, s) => {
+      const J = art[k]; if (!J || !nb[s]) return null;
+      const d = somme[s].multiplyScalar(1 / nb[s]).sub(J.pv).normalize();
+      return { p: J.pv, d, f: J.A.fondu || 0.05, parent: J.A.parent ? Math.max(0, OS_VIRTUELS.indexOf(J.A.parent + J.c)) : 0 };
+    });
+    return (this._nuageOs = { grille, H, cle, cote });
+  }
+  /** Les poids d'un point : les deux segments osseux les plus proches,
+      fondus sur 3,5 cm ; un segment est écarté du côté proximal de son pivot. */
+  _poidsPoint(x, y, z, out, masque = 0xffff, nx = 0, ny = 0, nz = 0) {
+    const { grille, H, cle, cote } = this._nuage(), n = OS_VIRTUELS.length, MELANGE = 0.035, avecN = nx || ny || nz;
+    const best = this._best || (this._best = new Float32Array(n));
+    best.fill(Infinity);
+    const ci = Math.floor(x / H), cj = Math.floor(y / H), ck = Math.floor(z / H);
+    let d1 = Infinity;
+    for (let r = 0; r <= 3; r++) {
+      for (let i = -r; i <= r; i++) for (let j = -r; j <= r; j++) for (let k = -r; k <= r; k++) {
+        if (Math.max(Math.abs(i), Math.abs(j), Math.abs(k)) !== r) continue;      // la couronne r seulement
+        const t = grille.get(cle(ci + i, cj + j, ck + k)); if (!t) continue;
+        for (let q = 0; q < t.length; q += 4) {
+          const sg = t[q + 3]; if (!((masque >> sg) & 1)) continue;
+          const dx = t[q] - x, dy = t[q + 1] - y, dz = t[q + 2] - z;
+          /* la peau : seuls comptent les os qui sont dessous, pas une main posée contre la cuisse */
+          if (avecN && dx * nx + dy * ny + dz * nz > 0.01) continue;
+          const d = dx * dx + dy * dy + dz * dz;
+          if (d < best[sg]) best[sg] = d;
+        }
+      }
+      for (let s = 0; s < n; s++) if (best[s] < d1) d1 = best[s];
+      if (d1 < Infinity && Math.sqrt(d1) + MELANGE <= r * H) break;
+    }
+    let a = 0, da = Infinity, b = -1, db = Infinity;
+    for (let s = 0; s < n; s++) {
+      if (best[s] === Infinity) continue;
+      const d = Math.sqrt(best[s]);
+      if (d < da) { b = a; db = da; a = s; da = d; } else if (d < db) { b = s; db = d; }
+    }
+    out.fill(0);
+    if (da === Infinity) { out[0] = 1; return; }
+    const xx = Math.min(1, (db - da) / MELANGE);
+    const wa = b < 0 || db === Infinity ? 1 : 0.5 + 0.5 * xx * xx * (3 - 2 * xx);
+    out[a] += wa; if (b >= 0 && wa < 1) out[b] += 1 - wa;
+    /* un segment n'emporte que ce qui est au-delà de son articulation :
+       la part en deçà revient au segment parent, avec un fondu propre à
+       chaque articulation (large à la hanche : la peau de l'aine ne suit
+       pas la cuisse en bloc). Des extrémités vers le tronc. */
+    for (let s = n - 1; s > 0; s--) {
+      const c = cote[s]; if (!c || !out[s]) continue;
+      const pr = (x - c.p.x) * c.d.x + (y - c.p.y) * c.d.y + (z - c.p.z) * c.d.z;
+      const g0 = Math.min(1, Math.max(0, (pr + 0.01) / c.f)), g = g0 * g0 * (3 - 2 * g0);
+      if (g >= 1) continue;
+      out[c.parent] += out[s] * (1 - g); out[s] *= g;
+    }
+  }
+  /** Calcule les poids des maillages déformables : aux nœuds d'un réseau
+      de 2 cm (mémorisés), puis interpolés pour chaque sommet. */
+  _ponderer(liste) {
+    if (!liste.length) return;
+    const n = OS_VIRTUELS.length, S = 0.02, memos = this._memoPoids || (this._memoPoids = new Map());
+    const tmp = new Float32Array(n), acc = new Float32Array(n), v = new THREE.Vector3(), nv = new THREE.Vector3(), ordre = new Uint16Array(4), poids = new Float32Array(4);
+    /* les muscles d'abord : la peau prend le membre du muscle qu'elle recouvre */
+    liste = [...liste].sort((a, b) => (a.userData.fichier === 'peau') - (b.userData.fichier === 'peau'));
+    for (const m of liste) {
+      const g = m.geometry, P = g.attributes.position, SI = g.attributes.skinIndex, SW = g.attributes.skinWeight;
+      m.updateMatrixWorld(true);
+      const peau = m.userData.fichier === 'peau';
+      const masqueMaillage = peau ? 0 : this._masqueDe(m);
+      for (let p = 0; p < P.count; p++) {
+        v.fromBufferAttribute(P, p).applyMatrix4(m.matrixWorld);
+        const masque = peau ? this._masquePeau(v) : masqueMaillage;
+        let memo = memos.get(masque); if (!memo) memos.set(masque, memo = new Map());
+        const fx = v.x / S, fy = v.y / S, fz = v.z / S, i0 = Math.floor(fx), j0 = Math.floor(fy), k0 = Math.floor(fz);
+        const tx = fx - i0, ty = fy - j0, tz = fz - k0;
+        acc.fill(0);
+        for (let c = 0; c < 8; c++) {
+          const di = c & 1, dj = (c >> 1) & 1, dk = (c >> 2) & 1;
+          const f = (di ? tx : 1 - tx) * (dj ? ty : 1 - ty) * (dk ? tz : 1 - tz);
+          if (f === 0) continue;
+          const i = i0 + di, j = j0 + dj, k = k0 + dk, cn = ((i + 2000) * 4000 + (j + 2000)) * 4000 + (k + 2000);
+          let w = memo.get(cn);
+          if (!w) { this._poidsPoint(i * S, j * S, k * S, tmp, masque); w = Float32Array.from(tmp); memo.set(cn, w); }
+          for (let s = 0; s < n; s++) if (w[s]) acc[s] += w[s] * f;
+        }
+        /* les quatre plus forts, renormalisés */
+        ordre.fill(0); poids.fill(-1);
+        for (let s = 0; s < n; s++) {
+          const w = acc[s]; if (w <= poids[3]) continue;
+          let q = 3; while (q > 0 && w > poids[q - 1]) { poids[q] = poids[q - 1]; ordre[q] = ordre[q - 1]; q--; }
+          poids[q] = w; ordre[q] = s;
+        }
+        const tot = Math.max(1e-6, Math.max(0, poids[0]) + Math.max(0, poids[1]) + Math.max(0, poids[2]) + Math.max(0, poids[3]));
+        SI.setXYZW(p, ordre[0], ordre[1], ordre[2], ordre[3]);
+        SW.setXYZW(p, Math.max(0, poids[0]) / tot, Math.max(0, poids[1]) / tot, Math.max(0, poids[2]) / tot, Math.max(0, poids[3]) / tot);
+      }
+      SI.needsUpdate = SW.needsUpdate = true;
+      m.userData.pondere = true;
+    }
+  }
+  /** Les segments permis pour un muscle, un vaisseau ou un nerf : le tronc
+      et le membre auquel il appartient (celui de la majorité de ses
+      sommets), jamais un membre voisin qui le frôle. */
+  _masqueDe(m) {
+    if (m.userData.masque) return m.userData.masque;
+    const P = m.geometry.attributes.position, v = new THREE.Vector3(), out = new Float32Array(OS_VIRTUELS.length);
+    const votes = {}, pas = Math.max(1, Math.floor(P.count / 200));
+    for (let i = 0; i < P.count; i += pas) {
+      v.fromBufferAttribute(P, i).applyMatrix4(m.matrixWorld);
+      this._poidsPoint(v.x, v.y, v.z, out);
+      for (let s = 1; s < out.length; s++) if (out[s] > 0.5) { const r = REGION[OS_VIRTUELS[s]]; votes[r] = (votes[r] || 0) + 1; }
+    }
+    const r = Object.keys(votes).sort((a, b) => votes[b] - votes[a])[0];
+    let masque = 1;                                   // l'os fixe, toujours
+    if (r) OS_VIRTUELS.forEach((k, s) => { if (REGION[k] === r) masque |= 1 << s; });
+    return (m.userData.masque = masque);
+  }
+  /** Le membre d'un point de peau : celui du muscle le plus proche (grille
+      de 2 cm des sommets des muscles), sinon le tronc seul. */
+  _masquePeau(v) {
+    if (!this._grilleMu) {
+      const H = 0.02, grille = new Map(), w = new THREE.Vector3();
+      for (const m of this.parCouche.mu1.concat(this.parCouche.mu2)) {
+        const mq = this._masqueDe(m), P = m.geometry.attributes.position, pas = Math.max(1, Math.floor(P.count / 400));
+        for (let i = 0; i < P.count; i += pas) {
+          w.fromBufferAttribute(P, i).applyMatrix4(m.matrixWorld);
+          const c = ((Math.floor(w.x / H) + 600) * 1200 + (Math.floor(w.y / H) + 600)) * 1200 + (Math.floor(w.z / H) + 600);
+          let t = grille.get(c); if (!t) grille.set(c, t = []);
+          t.push(w.x, w.y, w.z, mq);
+        }
+      }
+      this._grilleMu = { grille, H };
+    }
+    const { grille, H } = this._grilleMu, ci = Math.floor(v.x / H), cj = Math.floor(v.y / H), ck = Math.floor(v.z / H);
+    let best = Infinity, mq = 1;
+    for (let r = 0; r <= 2 && best === Infinity; r++)
+      for (let i = -r; i <= r; i++) for (let j = -r; j <= r; j++) for (let k = -r; k <= r; k++) {
+        if (Math.max(Math.abs(i), Math.abs(j), Math.abs(k)) !== r) continue;
+        const t = grille.get(((ci + i + 600) * 1200 + (cj + j + 600)) * 1200 + (ck + k + 600)); if (!t) continue;
+        for (let q = 0; q < t.length; q += 4) {
+          const d = (t[q] - v.x) ** 2 + (t[q + 1] - v.y) ** 2 + (t[q + 2] - v.z) ** 2;
+          if (d < best) { best = d; mq = t[q + 3]; }
+        }
+      }
+    return mq;
+  }
+
+  /* ───── bouger un membre à la main ─────
+     Scène figée : on touche un membre (os, muscle, peau…), on le fait
+     glisser ; l'articulation qui le porte tourne autour de son axe, dans le
+     sens où le doigt entraîne le point touché. */
+  modeMouvement(on) {
+    this.mouv = !!on;
+    this.controls.enabled = !on;
+    if (on) this.preparerMouvement();
+  }
+  _segmentDe(h) {
+    const m = h.object;
+    if (m.userData.segment) return m.userData.segment;
+    if (m.isSkinnedMesh && h.face) {
+      const SI = m.geometry.attributes.skinIndex, SW = m.geometry.attributes.skinWeight;
+      let best = 0, bw = -1;
+      for (const v of [h.face.a, h.face.b, h.face.c]) for (let q = 0; q < 4; q++) {
+        const w = SW.getComponent(v, q); if (w > bw) { bw = w; best = SI.getComponent(v, q); }
+      }
+      return OS_VIRTUELS[best];
+    }
+    return 'fixe';
+  }
+  _ecranDe(p) {
+    const r = this.renderer.domElement.getBoundingClientRect(), s = p.clone().project(this.camera);
+    return new THREE.Vector2((s.x + 1) / 2 * r.width, (1 - s.y) / 2 * r.height);
+  }
+  _saisir(x, y) {
+    const r = this.renderer.domElement.getBoundingClientRect();
+    this.ray.setFromCamera(new THREE.Vector2(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1), this.camera);
+    const h = this.ray.intersectObjects(this._visibles(), false).filter(h => this.plan.distanceToPoint(h.point) >= -1e-4 || !this.axe)[0];
+    const k = h ? this._segmentDe(h) : null;
+    const J = k && this._art && this._art[k];
+    if (!J) { if (this.o.surMouvement) this.o.surMouvement(null); return false; }
+    this._prise = { J, Q: h.point.clone(), x, y };
+    if (this.o.surMouvement) this.o.surMouvement({ cle: J.cle, c: J.c, deg: this.angle(J.cle, J.c), debut: true });
+    return true;
+  }
+  _glisser(x, y) {
+    const P = this._prise; if (!P) return;
+    const J = P.J, Mp = J.A.parent && this._mats ? this._mats[J.A.parent + J.c] || new THREE.Matrix4() : new THREE.Matrix4();
+    const pv = J.pv.clone().applyMatrix4(Mp), ax = J.axe.clone().transformDirection(Mp);
+    /* le déplacement à l'écran du point saisi, pour un radian de rotation */
+    const bras = P.Q.clone().sub(pv), vit = ax.clone().cross(bras);
+    const e = 0.01, s0 = this._ecranDe(P.Q), s1 = this._ecranDe(P.Q.clone().addScaledVector(vit, e));
+    const sv = s1.sub(s0).multiplyScalar(1 / e), l2 = sv.lengthSq();
+    const dx = x - P.x, dy = y - P.y; P.x = x; P.y = y;
+    if (l2 < 1) return;
+    let dth = Math.max(-0.25, Math.min(0.25, (dx * sv.x + dy * sv.y) / l2));
+    const avant = this.angle(J.cle, J.c), voulu = avant + THREE.MathUtils.radToDeg(dth) / J.signe;
+    this.articuler(J.cle, voulu, J.c);
+    const fait = THREE.MathUtils.degToRad((this.angle(J.cle, J.c) - avant) * J.signe);
+    P.Q.copy(pv).add(bras.applyAxisAngle(ax, fait));
+    if (this.o.surMouvement) this.o.surMouvement({ cle: J.cle, c: J.c, deg: this.angle(J.cle, J.c) });
   }
 
   /* ───── rendu à la demande ───── */
@@ -810,9 +1084,16 @@ export class Atlas3D {
   _gestes() {
     const cv = this.renderer.domElement;
     let x0 = 0, y0 = 0, t0 = 0, n = 0;
-    cv.addEventListener('pointerdown', e => { x0 = e.clientX; y0 = e.clientY; t0 = performance.now(); n++; });
+    cv.addEventListener('pointerdown', e => {
+      x0 = e.clientX; y0 = e.clientY; t0 = performance.now(); n++;
+      if (this.mouv && this._saisir(e.clientX, e.clientY)) cv.setPointerCapture(e.pointerId);
+    });
+    cv.addEventListener('pointermove', e => { if (this.mouv && this._prise) this._glisser(e.clientX, e.clientY); });
+    const fin = () => { if (this._prise) { this._prise = null; if (this.o.surMouvement) this.o.surMouvement({ fin: true }); } };
+    cv.addEventListener('pointercancel', () => { n = 0; fin(); });
     cv.addEventListener('pointerup', e => {
       n = Math.max(0, n - 1);
+      if (this.mouv) { fin(); return; }
       if (Math.hypot(e.clientX - x0, e.clientY - y0) < 6 && performance.now() - t0 < 500 && n === 0) this.toucher(e.clientX, e.clientY);
     });
   }

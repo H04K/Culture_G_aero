@@ -56,6 +56,16 @@ body:not(.no-tabs) .qz-bandeau { top: calc(48px + var(--safe-top)); }
 .a3-etiq[hidden] { display: none; }
 /* articulations */
 .an-art-j { flex-wrap: wrap; }
+.an-art-c { margin-top: 8px; }
+.an-art-c button[disabled] { opacity: .35; }
+.a3-mouv {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 3; pointer-events: none; white-space: nowrap;
+  padding: 8px 14px; border-radius: 12px; font-size: 13.5px; color: #eef1f6; background: rgba(16, 20, 27, .78); border: 1px solid rgba(255,255,255,.14);
+}
+.a3-mouv span { font: 800 15px var(--mono); color: var(--a3-sel); margin-left: 4px; }
+.a3-mouv[hidden] { display: none; }
+.a3-scene.fige { box-shadow: 0 0 0 2px var(--a3-sel), var(--lift); }
+.a3-scene.fige .a3-canvas { cursor: crosshair; }
 .an-art-l { display: flex; justify-content: space-between; align-items: baseline; margin: 12px 2px 2px; font-size: 13.5px; color: var(--ink-2); }
 .an-art-l b { font: 800 15px var(--mono); color: var(--ink); }
 /* la carie */
