@@ -40,7 +40,59 @@ const AnatDents = (() => {
 
   /* ───── la numérotation FDI ───── */
   const NOMS = { 1: 'Incisive centrale', 2: 'Incisive latérale', 3: 'Canine', 4: 'Première prémolaire', 5: 'Deuxième prémolaire', 6: 'Première molaire', 7: 'Deuxième molaire', 8: 'Troisième molaire' };
-  const NOMS_L = { 1: 'Incisive centrale lactéale', 2: 'Incisive latérale lactéale', 3: 'Canine lactéale', 4: 'Première molaire lactéale', 5: 'Deuxième molaire lactéale' };
+  const NOMS_L = { 1: 'Incisive centrale de lait', 2: 'Incisive latérale de lait', 3: 'Canine de lait', 4: 'Première molaire de lait', 5: 'Deuxième molaire de lait' };
+
+  /* ───── les autres noms ─────
+     Anatomie : Terminologia Anatomica (latin) et nomenclature française.
+     Archéologie et anthropologie : lettre du type, rang en exposant au
+     maxillaire, en indice à la mandibule (I¹, P₄, M³…). Les prémolaires
+     humaines y sont P3 et P4 : les premiers mammifères en avaient quatre,
+     nous avons perdu P1 et P2. Lettres minuscules précédées de d pour la
+     denture de lait (di¹, dc₁, dm²…). */
+  const ANAT = {
+    1: ['Incisive médiale', 'Dens incisivus medialis'], 2: ['Incisive latérale', 'Dens incisivus lateralis'], 3: ['Canine', 'Dens caninus'],
+    4: ['Première prémolaire', 'Dens premolaris primus'], 5: ['Deuxième prémolaire', 'Dens premolaris secundus'],
+    6: ['Première molaire', 'Dens molaris primus'], 7: ['Deuxième molaire', 'Dens molaris secundus'], 8: ['Troisième molaire', 'Dens molaris tertius, dens serotinus']
+  };
+  const USAGE = {
+    1: 'première incisive, « palette » (familier)', 2: 'deuxième incisive', 3: 'dent de l’œil, œillère (au maxillaire)',
+    4: 'petite molaire', 5: 'petite molaire', 6: 'dent de six ans, grosse molaire', 7: 'dent de douze ans, grosse molaire', 8: 'dent de sagesse'
+  };
+  const USAGE_L = { 1: 'dent de lait, dent temporaire, déciduale', 2: 'dent de lait, dent temporaire, déciduale', 3: 'dent de lait, dent temporaire, déciduale',
+    4: 'molaire temporaire (remplacée par la première prémolaire)', 5: 'molaire temporaire (remplacée par la deuxième prémolaire)' };
+  const ARCHEO = { 1: ['I', 1], 2: ['I', 2], 3: ['C', 1], 4: ['P', 3], 5: ['P', 4], 6: ['M', 1], 7: ['M', 2], 8: ['M', 3] };
+  const ARCHEO_L = { 1: ['di', 1], 2: ['di', 2], 3: ['dc', 1], 4: ['dm', 1], 5: ['dm', 2] };
+  const EXP = '⁰¹²³⁴⁵⁶⁷⁸⁹', IND = '₀₁₂₃₄₅₆₇₈₉';
+  /* numérotation universelle (américaine) : 1 à 32 en tournant depuis la
+     troisième molaire supérieure droite ; A à T pour les dents de lait */
+  function universel(q, n, lact) {
+    if (lact) {
+      const L = 'ABCDEFGHIJKLMNOPQRST';
+      const i = { 5: 5 - n, 6: 4 + n, 7: 15 - n, 8: 14 + n }[q];
+      return L[i];
+    }
+    return { 1: 9 - n, 2: 8 + n, 3: 25 - n, 4: 24 + n }[q];
+  }
+  /* Palmer (Zsigmondy) : le chiffre dans l'angle du quadrant, vu du praticien */
+  function palmer(q, n, lact) {
+    const x = lact ? 'ABCDE'[n - 1] : n;
+    return { 1: x + '┘', 5: x + '┘', 2: '└' + x, 6: '└' + x, 4: x + '┐', 8: x + '┐', 3: '┌' + x, 7: '┌' + x }[q];
+  }
+  function noms(fdi) {
+    const I = infos(fdi), { q, n, lact, sup } = I;
+    const droit = q === 1 || q === 4 || q === 5 || q === 8;
+    const [lettre, rang] = (lact ? ARCHEO_L : ARCHEO)[n];
+    const archeo = lettre + (sup ? EXP[rang] : IND[rang]);
+    const anat = ANAT[lact ? (n <= 3 ? n : n + 2) : n];
+    const pos = `${sup ? 'supérieure (maxillaire)' : 'inférieure (mandibulaire)'} ${droit ? 'droite' : 'gauche'}`;
+    return {
+      usage: lact ? USAGE_L[n] : !sup && n === 1 ? 'première incisive' : !sup && n === 3 ? 'canine' : USAGE[n],
+      anatomie: lact ? `${n <= 3 ? anat[0] : ['Première', 'Deuxième'][n - 4] + ' molaire'} temporaire ${pos}` : `${anat[0]} ${pos}`,
+      latin: lact ? (n <= 3 ? anat[1] : `Dens molaris ${n === 4 ? 'primus' : 'secundus'}`) + ' deciduus' : anat[1],
+      archeo: `${archeo} ${droit ? 'droite' : 'gauche'} (${droit ? 'R' : 'L'}${archeo})`,
+      fdi: String(fdi), universel: String(universel(q, n, lact)), palmer: palmer(q, n, lact)
+    };
+  }
   const QUADS = { 1: 'maxillaire droit', 2: 'maxillaire gauche', 3: 'mandibulaire gauche', 4: 'mandibulaire droit', 5: 'maxillaire droit', 6: 'maxillaire gauche', 7: 'mandibulaire gauche', 8: 'mandibulaire droit' };
 
   function infos(fdi) {
@@ -126,12 +178,13 @@ const AnatDents = (() => {
     const note = I.lact
       ? 'Émail et dentine plus minces, chambre pulpaire plus haute : une carie atteint vite la pulpe.'
       : I.n === 6 ? 'La « dent de six ans » : première dent définitive, elle pousse derrière les dents de lait, sans rien remplacer.'
-      : I.n === 8 ? 'La dent de sagesse : souvent incluse faute de place, on l’extrait fréquemment.'
+      : I.n === 8 ? 'La dent de sagesse : souvent incluse faute de place, on l’extrait fréquemment. Le modèle 3D d’origine n’en a pas : celle-ci reprend la forme de la deuxième molaire, un peu réduite, posée derrière elle ; dans le crâne, elle reste dans l’os, comme une dent incluse.'
       : I.n === 3 ? 'La racine la plus longue de la bouche (17 mm au maxillaire) : c’est la dernière dent qu’on perd.'
       : I.n === 1 && I.sup ? 'La plus visible des dents : la couronne mesure environ 10,5 mm de haut.'
       : '';
-    return { titre: `${I.nom} ${I.sup ? 'supérieure' : 'inférieure'} ${I.q === 1 || I.q === 4 || I.q === 5 || I.q === 8 ? 'droite' : 'gauche'}`, fdi, lignes, note, plan: I.t.plan === 'VL' ? 'coupe vestibulo-linguale' : 'coupe mésio-distale' };
+    const N = noms(fdi);
+    return { titre: `${I.nom} ${I.sup ? 'supérieure' : 'inférieure'} ${I.q === 1 || I.q === 4 || I.q === 5 || I.q === 8 ? 'droite' : 'gauche'}`, fdi, noms: N, lignes, note, plan: I.t.plan === 'VL' ? 'coupe vestibulo-linguale' : 'coupe mésio-distale' };
   }
 
-  return { fiche, infos, TISSUS, TYPES, ERUPT };
+  return { fiche, infos, noms, TISSUS, TYPES, ERUPT };
 })();

@@ -5,7 +5,7 @@
            un curseur descend de la peau aux muscles superficiels,
            aux profonds, au squelette ; origines et terminaisons
            en couleur sur les os ; un plan de coupe qu'on déplace.
-   Dents   les 28 dents définitives, qu'on isole et qu'on tranche :
+   Dents   les 32 dents définitives (dents de sagesse comprises), qu'on isole et qu'on tranche :
            émail, dentine, pulpe.
    Quiz    toucher la bonne structure sur le corps, la nommer,
            retrouver insertions, nerfs, dents et tissus.
@@ -32,12 +32,21 @@ function osDe(base) {
   for (const [id, o] of Object.entries(ANAT.OS)) if (new RegExp(o.z, 'i').test(base)) return { id, ...o };
   return null;
 }
+const FDI_N = { 'medial incisor': 1, 'lateral incisor': 2, canine: 3, 'first premolar': 4, 'second premolar': 5, 'first molar': 6, 'second molar': 7, 'third molar': 8 };
 function nomFr(nom) {
+  const f = fdiDe(nom);
+  if (f) return AnatDents.fiche(f).titre;
   const b = baseNom(nom).replace(/ \| (dentine|pulpe)$/, '');
   const t = DICO.noms[b];
   return t ? t[0] : b;
 }
-function latin(nom) { const t = DICO.noms[baseNom(nom)]; return t ? t[1] : ''; }
+function latin(nom) { const f = fdiDe(nom); if (f) return AnatDents.noms(f).latin; const t = DICO.noms[baseNom(nom)]; return t ? t[1] : ''; }
+/** Les noms d'une dent : courant, anatomique, archéologique, notations (le latin est sous le titre). */
+function nomsDent(f) {
+  const N = AnatDents.noms(f);
+  return [['Nom courant', N.usage], ['Anatomie', N.anatomie], ['Archéologie', N.archeo],
+    ['Notations', `FDI ${N.fdi} · universelle ${N.universel} · Palmer ${N.palmer}`]];
+}
 const CAT = { muscle: 'Muscle', tendon: 'Tendon ou aponévrose', os: 'Os', cartilage: 'Cartilage', email: 'Dent', racine: 'Dent', dentine: 'Dentine', pulpe: 'Pulpe', peau: 'Peau', ongle: 'Ongle', origine: 'Zone d’origine', terminaison: 'Zone de terminaison' };
 
 /* ───── navigation ───── */
@@ -163,6 +172,8 @@ function fiche(info, cible = '#an-fiche') {
   } else if (def && (def.o || def.t || def.a || def.i)) {
     lignes = [['Origine', def.o], ['Terminaison', def.t], ['Action', def.a], ['Innervation', def.i], ['Vascularisation', def.v]].filter(x => x[1]);
   }
+  const fd = fdiDe(info.nom);
+  if (fd) lignes = nomsDent(fd).concat(AnatDents.fiche(fd).lignes.filter(l => l[0] !== 'Position'));
   if (os) lignes = lignes.concat([['Os', os.nom], ['Type', os.type], ['Repères', os.r], ['Articulations', os.art]]);
   if (def && def.d) desc = def.d;
   if (!lignes.length && !desc && os) desc = os.d;
@@ -195,10 +206,10 @@ $('#an-fiche').addEventListener('click', async e => {
 /* ═══════════════ LES DENTS ═══════════════ */
 
 let dents = null;
-const FDI_N = { 'medial incisor': 1, 'lateral incisor': 2, canine: 3, 'first premolar': 4, 'second premolar': 5, 'first molar': 6, 'second molar': 7 };
 function fdiDe(nom) {
-  const b = baseNom(nom).replace(/ \| (dentine|pulpe)$/, '').toLowerCase().replace(' tooth', '');
+  const b = baseNom(String(nom).replace(/ \| (dentine|pulpe)$/, '')).toLowerCase().replace(' tooth', '');
   const sup = b.startsWith('upper');
+  if (!/^(upper|lower) .*(incisor|canine|premolar|molar)$/.test(b)) return null;
   const k = Object.keys(FDI_N).find(x => b.includes(x));
   if (!k) return null;
   const c = cote(nom.replace(/ \| (dentine|pulpe)$/, ''));
@@ -232,7 +243,7 @@ function montrerDents() {
   montrerScan();
   if (dents) return;
   dents = new Atlas3D($('#d3'), {
-    profondeur: 3,
+    profondeur: 3, tranches: true,
     surChoix: info => {
       if (!info) { $('#dt-fiche').innerHTML = ''; $('#dt-isoler').disabled = true; return; }
       const f = fdiDe(info.nom);
@@ -240,7 +251,10 @@ function montrerDents() {
       $('#dt-isoler').disabled = false;
       const F = AnatDents.fiche(f);
       $('#dt-fiche').innerHTML = `<div class="card an-fiche dt-f">
-        <div class="an-f-t"><span class="dt-num">${f}</span><div><h2>${esc(F.titre)}</h2><p class="latin">${esc(nomFr(info.nom))}</p></div></div>
+        <div class="an-f-t"><span class="dt-num">${f}</span><div><h2>${esc(F.titre)}</h2><p class="latin">${esc(F.noms.latin)}</p></div></div>
+        <p class="an-sous">Autres noms</p>
+        <dl>${nomsDent(f).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+        <p class="an-sous">La dent</p>
         <dl>${F.lignes.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
         ${F.note ? `<p class="an-note">${esc(F.note)}</p>` : ''}</div>`;
       if (info.cle === 'dentine' || info.cle === 'pulpe' || info.cle === 'email' || info.cle === 'racine') tissu({ dentine: 'dentine', pulpe: 'pulpe', email: 'email', racine: 'cement' }[info.cle]);
@@ -455,7 +469,7 @@ function entrees() {
     const b = baseNom(u.nom);
     if (vus.has(b)) continue;
     const type = u.fichier === 'muscles' ? 'muscle' : (u.cle === 'email' || u.cle === 'racine') ? 'dent' : 'os';
-    vus.set(b, { type, nom: u.nom, fr: nomFr(u.nom), la: latin(u.nom), base: b, sous: type === 'muscle' ? (u.cle === 'tendon' ? 'tendon' : u.couche === 'mu1' ? 'superficiel' : 'profond') : type === 'dent' ? 'dent' : (u.cle === 'cartilage' ? 'cartilage' : 'os') });
+    vus.set(b, { type, nom: u.nom, fr: type === 'dent' ? nomFr(u.nom).replace(/ (droite|gauche)$/, '') : nomFr(u.nom), la: latin(u.nom), base: b, sous: type === 'muscle' ? (u.cle === 'tendon' ? 'tendon' : u.couche === 'mu1' ? 'superficiel' : 'profond') : type === 'dent' ? 'dent' : (u.cle === 'cartilage' ? 'cartilage' : 'os') });
   }
   return [...vus.values()].sort((a, b) => a.fr.localeCompare(b.fr, 'fr'));
 }
