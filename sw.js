@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v28';
+const VERSION = 'maximus-v29';
 
 const ASSETS = [
   './',
@@ -133,6 +133,7 @@ const ASSETS = [
   './data/anatomie-atlas.js',
   './js/anatomie-dents.js',
   './js/anatomie-3d.js',
+  './js/anatomie-scan.js',
   './js/anatomie-app.js',
   './js/vendor/three/three.module.min.js',
   './js/vendor/three/addons/controls/OrbitControls.js',

@@ -427,6 +427,10 @@ Center for Life Science), reconstruits à partir de coupes d'un corps réel.
   et on la tranche : émail, dentine et pulpe apparaissent (coquilles internes
   calculées pour chaque dent, approximation pédagogique). Fiche FDI : éruption,
   racines, canaux, cuspides ; tableau des dents de lait ; tissus dentaires en clair.
+- **Vraies dents au micro-scanner** : quatre incisives humaines extraites, scannées
+  en micro-CT à 20 µm (Pereira et al., Zenodo, doi:10.5281/zenodo.3877625, CC BY 4.0).
+  Émail, dentine et pulpe sont segmentés depuis le scanner ; la coupe est exacte
+  (bouchons de coupe par stencil) et montre le vrai canal jusqu'à l'apex.
 - **Quiz** : toucher la bonne structure sur le corps, nommer une structure allumée,
   origines et terminaisons, innervation et action, os, dents et tissus.
 - **Index** : toutes les structures, cherchables en français, en latin ou en anglais.
@@ -636,6 +640,7 @@ anatomie.html           module Anatomie 3D (atlas, dents, quiz, index)
 css/anatomie.css        styles de l'anatomie
 js/anatomie-3d.js       le visualiseur 3D : couches, coupe, insertions, sélection
 js/anatomie-app.js      écrans, fiches, dents, quiz, index (module ES)
+js/anatomie-scan.js     les vraies dents scannées (micro-CT), coupe exacte par stencil
 js/anatomie-dents.js    les dents : numérotation FDI, éruption, racines, tissus
 data/anatomie-atlas.js  les fiches rédigées des muscles et des os
 data/anatomie3d/        les modèles 3D (glTF Draco), noms français, définitions, licence
