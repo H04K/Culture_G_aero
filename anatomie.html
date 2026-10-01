@@ -47,6 +47,7 @@
         <button data-vue="face">Face</button><button data-vue="dos">Dos</button><button data-vue="droite">Profil</button>
       </div>
       <div class="a3-etiq" id="a3-etiq" hidden></div>
+      <div class="a3-mouv" id="a3-mouv" hidden></div>
     </div>
     <p class="an-aide">Un doigt pour tourner, deux pour zoomer et déplacer. Touche une structure pour sa fiche.</p>
 
@@ -68,10 +69,11 @@
     <div class="lab">Articulations en mouvement</div>
     <div class="an-couches card an-art" id="an-art">
       <div class="seg an-art-j" id="art-j"></div>
+      <div class="seg an-art-c" id="art-cote"><button data-c="">Les deux côtés</button><button data-c="r">Droit</button><button data-c="l">Gauche</button></div>
       <div class="an-art-l"><span id="art-geste"></span><b id="art-val">0°</b></div>
       <input type="range" id="art-deg" min="0" max="90" step="0.5" value="0" aria-label="Angle de l'articulation">
-      <div class="an-outils"><button class="chip-btn" id="art-jouer">▶ Animer</button><button class="chip-btn" id="art-repos">Position de repos</button></div>
-      <p class="an-aide">Seul le squelette bouge : muscles, peau, vaisseaux et nerfs s'effacent le temps du mouvement. Les deux côtés bougent ensemble.</p>
+      <div class="an-outils"><button class="chip-btn" id="art-main" aria-pressed="false">✋ Bouger à la main</button><button class="chip-btn" id="art-jouer">▶ Animer</button><button class="chip-btn" id="art-repos">Position de repos</button></div>
+      <p class="an-aide">« Bouger à la main » fige la scène : touche un membre et fais-le glisser, l'articulation suit dans ses amplitudes réelles. Muscles, peau, vaisseaux et nerfs se déforment avec les os (une approximation : ils s'étirent, ils ne se contractent pas).</p>
     </div>
 
     <div class="lab">Aller à</div>

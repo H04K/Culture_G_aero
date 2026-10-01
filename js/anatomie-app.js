@@ -164,46 +164,76 @@ $('#an-pos').addEventListener('input', e => { const b = $('#an-axe .on'); atlas.
 $('#a3-vues').addEventListener('click', e => { const b = e.target.closest('[data-vue]'); if (b) atlas.vue(b.dataset.vue); });
 $('#an-regions').addEventListener('click', e => { const b = e.target.closest('[data-vue]'); if (b) { atlas.vue(b.dataset.vue); $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
 
-/* ───── articulations en mouvement ───── */
-let artCle = 'coude', artAnim = null;
-const artPose = {};
-$('#art-j').innerHTML = Object.entries(ARTICULATIONS).map(([k, A]) => `<button data-art="${k}" class="${k === artCle ? 'on' : ''}">${A.nom}</button>`).join('');
+/* ───── articulations en mouvement ─────
+   Deux façons de bouger : le curseur (et l'animation) pour une
+   articulation choisie, ou « Bouger à la main » : la scène se fige, on
+   touche un membre et on le fait glisser. Muscles, peau, vaisseaux et
+   nerfs suivent, attachés aux os les plus proches. */
+let artCle = 'coude', artCote = '', artAnim = null;
+const NOM_COTE = { r: 'droit', l: 'gauche', '': '' };
+$('#art-j').innerHTML = Object.entries(ARTICULATIONS).map(([k, A]) => `<button data-art="${k}">${A.nom}</button>`).join('');
 function syncArt() {
-  const A = ARTICULATIONS[artCle], v = artPose[artCle] || 0;
+  const A = ARTICULATIONS[artCle], v = atlas.angle ? atlas.angle(artCle, artCote || A.cotes[0]) : 0;
   $$('#art-j [data-art]').forEach(b => b.classList.toggle('on', b.dataset.art === artCle));
+  $$('#art-cote [data-c]').forEach(b => { b.classList.toggle('on', b.dataset.c === artCote); b.disabled = A.cotes.length < 2 && b.dataset.c !== ''; });
   $('#art-geste').textContent = A.geste;
   Object.assign($('#art-deg'), { min: A.min, max: A.max });
   $('#art-deg').value = v;
   $('#art-val').textContent = Math.round(v) + '°';
 }
+/* la première fois, il faut attacher les tissus aux os (une seconde environ) */
+function pretAuMouvement(fn) {
+  if (atlas._poidsPrets || !atlas.objets.length) return fn();
+  $('#a3-charge').hidden = false; $('#a3-pct').style.width = '100%';
+  $('#a3-txt').textContent = 'On attache les muscles et la peau aux os…';
+  setTimeout(() => { atlas.preparerMouvement(); $('#a3-charge').hidden = true; fn(); }, 60);
+}
 function articuler(cle, v) {
   if (!atlas.objets.length) return;
-  const avant = atlas.enPose();
-  artPose[cle] = v; atlas.articuler(cle, v);
-  if (!avant && atlas.enPose()) { if (data.d < 2.9) allerProfondeur(3); atlas.selectionner(null); }
+  const A = ARTICULATIONS[cle];
+  atlas.articuler(cle, v, A.cotes.length > 1 && artCote ? artCote : undefined);
   if (cle === artCle) { $('#art-deg').value = v; $('#art-val').textContent = Math.round(v) + '°'; }
 }
 function arreterAnim() { cancelAnimationFrame(artAnim); artAnim = null; $('#art-jouer').textContent = '▶ Animer'; }
 $('#art-j').addEventListener('click', e => { const b = e.target.closest('[data-art]'); if (!b) return; arreterAnim(); artCle = b.dataset.art; syncArt(); });
-$('#art-deg').addEventListener('input', e => { arreterAnim(); articuler(artCle, +e.target.value); });
+$('#art-cote').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (!b || b.disabled) return; artCote = b.dataset.c; syncArt(); });
+$('#art-deg').addEventListener('input', e => { arreterAnim(); const v = +e.target.value; pretAuMouvement(() => articuler(artCle, v)); });
 $('#art-jouer').addEventListener('click', () => {
   if (artAnim) return arreterAnim();
-  $('#art-jouer').textContent = '❚❚ Pause';
-  const A = ARTICULATIONS[artCle], t0 = performance.now(), cle = artCle;
-  /* aller-retour doux entre le repos (ou le minimum) et l'amplitude maximale */
-  const bas = A.min < 0 ? A.min : 0;
-  const pas = t => {
-    const f = (1 - Math.cos((t - t0) / 1600 * Math.PI)) / 2;
-    articuler(cle, bas + (A.max - bas) * f);
+  pretAuMouvement(() => {
+    $('#art-jouer').textContent = '❚❚ Pause';
+    const A = ARTICULATIONS[artCle], t0 = performance.now(), cle = artCle;
+    /* aller-retour doux entre le repos (ou le minimum) et l'amplitude maximale */
+    const bas = A.min < 0 ? A.min : 0;
+    const pas = t => {
+      const f = (1 - Math.cos((t - t0) / 1600 * Math.PI)) / 2;
+      articuler(cle, bas + (A.max - bas) * f);
+      artAnim = requestAnimationFrame(pas);
+    };
     artAnim = requestAnimationFrame(pas);
-  };
-  artAnim = requestAnimationFrame(pas);
+  });
 });
-$('#art-repos').addEventListener('click', () => {
+$('#art-repos').addEventListener('click', () => { arreterAnim(); atlas.repos(); syncArt(); });
+/* bouger à la main */
+$('#art-main').addEventListener('click', e => {
+  const b = e.currentTarget, on = !b.classList.contains('on');
   arreterAnim();
-  for (const k of Object.keys(artPose)) delete artPose[k];
-  atlas.repos(); syncArt();
+  pretAuMouvement(() => {
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    atlas.modeMouvement(on);
+    $('#a3').classList.toggle('fige', on);
+    if (on) { atlas.selectionner(null); toast('Scène figée : touche un bras, une jambe ou la mâchoire et fais-le glisser'); $('#a3').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
 });
+atlas.o.surMouvement = m => {
+  const el = $('#a3-mouv');
+  if (!m) { toast('Touche un membre : bras, avant-bras, cuisse, jambe, pied ou mâchoire'); return; }
+  if (m.fin) { setTimeout(() => { el.hidden = true; }, 900); return; }
+  const A = ARTICULATIONS[m.cle];
+  el.hidden = false;
+  el.innerHTML = `<b>${A.nom}${m.c ? ' ' + NOM_COTE[m.c] : ''}</b> · ${esc(A.geste.split(' (')[0].toLowerCase())} <span>${Math.round(m.deg)}°</span>`;
+  artCle = m.cle; artCote = m.c; syncArt();
+};
 syncArt();
 
 function placerEtiquette(a, sel) {
