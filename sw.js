@@ -2,7 +2,7 @@
    sw.js — service worker : app installable et 100 % hors-ligne
    ═══════════════════════════════════════════════════════════ */
 
-const VERSION = 'maximus-v30';
+const VERSION = 'maximus-v31';
 
 const ASSETS = [
   './',
