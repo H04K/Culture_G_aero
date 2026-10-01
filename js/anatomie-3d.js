@@ -35,7 +35,7 @@ const TEINTES = {
   ongle:       { c: 0xf0d7cf, r: 0.35, cut: 0xf0d7cf },
   muscle:      { c: 0x8f1d24, r: 0.48, cut: 0x6e141b, sheen: 0.55, clear: 0.22 },
   tendon:      { c: 0xe9e2cf, r: 0.38, cut: 0xd9ceb4, sheen: 0.4, clear: 0.2 },
-  os:          { c: 0xe6dac0, r: 0.58, cut: 0xc98f6d },
+  os:          { c: 0xe9dfc8, r: 0.46, cut: 0xc98f6d, clear: 0.12 },
   cartilage:   { c: 0x9fc0cc, r: 0.3, cut: 0x8fb2be, clear: 0.3 },
   email:       { c: 0xf8f6ee, r: 0.16, cut: 0xf3efe2, clear: 0.6 },
   racine:      { c: 0xe6d29e, r: 0.45, cut: 0xefd9a5 },
@@ -44,6 +44,15 @@ const TEINTES = {
   origine:     { c: 0xe23b3b, r: 0.5, cut: 0xe23b3b, e: 0x3a0000 },
   terminaison: { c: 0x2f7cf0, r: 0.5, cut: 0x2f7cf0, e: 0x001236 }
 };
+
+/* ───── la structure choisie ─────
+   Elle prend une couleur franche ; le reste s'assombrit un peu pour
+   qu'elle ressorte, même au milieu des autres muscles. */
+const CHOIX = {
+  os: 0xf0b429, cartilage: 0x46b4e6, email: 0xf0b429, racine: 0xf0b429, dentine: 0xf0b429, pulpe: 0xff5a6a,
+  muscle: 0xffb21e, tendon: 0xffe27a, peau: 0xf0a070, ongle: 0xf0a070
+};
+const ATTENUE = 0.35;
 
 /* ───── les textures calculées ─────
    Aucune image : le grain est calculé à chaque pixel, en millimètres
@@ -66,8 +75,8 @@ float bruit(vec3 x) {
   #define TEINTE_RELIEF 0.10
   #define BOSSE_RELIEF 0.0004
 #elif RELIEF == 3
-  #define TEINTE_RELIEF 0.16
-  #define BOSSE_RELIEF 0.0005
+  #define TEINTE_RELIEF 0.05
+  #define BOSSE_RELIEF 0.00008
 #else
   #define TEINTE_RELIEF 0.08
   #define BOSSE_RELIEF 0.00025
@@ -85,9 +94,10 @@ float relief(vec3 p, vec3 f, inout float w) {
   float wf = clamp(1.6 - px * F * 0.22 * 1.2, 0.0, 1.0);
   return RELIEF == 1 ? (fin * 0.55 * w + smoothstep(0.35, 0.75, fais) * 0.45 * wf) : fin;
 #elif RELIEF == 3
-  float F = 900.0;
+  /* l'os sec est lisse et satiné : à peine un voile, pas de grain */
+  float F = 260.0;
   w = clamp(1.6 - px * F * 1.2, 0.0, 1.0);
-  return bruit(p * F) * 0.6 + bruit(p * F * 0.25 + 3.1) * 0.4;
+  return bruit(p * F) * 0.5 + bruit(p * F * 0.3 + 3.1) * 0.5;
 #else
   float F = 2200.0;
   w = clamp(1.6 - px * F * 1.2, 0.0, 1.0);
@@ -95,7 +105,7 @@ float relief(vec3 p, vec3 f, inout float w) {
 #endif
 }`;
 
-function matiere(cle, plan) {
+function matiere(cle, plan, coupeActive) {
   const t = TEINTES[cle] || TEINTES.os;
   const m = new THREE.MeshPhysicalMaterial({
     color: t.c, roughness: t.r, metalness: 0, sheen: t.sheen || 0, sheenRoughness: 0.5, sheenColor: new THREE.Color(0xffffff),
@@ -110,6 +120,7 @@ function matiere(cle, plan) {
   const relief = RELIEF[cle] || 0;
   m.onBeforeCompile = sh => {
     sh.uniforms.uCut = m.userData.cut;
+    sh.uniforms.uCoupe = coupeActive;
     if (relief) {
       sh.vertexShader = 'attribute vec3 fibre;\nvarying vec3 vP;\nvarying vec3 vF;\n' + sh.vertexShader
         .replace('#include <begin_vertex>', '#include <begin_vertex>\n vP = position; vF = fibre;');
@@ -127,8 +138,10 @@ function matiere(cle, plan) {
     normal = normalize(abs(det) * normal - grad);
   }`);
     }
-    sh.fragmentShader = 'uniform vec3 uCut;\n' + sh.fragmentShader.replace('#include <dithering_fragment>',
-      '#include <dithering_fragment>\n if (!gl_FrontFacing) { gl_FragColor = vec4(uCut * 0.92, gl_FragColor.a); }');
+    /* hors coupe, une face arrière aperçue entre deux pièces (une suture,
+       un interstice) reste dans le ton du tissu, juste plus sombre */
+    sh.fragmentShader = 'uniform vec3 uCut;\nuniform float uCoupe;\n' + sh.fragmentShader.replace('#include <dithering_fragment>',
+      '#include <dithering_fragment>\n if (!gl_FrontFacing) { gl_FragColor = vec4(uCoupe > 0.5 ? uCut * 0.92 : gl_FragColor.rgb * 0.8, gl_FragColor.a); }');
   };
   m.customProgramCacheKey = () => 'anat-' + relief;
   m.userData.cle = cle;
@@ -157,11 +170,93 @@ function axeFibres(g) {
   g.setAttribute('fibre', new THREE.BufferAttribute(a, 3));
 }
 
+/** Lissage de Taubin : efface les bosses laissées par la reconstruction
+    (les modèles viennent de coupes d'un corps réel, empilées) sans faire
+    maigrir l'os. Alternance d'un pas qui lisse (λ) et d'un pas qui
+    regonfle (μ) ; les sommets dédoublés sont d'abord recousus. */
+function lisser(g, tours) {
+  g.deleteAttribute('normal');
+  for (const k of Object.keys(g.attributes)) if (k !== 'position') g.deleteAttribute(k);
+  const m = mergeVertices(g, 1e-5);
+  const P = m.attributes.position.array, I = m.index.array, n = P.length / 3;
+  const deg = new Uint32Array(n + 1);
+  for (let i = 0; i < I.length; i += 3) { deg[I[i]] += 2; deg[I[i + 1]] += 2; deg[I[i + 2]] += 2; }
+  const debut = new Uint32Array(n + 1);
+  for (let v = 0; v < n; v++) debut[v + 1] = debut[v] + deg[v];
+  const voisins = new Uint32Array(debut[n]), rempli = debut.slice(0, n);
+  for (let i = 0; i < I.length; i += 3) {
+    const a = I[i], b = I[i + 1], c = I[i + 2];
+    voisins[rempli[a]++] = b; voisins[rempli[a]++] = c;
+    voisins[rempli[b]++] = c; voisins[rempli[b]++] = a;
+    voisins[rempli[c]++] = a; voisins[rempli[c]++] = b;
+  }
+  /* les bords libres (os recoupé, comme les mâchoires de la vue des
+     dents) ne bougent pas : sinon ils se rétractent */
+  const fixe = new Uint8Array(n), aretes = new Map();
+  for (let i = 0; i < I.length; i += 3) for (let e = 0; e < 3; e++) {
+    const a = I[i + e], b = I[i + (e + 1) % 3], k = a < b ? a * n + b : b * n + a;
+    aretes.set(k, (aretes.get(k) || 0) + 1);
+  }
+  for (const [k, c] of aretes) if (c === 1) { fixe[Math.floor(k / n)] = 1; fixe[k % n] = 1; }
+  const Q = new Float32Array(P.length);
+  const pas = f => {
+    for (let v = 0; v < n; v++) {
+      const d0 = debut[v], d1 = debut[v + 1];
+      if (d1 === d0 || fixe[v]) { Q[v * 3] = P[v * 3]; Q[v * 3 + 1] = P[v * 3 + 1]; Q[v * 3 + 2] = P[v * 3 + 2]; continue; }
+      let x = 0, y = 0, z = 0;
+      for (let j = d0; j < d1; j++) { const u = voisins[j] * 3; x += P[u]; y += P[u + 1]; z += P[u + 2]; }
+      const k = 1 / (d1 - d0), o = v * 3;
+      Q[o] = P[o] + f * (x * k - P[o]); Q[o + 1] = P[o + 1] + f * (y * k - P[o + 1]); Q[o + 2] = P[o + 2] + f * (z * k - P[o + 2]);
+    }
+    P.set(Q);
+  };
+  for (let t = 0; t < tours; t++) { pas(0.5); pas(-0.53); }
+  m.computeVertexNormals();
+  return m;
+}
+
+/* ───── les dents de sagesse ─────
+   Les modèles s'arrêtent à 28 dents. Les troisièmes molaires sont
+   posées derrière les deuxièmes : même forme un peu réduite, décalée
+   d'une dent vers l'arrière le long de l'arcade (le pas entre première
+   et deuxième molaire), un peu plus haut que la deuxième molaire, comme
+   la courbe de l'arcade le veut. */
+const M3 = { Upper: { k: 0.9, dy: 0.0008 }, Lower: { k: 0.94, dy: 0.0003 } };
+function dentsDeSagesse(liste, racine) {
+  const centre = m => { m.geometry.computeBoundingBox(); return m.geometry.boundingBox.getCenter(new THREE.Vector3()).applyMatrix4(m.matrixWorld); };
+  const nouveaux = [];
+  for (const jaw of ['Upper', 'Lower']) for (const c of ['l', 'r']) {
+    const nomM1 = `${jaw} first molar tooth.${c}`, nomM2 = `${jaw} second molar tooth.${c}`;
+    const m1 = liste.filter(x => x.userData.nomBrut === nomM1), m2 = liste.filter(x => x.userData.nomBrut.split(' | ')[0] === nomM2);
+    const plein1 = m1[0], plein2 = m2.find(x => x.userData.nomBrut === nomM2);
+    if (!plein1 || !plein2) continue;
+    const c1 = centre(plein1), c2 = centre(plein2);
+    const pasArc = c2.clone().sub(c1); pasArc.y = 0;     // on suit l'arcade à plat, la hauteur est réglée à part
+    const { k, dy } = M3[jaw];
+    const cible = c2.clone().add(pasArc.multiplyScalar(0.92)); cible.y += dy;
+    const versLocal = new THREE.Matrix4().copy(racine.matrixWorld).invert();
+    for (const src of m2) {
+      const g = src.geometry.clone().applyMatrix4(src.matrixWorld);
+      g.translate(-c2.x, -c2.y, -c2.z); g.scale(k, k, k); g.translate(cible.x, cible.y, cible.z);
+      g.applyMatrix4(versLocal);
+      const mesh = new THREE.Mesh(g, src.material);
+      mesh.name = src.userData.nomBrut.replace('second molar', 'third molar');
+      mesh.userData = { nomBrut: mesh.name };
+      racine.add(mesh);
+      nouveaux.push(mesh);
+    }
+  }
+  return nouveaux;
+}
+
 /* ───── la classe ───── */
 export class Atlas3D {
   constructor(el, o = {}) {
     this.el = el; this.o = o;
     this.plan = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6);
+    /* o.tranches : des pièces recoupées (les mâchoires de la vue des dents)
+       dont les bords montrent toujours la tranche */
+    this.uCoupe = { value: o.tranches ? 1 : 0 };
     this.d = o.profondeur ?? 1;
     this.objets = [];            // tous les maillages
     this.parCouche = { peau: [], mu1: [], mu2: [], os: [], ins: [] };
@@ -252,7 +347,7 @@ export class Atlas3D {
 
   _mat(couche, cle) {
     const k = couche + ':' + cle;
-    if (!this.mats[k]) { this.mats[k] = matiere(cle, this.plan); this.mats[k].userData.couche = couche; }
+    if (!this.mats[k]) { this.mats[k] = matiere(cle, this.plan, this.uCoupe); this.mats[k].userData.couche = couche; }
     return this.mats[k];
   }
 
@@ -268,7 +363,11 @@ export class Atlas3D {
          on garde le nom de la structure sur chacun */
       let a = m;
       while (a && a !== racine && !(a.userData && a.userData.name)) a = a.parent;
-      const nom = a && a.userData && a.userData.name ? a.userData.name : m.name;
+      m.userData.nomBrut = a && a.userData && a.userData.name ? a.userData.name : m.name;
+    }
+    if (fichier === 'squelette' || fichier === 'dents') { liste.push(...dentsDeSagesse(liste, racine)); racine.updateMatrixWorld(true); }
+    for (const m of liste) {
+      const nom = m.userData.nomBrut;
       const cleM = (m.material && m.material.name) || 'os';
       const info = (this.meta && (this.meta[nom] || this.meta[nom.replace(/\.(\d+)$/, '')])) || {};
       let couche;
@@ -283,6 +382,10 @@ export class Atlas3D {
         /* la peau est faite de régions cousues : on soude large pour effacer les coutures */
         const g = mergeVertices(m.geometry.deleteAttribute('normal') && m.geometry, fichier === 'peau' ? 8e-4 : fichier.startsWith('scan') ? 1e-7 : 1e-4);
         g.computeVertexNormals();
+        m.geometry.dispose(); m.geometry = g;
+      }
+      else if (cleM === 'os' && !fichier.startsWith('scan')) {
+        const g = lisser(m.geometry, source.endsWith('-hd') ? 12 : 8);
         m.geometry.dispose(); m.geometry = g;
       }
       if (cleM === 'muscle' || cleM === 'tendon') axeFibres(m.geometry);
@@ -340,6 +443,7 @@ export class Atlas3D {
   /* ───── coupe ───── */
   coupe(axe, t, boite) {
     this.axe = axe;
+    this.uCoupe.value = axe || this.o.tranches ? 1 : 0;
     if (!axe) { this.plan.set(new THREE.Vector3(0, -1, 0), 1e6); this.appliquer(); this.demander(); return; }
     const b = boite || new THREE.Box3(new THREE.Vector3(-0.42, 0, -0.24), new THREE.Vector3(0.42, 1.76, 0.24));
     const k = { x: 'x', y: 'y', z: 'z' }[axe];
@@ -381,7 +485,10 @@ export class Atlas3D {
     this.selectionner(h ? h.object : null);
   }
   selectionner(m) {
-    for (const x of this.selSet || []) x.material = x.userData.matAvant;
+    for (const x of this.selSet || []) {
+      x.material = x.userData.matAvant;
+      if (x.userData.fantome) { x.remove(x.userData.fantome); x.userData.fantome.material.dispose(); delete x.userData.fantome; }
+    }
     this.sel = m;
     this.selSet = m ? this.objets.filter(x => cleSel(x.userData.nom) === cleSel(m.userData.nom) && x.userData.couche !== 'ins') : [];
     for (const x of this.selSet) {
@@ -391,13 +498,35 @@ export class Atlas3D {
       hm.customProgramCacheKey = x.userData.matAvant.customProgramCacheKey;
       hm.userData = { ...x.userData.matAvant.userData };
       hm.clippingPlanes = [this.plan];
-      hm.emissive = new THREE.Color(0x4a3000); hm.emissiveIntensity = 1;
+      const vif = new THREE.Color(CHOIX[x.userData.cle] ?? 0xf0b429);
+      hm.color = vif;
+      hm.emissive = vif.clone().multiplyScalar(x.userData.cle === 'muscle' || x.userData.cle === 'tendon' ? 0.3 : 0.18); hm.emissiveIntensity = 1;
+      hm.sheen = 0; hm.userData.choisi = true;
       hm.opacity = 1; hm.transparent = false; hm.depthWrite = true; hm.visible = true;
       x.material = hm;
+      /* son fantôme : la structure choisie se devine à travers ce qui la
+         cache (une dent de sagesse dans l'os, un muscle profond) */
+      const fm = new THREE.MeshBasicMaterial({ color: vif, transparent: true, opacity: 0.38, depthTest: false, depthWrite: false, clippingPlanes: [this.plan] });
+      const f = new THREE.Mesh(x.geometry, fm);
+      f.renderOrder = 10; f.raycast = () => {};
+      x.add(f); x.userData.fantome = f;
     }
+    this._attenuer(!!m);
     this.appliquer();
     this.demander();
     if (this.o.surChoix) this.o.surChoix(m ? { nom: m.userData.nom, cle: m.userData.cle, couche: m.userData.couche, fichier: m.userData.fichier } : null);
+  }
+  /** Assombrit tout ce qui n'est pas choisi (ou rend les couleurs d'origine). */
+  _attenuer(on) {
+    for (const [k, m] of Object.entries(this.mats)) {
+      if (k.startsWith('ins')) continue;
+      if (!m.userData.base) m.userData.base = { c: m.color.clone(), sheen: m.sheen, env: m.envMapIntensity };
+      const B = m.userData.base;
+      m.color.copy(B.c); m.sheen = B.sheen; m.envMapIntensity = B.env;
+      /* le reflet satiné et l'éclairage d'ambiance éclaircissent tout :
+         on les baisse aussi, sinon l'assombrissement ne se voit pas */
+      if (on) { m.color.multiplyScalar(ATTENUE); m.sheen = B.sheen * 0.3; m.envMapIntensity = B.env * 0.5; }
+    }
   }
   /** Sélectionne une structure par son nom (côté droit par défaut) et la cadre. */
   choisir(nom) {

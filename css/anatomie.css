@@ -66,6 +66,7 @@ body { --m: var(--m-anat); }
 .an-f-t { display: flex; align-items: flex-start; gap: 10px; }
 .an-f-t > div { flex: 1; min-width: 0; }
 .an-f-t h2 { font-size: 19px; letter-spacing: -.02em; line-height: 1.25; }
+.an-sous { margin: 12px 0 2px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 .latin { font-size: 12.5px; font-style: italic; color: var(--dim); margin-top: 2px; }
 .an-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .an-fiche dl { margin-top: 12px; display: grid; grid-template-columns: 108px 1fr; gap: 8px 12px; }
